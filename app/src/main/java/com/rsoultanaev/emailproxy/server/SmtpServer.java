@@ -44,7 +44,7 @@ public class SmtpServer {
                         String receivedString = new String(receivedBytes);
 
                         System.out.println("[Server] Received Message Length: " + receivedString.length() + "\n");
-                        System.out.println("[Server] Received Message: " + receivedString + "\n");
+                        System.out.println("[Server] Received Message:\n" + receivedString + "\n");
 
                         final String response = respondToCommand(receivedString);
                         sendResponse(socket, response);
