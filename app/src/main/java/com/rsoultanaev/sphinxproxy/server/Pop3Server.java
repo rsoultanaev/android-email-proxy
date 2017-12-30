@@ -18,9 +18,9 @@ public class Pop3Server {
     private InetAddress host;
     private int port;
 
-    public Pop3Server(String host, int port) {
+    public Pop3Server(int port) {
         try {
-            this.host = InetAddress.getByName(host);
+            this.host = InetAddress.getByName("localhost");
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }

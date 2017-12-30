@@ -15,8 +15,7 @@ public class MainActivity extends AppCompatActivity {
     private static class Pop3Task extends AsyncTask<Integer, Void, Void> {
         protected Void doInBackground(Integer... urls) {
             int port = urls[0];
-            String host = "localhost";
-            Pop3Server pop3Server = new Pop3Server(host, port);
+            Pop3Server pop3Server = new Pop3Server(port);
             pop3Server.start();
 
             return null;
