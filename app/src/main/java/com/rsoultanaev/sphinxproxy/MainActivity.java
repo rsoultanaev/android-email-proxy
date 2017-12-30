@@ -4,8 +4,11 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import com.rsoultanaev.sphinxproxy.server.MessageListener;
 import com.rsoultanaev.sphinxproxy.server.Pop3Server;
-import com.rsoultanaev.sphinxproxy.server.SmtpServer;
+
+import org.subethamail.smtp.helper.SimpleMessageListenerAdapter;
+import org.subethamail.smtp.server.SMTPServer;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -15,6 +18,7 @@ public class MainActivity extends AppCompatActivity {
             String host = "localhost";
             Pop3Server pop3Server = new Pop3Server(host, port);
             pop3Server.start();
+
             return null;
         }
     }
@@ -22,9 +26,12 @@ public class MainActivity extends AppCompatActivity {
     private static class SmtpTask extends AsyncTask<Integer, Void, Void> {
         protected Void doInBackground(Integer... urls) {
             int port = urls[0];
-            String host = "localhost";
-            SmtpServer smtpServer = new SmtpServer(host, port);
+
+            MessageListener messageListener = new MessageListener();
+            SMTPServer smtpServer = new SMTPServer(new SimpleMessageListenerAdapter(messageListener));
+            smtpServer.setPort(port);
             smtpServer.start();
+
             return null;
         }
     }
