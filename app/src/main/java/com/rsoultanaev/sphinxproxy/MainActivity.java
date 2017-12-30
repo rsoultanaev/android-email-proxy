@@ -6,7 +6,6 @@ import android.os.Bundle;
 
 import com.rsoultanaev.sphinxproxy.server.MessageListener;
 import com.rsoultanaev.sphinxproxy.server.Pop3Server;
-import com.rsoultanaev.sphinxproxy.server.SmtpServer;
 
 import org.subethamail.smtp.helper.SimpleMessageListenerAdapter;
 import org.subethamail.smtp.server.SMTPServer;
@@ -27,15 +26,11 @@ public class MainActivity extends AppCompatActivity {
     private static class SmtpTask extends AsyncTask<Integer, Void, Void> {
         protected Void doInBackground(Integer... urls) {
             int port = urls[0];
-            String host = "localhost";
 
             MessageListener messageListener = new MessageListener();
             SMTPServer smtpServer = new SMTPServer(new SimpleMessageListenerAdapter(messageListener));
             smtpServer.setPort(port);
             smtpServer.start();
-
-//            SmtpServer smtpServer = new SmtpServer(host, port);
-//            smtpServer.start();
 
             return null;
         }
