@@ -12,6 +12,7 @@ import com.koushikdutta.async.callback.ListenCallback;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.net.SocketException;
 
 public class Pop3Server {
 
@@ -56,10 +57,9 @@ public class Pop3Server {
                     @Override
                     public void onCompleted(Exception ex) {
                         if (ex != null) {
-                            if (ex instanceof java.net.SocketException) {
-                                java.net.SocketException socketException = (java.net.SocketException) ex;
+                            if (ex instanceof SocketException) {
                                 System.out.println("[Server] Socket exception while closing connection:\n");
-                                System.out.println(socketException.getMessage());
+                                System.out.println(ex.getMessage());
                             } else {
                                 throw new RuntimeException(ex);
                             }
@@ -73,10 +73,9 @@ public class Pop3Server {
                     @Override
                     public void onCompleted(Exception ex) {
                         if (ex != null) {
-                            if (ex instanceof java.net.SocketException) {
-                                java.net.SocketException socketException = (java.net.SocketException) ex;
+                            if (ex instanceof SocketException) {
                                 System.out.println("[Server] Socket exception while ending connection:\n");
-                                System.out.println(socketException.getMessage());
+                                System.out.println(ex.getMessage());
                             } else {
                                 throw new RuntimeException(ex);
                             }
