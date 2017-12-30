@@ -1,11 +1,11 @@
-package com.rsoultanaev.emailproxy;
+package com.rsoultanaev.sphinxproxy;
 
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import com.rsoultanaev.emailproxy.server.Pop3Server;
-import com.rsoultanaev.emailproxy.server.SmtpServer;
+import com.rsoultanaev.sphinxproxy.server.Pop3Server;
+import com.rsoultanaev.sphinxproxy.server.SmtpServer;
 
 public class MainActivity extends AppCompatActivity {
 

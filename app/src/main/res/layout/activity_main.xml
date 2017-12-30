@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.rsoultanaev.emailproxy.MainActivity">
+    tools:context="com.rsoultanaev.sphinxproxy.MainActivity">
 
     <TextView
         android:layout_width="wrap_content"

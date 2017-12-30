@@ -1,4 +1,4 @@
-package com.rsoultanaev.emailproxy;
+package com.rsoultanaev.sphinxproxy;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

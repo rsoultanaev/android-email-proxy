@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/EmailProxy.iml" filepath="$PROJECT_DIR$/EmailProxy.iml" />
+      <module fileurl="file://$PROJECT_DIR$/SphinxProxy.iml" filepath="$PROJECT_DIR$/SphinxProxy.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

@@ -1,4 +1,4 @@
-package com.rsoultanaev.emailproxy.server;
+package com.rsoultanaev.sphinxproxy.server;
 
 import com.koushikdutta.async.AsyncServer;
 import com.koushikdutta.async.AsyncServerSocket;
@@ -13,12 +13,11 @@ import com.koushikdutta.async.callback.ListenCallback;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-public class Pop3Server {
-
+public class SmtpServer {
     private InetAddress host;
     private int port;
 
-    public Pop3Server(String host, int port) {
+    public SmtpServer(String host, int port) {
         try {
             this.host = InetAddress.getByName(host);
         } catch (UnknownHostException e) {
@@ -35,7 +34,7 @@ public class Pop3Server {
             public void onAccepted(final AsyncSocket socket) {
                 System.out.println("[Server] New Connection " + socket.toString());
 
-                final String serverGreeting = "+OK Hello there\n";
+                final String serverGreeting = "220 Hello there\n";
                 sendResponse(socket, serverGreeting);
 
                 socket.setDataCallback(new DataCallback() {
@@ -45,7 +44,7 @@ public class Pop3Server {
                         String receivedString = new String(receivedBytes);
 
                         System.out.println("[Server] Received Message Length: " + receivedString.length() + "\n");
-                        System.out.println("[Server] Received Message: " + receivedString + "\n");
+                        System.out.println("[Server] Received Message:\n" + receivedString + "\n");
 
                         final String response = respondToCommand(receivedString);
                         sendResponse(socket, response);
@@ -101,22 +100,15 @@ public class Pop3Server {
     }
 
     private String respondToCommand(String command) {
-        if (command.length() >= 4) {
-            command = command.substring(0, 4);
-        } else {
-            return "-ERR unsupported command\n";
-        }
+        command = command.split(" ")[0];
 
         switch (command) {
-            case "USER":
-            case "PASS":
-            case "UIDL":
+            case "EHLO":
+                return "250 No extensions here\n";
             case "QUIT":
-                return "+OK\n";
-            case "STAT":
-                return "+OK 0 0\n";
+                return "221 Bye\n";
             default:
-                return "-ERR unsupported command\n";
+                return "250 ok\n";
         }
     }
 
