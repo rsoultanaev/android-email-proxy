@@ -5,15 +5,26 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.rsoultanaev.emailproxy.server.Pop3Server;
+import com.rsoultanaev.emailproxy.server.SmtpServer;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static class ServerTask extends AsyncTask<Integer, Void, Void> {
+    private static class Pop3Task extends AsyncTask<Integer, Void, Void> {
         protected Void doInBackground(Integer... urls) {
             int port = urls[0];
             String host = "localhost";
             Pop3Server pop3Server = new Pop3Server(host, port);
             pop3Server.start();
+            return null;
+        }
+    }
+
+    private static class SmtpTask extends AsyncTask<Integer, Void, Void> {
+        protected Void doInBackground(Integer... urls) {
+            int port = urls[0];
+            String host = "localhost";
+            SmtpServer smtpServer = new SmtpServer(host, port);
+            smtpServer.start();
             return null;
         }
     }
@@ -25,7 +36,10 @@ public class MainActivity extends AppCompatActivity {
 
         // AsyncTask not recommended for long running tasks,
         // so this is for prototyping purposes
-        ServerTask serverTask = new ServerTask();
-        serverTask.execute(27000);
+        Pop3Task pop3Task = new Pop3Task();
+        pop3Task.execute(27000);
+
+        SmtpTask smtpTask = new SmtpTask();
+        smtpTask.execute(28000);
     }
 }
