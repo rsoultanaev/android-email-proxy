@@ -26,11 +26,9 @@ public class MessageListener implements SimpleMessageListener {
         byte[] bytes = out.toByteArray();
         String emailBody = new String(bytes);
 
-        System.out.println("[MessageListener] Received email\n"
-                         + "[MessageListener] from: " + from + "\n"
-                         + "[MessageListener] recipient: " + recipient + "\n"
-                         + "[MessageListener] email body start ----------------\n"
-                         + emailBody
-                         + "[MessageListener] email body end ------------------\n");
+        System.out.println("[SMTP] email body start");
+        System.out.println(emailBody);
+        System.out.println("[SMTP] email body end");
+        System.out.println("[SMTP] email length: " + bytes.length);
     }
 }
