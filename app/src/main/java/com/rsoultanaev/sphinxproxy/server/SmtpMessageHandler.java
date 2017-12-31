@@ -8,7 +8,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class MessageListener implements SimpleMessageListener {
+public class SmtpMessageHandler implements SimpleMessageListener {
     public boolean accept(String from, String recipient) {
         return true;
     }

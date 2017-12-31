@@ -4,7 +4,7 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import com.rsoultanaev.sphinxproxy.server.MessageListener;
+import com.rsoultanaev.sphinxproxy.server.SmtpMessageHandler;
 import com.rsoultanaev.sphinxproxy.server.Pop3Server;
 
 import org.subethamail.smtp.helper.SimpleMessageListenerAdapter;
@@ -26,8 +26,8 @@ public class MainActivity extends AppCompatActivity {
         protected Void doInBackground(Integer... urls) {
             int port = urls[0];
 
-            MessageListener messageListener = new MessageListener();
-            SMTPServer smtpServer = new SMTPServer(new SimpleMessageListenerAdapter(messageListener));
+            SmtpMessageHandler smtpMessageHandler = new SmtpMessageHandler();
+            SMTPServer smtpServer = new SMTPServer(new SimpleMessageListenerAdapter(smtpMessageHandler));
             smtpServer.setPort(port);
             smtpServer.start();
 
