@@ -65,6 +65,7 @@ public class ProxyService extends Service {
     @Override
     public void onDestroy() {
         smtpServer.stop();
+        pop3Server.stop();
         running = false;
         stopForeground(true);
     }
