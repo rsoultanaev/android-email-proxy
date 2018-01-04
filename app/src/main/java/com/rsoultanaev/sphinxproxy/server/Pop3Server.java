@@ -99,6 +99,10 @@ public class Pop3Server {
         });
     }
 
+    public void stop() {
+        AsyncServer.getDefault().stop();
+    }
+
     private String respondToCommand(String command) {
         command = command.split("[\\r\\n ]")[0];
 
