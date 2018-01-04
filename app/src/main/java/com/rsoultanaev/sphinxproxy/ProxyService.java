@@ -11,24 +11,29 @@ import org.subethamail.smtp.server.SMTPServer;
 
 public class ProxyService extends Service {
 
+    private SMTPServer smtpServer;
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         final int smtpPort = intent.getIntExtra("smtpPort", 28000);
 
-        Runnable runSmtpServer = new Runnable() {
+        // Initialising SMTPServer blocks, so we need to do it in a separate thread
+        new Thread(new Runnable() {
             public void run() {
                 SmtpMessageHandler smtpMessageHandler = new SmtpMessageHandler();
-                SMTPServer smtpServer = new SMTPServer(new SimpleMessageListenerAdapter(smtpMessageHandler));
+                smtpServer = new SMTPServer(new SimpleMessageListenerAdapter(smtpMessageHandler));
                 smtpServer.setPort(smtpPort);
                 smtpServer.start();
             }
-        };
-
-        Thread smtpThread = new Thread(runSmtpServer);
-        smtpThread.start();
+        }).start();
 
         // TODO: investigate which return is best here
         return Service.START_NOT_STICKY;
+    }
+
+    @Override
+    public void onDestroy() {
+        smtpServer.stop();
     }
 
     @Override

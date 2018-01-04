@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">SphinxProxy</string>
-    <string name="button_start_smtp">Start SMTP</string>
+    <string name="start_service">Start Service</string>
+    <string name="stop_service">Stop Service</string>
 </resources>

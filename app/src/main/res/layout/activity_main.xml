@@ -7,19 +7,33 @@
     tools:context="com.rsoultanaev.sphinxproxy.MainActivity">
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/start_service_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="128dp"
         android:layout_marginEnd="137dp"
         android:layout_marginStart="137dp"
         android:layout_marginTop="335dp"
-        android:text="@string/button_start_smtp"
-        android:onClick="startSmtp"
+        android:onClick="startProxy"
+        android:text="@string/start_service"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0" />
+
+    <Button
+        android:id="@+id/stop_service_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="63dp"
+        android:layout_marginEnd="133dp"
+        android:layout_marginStart="133dp"
+        android:layout_marginTop="17dp"
+        android:text="@string/stop_service"
+        android:onClick="stopProxy"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/start_service_button" />
 </android.support.constraint.ConstraintLayout>

@@ -36,14 +36,30 @@ public class MainActivity extends AppCompatActivity {
         pop3Task.execute(27000);
     }
 
-    public void startSmtp(View view) {
+    public void startProxy(View view) {
         if (!serviceStarted) {
-            Intent startProxyIntent = new Intent(this, ProxyService.class);
-            startProxyIntent.putExtra("smtpPort", 28000);
-            startService(startProxyIntent);
+            Intent proxyIntent = new Intent(this, ProxyService.class);
+            proxyIntent.putExtra("smtpPort", 28000);
+
+            startService(proxyIntent);
             serviceStarted = true;
+
+            Toast.makeText(this, "Service started", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, "Service already running", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Service already started", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void stopProxy(View view) {
+        if (serviceStarted) {
+            Intent proxyIntent = new Intent(this, ProxyService.class);
+
+            stopService(proxyIntent);
+            serviceStarted = false;
+
+            Toast.makeText(this, "Service stopped", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Service already stopped", Toast.LENGTH_SHORT).show();
         }
     }
 }
