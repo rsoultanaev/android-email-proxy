@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 
+import com.rsoultanaev.sphinxproxy.server.Pop3Server;
 import com.rsoultanaev.sphinxproxy.server.SmtpMessageHandler;
 
 import org.subethamail.smtp.helper.SimpleMessageListenerAdapter;
@@ -15,6 +16,7 @@ import org.subethamail.smtp.server.SMTPServer;
 public class ProxyService extends Service {
 
     private SMTPServer smtpServer;
+    private Pop3Server pop3Server;
     private boolean running;
 
     @Override
@@ -26,6 +28,7 @@ public class ProxyService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (!running) {
             final int smtpPort = intent.getIntExtra("smtpPort", 28000);
+            final int pop3Port = intent.getIntExtra("pop3Port", 27000);
 
             // Initialising SMTPServer blocks, so we need to do it in a separate thread
             new Thread(new Runnable() {
@@ -34,6 +37,9 @@ public class ProxyService extends Service {
                     smtpServer = new SMTPServer(new SimpleMessageListenerAdapter(smtpMessageHandler));
                     smtpServer.setPort(smtpPort);
                     smtpServer.start();
+
+                    pop3Server = new Pop3Server(pop3Port);
+                    pop3Server.start();
                 }
             }).start();
 
@@ -48,8 +54,9 @@ public class ProxyService extends Service {
                     .setContentIntent(pendingIntent).build();
 
             startForeground(1337, notification);
+
+            running = true;
         }
-        running = true;
 
         // TODO: investigate which return is best here
         return Service.START_NOT_STICKY;
