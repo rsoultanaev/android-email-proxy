@@ -5,11 +5,7 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import com.rsoultanaev.sphinxproxy.server.SmtpMessageHandler;
 import com.rsoultanaev.sphinxproxy.server.Pop3Server;
-
-import org.subethamail.smtp.helper.SimpleMessageListenerAdapter;
-import org.subethamail.smtp.server.SMTPServer;
 
 public class MainActivity extends AppCompatActivity {
 
