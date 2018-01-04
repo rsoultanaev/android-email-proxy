@@ -23,19 +23,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-//    private static class SmtpTask extends AsyncTask<Integer, Void, Void> {
-//        protected Void doInBackground(Integer... urls) {
-//            int port = urls[0];
-//
-//            SmtpMessageHandler smtpMessageHandler = new SmtpMessageHandler();
-//            SMTPServer smtpServer = new SMTPServer(new SimpleMessageListenerAdapter(smtpMessageHandler));
-//            smtpServer.setPort(port);
-//            smtpServer.start();
-//
-//            return null;
-//        }
-//    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
