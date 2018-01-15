@@ -29,6 +29,9 @@ import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import static com.rsoultanaev.sphinxproxy.SphinxUtil.genTestMessage;
+import static com.rsoultanaev.sphinxproxy.SphinxUtil.splitIntoSphinxPackets;
+
 public class SmtpMessageHandler implements SimpleMessageListener {
     public boolean accept(String from, String recipient) {
         return true;
@@ -109,9 +112,6 @@ public class SmtpMessageHandler implements SimpleMessageListener {
         nodeKeys[0] = com.rsoultanaev.javasphinx.Util.decodeECPoint(Hex.decode("036457e713498b559afe446158aaa08613530022b25e418c59b8b2a624"));
         nodeKeys[1] = com.rsoultanaev.javasphinx.Util.decodeECPoint(Hex.decode("039d95b858383fdeee0d493a1675d513c29671de322c367d23a08cd5bf"));
         nodeKeys[2] = com.rsoultanaev.javasphinx.Util.decodeECPoint(Hex.decode("02739a6205b940db5dd4c62c17fe568dc1b061a150322df9a45543898f"));
-//        for (int i = 0; i < useNodes.length; i++) {
-//            nodeKeys[i] = pkiPub.get(useNodes[i]).y;
-//        }
 
         System.out.println("-------------------------");
 
@@ -131,20 +131,8 @@ public class SmtpMessageHandler implements SimpleMessageListener {
         }
 
         byte[] dest = "rsoultanaev@rsoultanaev.com".getBytes();
-        byte[] message = "Message from sphinxproxy 2".getBytes();
-
-        DestinationAndMessage destinationAndMessage = new DestinationAndMessage(dest, message);
-        HeaderAndDelta headerAndDelta = SphinxClient.createForwardMessage(params, nodesRouting, nodeKeys, destinationAndMessage);
-        ParamLengths paramLengths = new ParamLengths(params.getHeaderLength(), params.getBodyLength());
-        SphinxPacket sphinxPacket = new SphinxPacket(paramLengths, headerAndDelta);
-        byte[] binMessage = SphinxClient.packMessage(sphinxPacket);
-
-        System.out.println("Sphinx packet:");
-        System.out.println(Hex.toHexString(binMessage));
-
-
-        // --------------------------
-
+        byte[] message = genTestMessage("Message5", 5400);
+        byte[][] splitMessage = splitIntoSphinxPackets(dest, message, params, nodesRouting, nodeKeys);
 
         class Client {
 
@@ -199,9 +187,8 @@ public class SmtpMessageHandler implements SimpleMessageListener {
             }
         }
 
-
-        new Client("localhost", 10000, binMessage);
-
-
+        for (byte[] binMessage : splitMessage) {
+            new Client("localhost", 10000, binMessage);
+        }
     }
 }
