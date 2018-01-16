@@ -5,16 +5,17 @@ import com.koushikdutta.async.AsyncSocket;
 import com.koushikdutta.async.Util;
 import com.koushikdutta.async.callback.CompletedCallback;
 import com.koushikdutta.async.callback.ConnectCallback;
-import com.rsoultanaev.javasphinx.DestinationAndMessage;
-import com.rsoultanaev.javasphinx.HeaderAndDelta;
-import com.rsoultanaev.javasphinx.ParamLengths;
-import static com.rsoultanaev.javasphinx.SphinxClient.createForwardMessage;
-import static com.rsoultanaev.javasphinx.SphinxClient.packMessage;
-import static com.rsoultanaev.javasphinx.Util.concatByteArrays;
+import com.robertsoultanaev.javasphinx.DestinationAndMessage;
+import com.robertsoultanaev.javasphinx.HeaderAndDelta;
+import com.robertsoultanaev.javasphinx.ParamLengths;
+import static com.robertsoultanaev.javasphinx.SphinxClient.createForwardMessage;
+import static com.robertsoultanaev.javasphinx.SphinxClient.packMessage;
+import static com.robertsoultanaev.javasphinx.Util.concatByteArrays;
+import static com.robertsoultanaev.javasphinx.Util.decodeECPoint;
 
-import com.rsoultanaev.javasphinx.SphinxClient;
-import com.rsoultanaev.javasphinx.SphinxPacket;
-import com.rsoultanaev.javasphinx.SphinxParams;
+import com.robertsoultanaev.javasphinx.SphinxClient;
+import com.robertsoultanaev.javasphinx.SphinxPacket;
+import com.robertsoultanaev.javasphinx.SphinxParams;
 
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.encoders.Hex;
@@ -79,9 +80,9 @@ public class SphinxUtil {
         }
 
         nodeKeys = new ECPoint[useNodes.length];
-        nodeKeys[0] = com.rsoultanaev.javasphinx.Util.decodeECPoint(Hex.decode("036457e713498b559afe446158aaa08613530022b25e418c59b8b2a624"));
-        nodeKeys[1] = com.rsoultanaev.javasphinx.Util.decodeECPoint(Hex.decode("039d95b858383fdeee0d493a1675d513c29671de322c367d23a08cd5bf"));
-        nodeKeys[2] = com.rsoultanaev.javasphinx.Util.decodeECPoint(Hex.decode("02739a6205b940db5dd4c62c17fe568dc1b061a150322df9a45543898f"));
+        nodeKeys[0] = decodeECPoint(Hex.decode("036457e713498b559afe446158aaa08613530022b25e418c59b8b2a624"));
+        nodeKeys[1] = decodeECPoint(Hex.decode("039d95b858383fdeee0d493a1675d513c29671de322c367d23a08cd5bf"));
+        nodeKeys[2] = decodeECPoint(Hex.decode("02739a6205b940db5dd4c62c17fe568dc1b061a150322df9a45543898f"));
 
         byte[] dest = "rsoultanaev@rsoultanaev.com".getBytes();
         byte[][] splitMessage = splitIntoSphinxPackets(dest, email, params, nodesRouting, nodeKeys);

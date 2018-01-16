@@ -13,7 +13,7 @@ import com.rsoultanaev.sphinxproxy.server.SmtpMessageHandler;
 import org.subethamail.smtp.helper.SimpleMessageListenerAdapter;
 import org.subethamail.smtp.server.SMTPServer;
 
-import com.rsoultanaev.javasphinx.SphinxParams;
+import com.robertsoultanaev.javasphinx.SphinxParams;
 
 public class ProxyService extends Service {
 

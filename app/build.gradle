@@ -31,6 +31,5 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
     compile 'com.koushikdutta.async:androidasync:2.1.7'
     compile 'org.subethamail:subethasmtp:3.1.7'
-    //compile 'org.bouncycastle:bcprov-ext-jdk15on:1.58'
-    implementation files('libs/java-sphinx.jar')
+    implementation files('libs/javasphinx.jar')
 }
