@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/SphinxProxy.iml" filepath="$PROJECT_DIR$/SphinxProxy.iml" />
       <module fileurl="file://$PROJECT_DIR$/android-sphinx-proxy.iml" filepath="$PROJECT_DIR$/android-sphinx-proxy.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
