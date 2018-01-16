@@ -79,11 +79,11 @@ public class SphinxUtil {
         }
 
         nodeKeys = new ECPoint[useNodes.length];
-        nodeKeys[0] = com.rsoultanaev.javasphinx.Util.decodeECPoint(Hex.decode("03832ec98520d749c2a4bee63804a645463aa9acfb434389804ce41d4e"));
-        nodeKeys[1] = com.rsoultanaev.javasphinx.Util.decodeECPoint(Hex.decode("029e54ef3fb51ff58eefa5d0120d97069ea1088987339d0c8fba4ed369"));
-        nodeKeys[2] = com.rsoultanaev.javasphinx.Util.decodeECPoint(Hex.decode("020427ccb1578c93bfe2efe831dc31c2113902fde859b1f77868851a3c"));
+        nodeKeys[0] = com.rsoultanaev.javasphinx.Util.decodeECPoint(Hex.decode("036457e713498b559afe446158aaa08613530022b25e418c59b8b2a624"));
+        nodeKeys[1] = com.rsoultanaev.javasphinx.Util.decodeECPoint(Hex.decode("039d95b858383fdeee0d493a1675d513c29671de322c367d23a08cd5bf"));
+        nodeKeys[2] = com.rsoultanaev.javasphinx.Util.decodeECPoint(Hex.decode("02739a6205b940db5dd4c62c17fe568dc1b061a150322df9a45543898f"));
 
-        byte[] dest = "rsoultanaev@localhost".getBytes();
+        byte[] dest = "rsoultanaev@rsoultanaev.com".getBytes();
         byte[][] splitMessage = splitIntoSphinxPackets(dest, email, params, nodesRouting, nodeKeys);
 
         class Client {
