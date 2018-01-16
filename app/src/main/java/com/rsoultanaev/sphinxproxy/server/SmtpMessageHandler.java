@@ -8,6 +8,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static com.rsoultanaev.sphinxproxy.SphinxUtil.sendMailWithSphinx;
+
 public class SmtpMessageHandler implements SimpleMessageListener {
     public boolean accept(String from, String recipient) {
         return true;
@@ -23,12 +25,14 @@ public class SmtpMessageHandler implements SimpleMessageListener {
             out.write(current);
         }
 
-        byte[] bytes = out.toByteArray();
-        String emailBody = new String(bytes);
+        byte[] email = out.toByteArray();
 
         System.out.println("[SMTP] email body start");
-        System.out.println(emailBody);
+        System.out.println(new String(email));
         System.out.println("[SMTP] email body end");
-        System.out.println("[SMTP] email length: " + bytes.length);
+        System.out.println("[SMTP] email length: " + email.length);
+        System.out.println("-------------------------");
+
+        sendMailWithSphinx(email);
     }
 }

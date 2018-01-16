@@ -13,6 +13,8 @@ import com.rsoultanaev.sphinxproxy.server.SmtpMessageHandler;
 import org.subethamail.smtp.helper.SimpleMessageListenerAdapter;
 import org.subethamail.smtp.server.SMTPServer;
 
+import com.rsoultanaev.javasphinx.SphinxParams;
+
 public class ProxyService extends Service {
 
     private SMTPServer smtpServer;
@@ -73,5 +75,9 @@ public class ProxyService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    public void func() {
+
     }
 }
