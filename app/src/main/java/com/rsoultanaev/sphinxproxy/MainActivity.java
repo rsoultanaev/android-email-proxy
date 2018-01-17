@@ -37,11 +37,15 @@ public class MainActivity extends AppCompatActivity {
 
                 byte[][] newMessages = pop3Puller.pullMessages(false);
 
-                System.out.println("Messages for mort:");
-                for (byte[] m : newMessages) {
-                    System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-                    System.out.println(new String(m));
-                    System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+                if (newMessages == null) {
+                    System.out.println("Message pull failed");
+                } else {
+                    System.out.println("Messages for mort:");
+                    for (byte[] m : newMessages) {
+                        System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+                        System.out.println(new String(m));
+                        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+                    }
                 }
             }
         }).start();

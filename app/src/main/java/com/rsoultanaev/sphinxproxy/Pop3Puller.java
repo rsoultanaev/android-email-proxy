@@ -5,15 +5,16 @@ import org.apache.commons.net.pop3.POP3Client;
 import org.apache.commons.net.pop3.POP3MessageInfo;
 import org.jsoup.Jsoup;
 
-import javax.mail.BodyPart;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
+//import javax.mail.BodyPart;
+//import javax.mail.Message;
+//import javax.mail.MessagingException;
+//import javax.mail.Session;
+//import javax.mail.internet.MimeMessage;
+//import javax.mail.internet.MimeMultipart;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.util.Properties;
 
 public class Pop3Puller {
@@ -79,17 +80,16 @@ public class Pop3Puller {
                 return null;
             }
 
-            Properties props = System.getProperties();
-            Session session = Session.getDefaultInstance(props);
+//            Properties props = System.getProperties();
+//            Session session = Session.getDefaultInstance(props);
             byte[][] pulledMessages = new byte[messages.length][];
 
             for (int i = 0; i < messages.length; i++) {
-                BufferedReader reader = (BufferedReader) pop3Client.retrieveMessage(messages[i].number);
-                InputStream inputStream = IOUtils.toInputStream(IOUtils.toString(reader), Charsets.UTF_8);
+                Reader reader = pop3Client.retrieveMessage(messages[i].number);
 
                 try {
-                    MimeMessage message = new MimeMessage(session, inputStream);
-                    pulledMessages[i] = getTextFromMessage(message);
+//                    MimeMessage message = new MimeMessage(session, inputStream);
+                    pulledMessages[i] = org.apache.commons.io.IOUtils.toString(reader).getBytes();
                 } catch (Exception e) {
                     e.printStackTrace();
                     return null;
@@ -114,33 +114,33 @@ public class Pop3Puller {
         }
     }
 
-    private byte[] getTextFromMessage(Message message) throws MessagingException, IOException {
-        String result = "";
-        if (message.isMimeType("text/plain")) {
-            result = message.getContent().toString();
-        } else if (message.isMimeType("multipart/*")) {
-            MimeMultipart mimeMultipart = (MimeMultipart) message.getContent();
-            result = getTextFromMimeMultipart(mimeMultipart);
-        }
-        return result.getBytes();
-    }
-
-    private String getTextFromMimeMultipart(
-            MimeMultipart mimeMultipart)  throws MessagingException, IOException{
-        String result = "";
-        int count = mimeMultipart.getCount();
-        for (int i = 0; i < count; i++) {
-            BodyPart bodyPart = mimeMultipart.getBodyPart(i);
-            if (bodyPart.isMimeType("text/plain")) {
-                result = result + "\n" + bodyPart.getContent();
-                break;
-            } else if (bodyPart.isMimeType("text/html")) {
-                String html = (String) bodyPart.getContent();
-                result = result + "\n" + Jsoup.parse(html).text();
-            } else if (bodyPart.getContent() instanceof MimeMultipart){
-                result = result + getTextFromMimeMultipart((MimeMultipart)bodyPart.getContent());
-            }
-        }
-        return result;
-    }
+//    private byte[] getTextFromMessage(Message message) throws MessagingException, IOException {
+//        String result = "";
+//        if (message.isMimeType("text/plain")) {
+//            result = message.getContent().toString();
+//        } else if (message.isMimeType("multipart/*")) {
+//            MimeMultipart mimeMultipart = (MimeMultipart) message.getContent();
+//            result = getTextFromMimeMultipart(mimeMultipart);
+//        }
+//        return result.getBytes();
+//    }
+//
+//    private String getTextFromMimeMultipart(
+//            MimeMultipart mimeMultipart)  throws MessagingException, IOException{
+//        String result = "";
+//        int count = mimeMultipart.getCount();
+//        for (int i = 0; i < count; i++) {
+//            BodyPart bodyPart = mimeMultipart.getBodyPart(i);
+//            if (bodyPart.isMimeType("text/plain")) {
+//                result = result + "\n" + bodyPart.getContent();
+//                break;
+//            } else if (bodyPart.isMimeType("text/html")) {
+//                String html = (String) bodyPart.getContent();
+//                result = result + "\n" + Jsoup.parse(html).text();
+//            } else if (bodyPart.getContent() instanceof MimeMultipart){
+//                result = result + getTextFromMimeMultipart((MimeMultipart)bodyPart.getContent());
+//            }
+//        }
+//        return result;
+//    }
 }

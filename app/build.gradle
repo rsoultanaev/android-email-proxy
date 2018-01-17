@@ -27,6 +27,7 @@ configurations.all {
 }
 
 dependencies {
+    implementation 'com.android.support:multidex:1.0.2'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:26.1.0'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
@@ -37,8 +38,8 @@ dependencies {
     implementation'org.subethamail:subethasmtp:3.1.7'
     implementation'android.arch.persistence.room:runtime:1.0.0'
     annotationProcessor "android.arch.persistence.room:compiler:1.0.0"
-    implementation 'com.sun.mail:android-mail:1.6.0'
-    implementation 'com.sun.mail:android-activation:1.6.0'
+//    implementation 'com.sun.mail:android-mail:1.6.0'
+//    implementation 'com.sun.mail:android-activation:1.6.0'
     implementation'commons-net:commons-net:3.6'
     implementation'commons-io:commons-io:2.6'
     implementation'org.jsoup:jsoup:1.11.2'
