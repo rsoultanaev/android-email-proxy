@@ -84,7 +84,7 @@ public class SphinxUtil {
         nodeKeys[1] = decodeECPoint(Hex.decode("039d95b858383fdeee0d493a1675d513c29671de322c367d23a08cd5bf"));
         nodeKeys[2] = decodeECPoint(Hex.decode("02739a6205b940db5dd4c62c17fe568dc1b061a150322df9a45543898f"));
 
-        byte[] dest = "rsoultanaev@rsoultanaev.com".getBytes();
+        byte[] dest = "mort@rsoultanaev.com".getBytes();
         byte[][] splitMessage = splitIntoSphinxPackets(dest, email, params, nodesRouting, nodeKeys);
 
         class Client {
