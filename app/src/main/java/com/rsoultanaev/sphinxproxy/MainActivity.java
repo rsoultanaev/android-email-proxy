@@ -24,4 +24,26 @@ public class MainActivity extends AppCompatActivity {
         Intent proxyIntent = new Intent(this, ProxyService.class);
         stopService(proxyIntent);
     }
+
+    public void triggerTest(View view) {
+        new Thread(new Runnable() {
+            public void run() {
+                String server = "localhost";
+                int port = 11000;
+                String username = "mort";
+                String password = "1234";
+
+                Pop3Puller pop3Puller = new Pop3Puller(server, port, username, password);
+
+                byte[][] newMessages = pop3Puller.pullMessages(false);
+
+                System.out.println("Messages for mort:");
+                for (byte[] m : newMessages) {
+                    System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+                    System.out.println(new String(m));
+                    System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+                }
+            }
+        }).start();
+    }
 }
