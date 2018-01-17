@@ -1,11 +1,16 @@
 package com.rsoultanaev.sphinxproxy;
 
+import com.rsoultanaev.sphinxproxy.database.Packet;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.net.pop3.POP3Client;
 import org.apache.commons.net.pop3.POP3MessageInfo;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.UUID;
 
 public class Pop3Puller {
     private String server;
@@ -25,7 +30,7 @@ public class Pop3Puller {
         pop3Client.setDefaultTimeout(60000);
     }
 
-    public byte[][] pullMessages(boolean deleteAfterFetching) {
+    public Packet[] pullMessages(boolean deleteAfterFetching) {
         try
         {
             pop3Client.connect(server, port);
@@ -57,7 +62,7 @@ public class Pop3Puller {
             if (status.number == 0) {
                 pop3Client.logout();
                 pop3Client.disconnect();
-                return new byte[0][];
+                return new Packet[0];
             }
 
             POP3MessageInfo[] messages = pop3Client.listMessages();
@@ -70,13 +75,13 @@ public class Pop3Puller {
                 return null;
             }
 
-            byte[][] pulledMessages = new byte[messages.length][];
+            Packet[] pulledMessages = new Packet[messages.length];
 
             for (int i = 0; i < messages.length; i++) {
                 BufferedReader reader = (BufferedReader) pop3Client.retrieveMessage(messages[i].number);
 
                 try {
-                    pulledMessages[i] = getTextFromMessage(reader);
+                    pulledMessages[i] = parseMessageToPacket(reader);
                 } catch (Exception e) {
                     e.printStackTrace();
                     return null;
@@ -101,7 +106,7 @@ public class Pop3Puller {
         }
     }
 
-    private byte[] getTextFromMessage(BufferedReader reader) throws IOException {
+    private byte[] getMessageBody(BufferedReader reader) throws IOException {
         String line = reader.readLine();
         while(line != null) {
             if (line.isEmpty()) {
@@ -111,5 +116,24 @@ public class Pop3Puller {
         }
 
         return IOUtils.toString(reader).getBytes();
+    }
+
+    private Packet parseMessageToPacket(BufferedReader reader) throws IOException {
+        byte[] message = getMessageBody(reader);
+
+        System.out.println(message.length);
+
+        ByteBuffer byteBuffer = ByteBuffer.wrap(Arrays.copyOfRange(message, 0, 16));
+        long uuidHigh = byteBuffer.getLong();
+        long uuidLow = byteBuffer.getLong();
+        String uuid = new UUID(uuidHigh, uuidLow).toString();
+
+        byteBuffer = ByteBuffer.wrap(Arrays.copyOfRange(message, 16, 24));
+        int packetsInMessage = byteBuffer.getInt();
+        int sequenceNumber = byteBuffer.getInt();
+
+        byte[] payload = Arrays.copyOfRange(message, 24, message.length);
+
+        return new Packet(uuid, packetsInMessage, sequenceNumber, payload);
     }
 }

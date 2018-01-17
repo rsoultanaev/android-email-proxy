@@ -172,7 +172,7 @@ public class SphinxUtil {
     }
 
     public static byte[][] splitIntoSphinxPackets(byte[] dest, byte[] message, SphinxParams params, byte[][] nodesRouting, ECPoint[] nodeKeys) throws IOException {
-        int payloadSize = 832;
+        int payloadSize = 1000;
 
         int total = (int) Math.ceil((double) message.length / payloadSize);
         byte[] uuid = newUUID();

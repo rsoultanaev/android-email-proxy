@@ -5,6 +5,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
+import com.rsoultanaev.sphinxproxy.database.DB;
+import com.rsoultanaev.sphinxproxy.database.DBQuery;
+import com.rsoultanaev.sphinxproxy.database.Packet;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -35,15 +39,19 @@ public class MainActivity extends AppCompatActivity {
 
                 Pop3Puller pop3Puller = new Pop3Puller(server, port, username, password);
 
-                byte[][] newMessages = pop3Puller.pullMessages(true);
+                Packet[] newMessages = pop3Puller.pullMessages(false);
 
                 if (newMessages == null) {
                     System.out.println("Message pull failed");
                 } else {
                     System.out.println("Messages for mort: " + newMessages.length);
-                    for (byte[] m : newMessages) {
+                    for (Packet m : newMessages) {
                         System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-                        System.out.println(new String(m));
+                        System.out.println(m.uuid);
+                        System.out.println(m.packetsInMessage);
+                        System.out.println(m.sequenceNumber);
+                        System.out.println(m.payload.length);
+                        System.out.println(new String(m.payload));
                         System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
                     }
                 }
