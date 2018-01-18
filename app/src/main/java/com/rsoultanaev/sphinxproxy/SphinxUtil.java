@@ -16,6 +16,8 @@ import static com.robertsoultanaev.javasphinx.Util.decodeECPoint;
 import com.robertsoultanaev.javasphinx.SphinxClient;
 import com.robertsoultanaev.javasphinx.SphinxPacket;
 import com.robertsoultanaev.javasphinx.SphinxParams;
+import com.rsoultanaev.sphinxproxy.database.AssembledMessage;
+import com.rsoultanaev.sphinxproxy.database.Packet;
 
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.encoders.Hex;
@@ -25,6 +27,7 @@ import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 public class SphinxUtil {
@@ -84,7 +87,7 @@ public class SphinxUtil {
         nodeKeys[1] = decodeECPoint(Hex.decode("039d95b858383fdeee0d493a1675d513c29671de322c367d23a08cd5bf"));
         nodeKeys[2] = decodeECPoint(Hex.decode("02739a6205b940db5dd4c62c17fe568dc1b061a150322df9a45543898f"));
 
-        byte[] dest = "rsoultanaev@rsoultanaev.com".getBytes();
+        byte[] dest = "mort@rsoultanaev.com".getBytes();
         byte[][] splitMessage = splitIntoSphinxPackets(dest, email, params, nodesRouting, nodeKeys);
 
         class Client {
@@ -172,7 +175,7 @@ public class SphinxUtil {
     }
 
     public static byte[][] splitIntoSphinxPackets(byte[] dest, byte[] message, SphinxParams params, byte[][] nodesRouting, ECPoint[] nodeKeys) throws IOException {
-        int payloadSize = 832;
+        int payloadSize = 300;
 
         int total = (int) Math.ceil((double) message.length / payloadSize);
         byte[] uuid = newUUID();
@@ -184,14 +187,28 @@ public class SphinxUtil {
             ByteBuffer byteBuffer = ByteBuffer.allocate(8);
             byteBuffer.putInt(total).putInt(i);
             byte[] sphinxPayload = concatByteArrays(uuid, byteBuffer.array(), payload);
-            packets[i] = createBinSphinxPacket(dest, sphinxPayload, params, nodesRouting, nodeKeys);
+            String encodedSphinxPayload = Hex.toHexString(sphinxPayload);
+            packets[i] = createBinSphinxPacket(dest, encodedSphinxPayload.getBytes(), params, nodesRouting, nodeKeys);
         }
 
         return packets;
     }
 
+    // Assume all packets present and in sorted order
+    public static AssembledMessage assemblePackets(List<Packet> packets) {
+        String uuid = packets.get(0).uuid;
+        byte[][] payloads = new byte[packets.size()][];
+        for (int i = 0; i < packets.size(); i++) {
+            payloads[i] = packets.get(i).payload;
+        }
+        byte[] message = concatByteArrays(payloads);
+
+        return new AssembledMessage(uuid, message);
+    }
+
     private static byte[] newUUID() {
         UUID uuid = UUID.randomUUID();
+        System.out.println("Message UUID: " + uuid.toString());
         long hi = uuid.getMostSignificantBits();
         long lo = uuid.getLeastSignificantBits();
         return ByteBuffer.allocate(16).putLong(hi).putLong(lo).array();

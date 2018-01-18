@@ -5,6 +5,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
+import com.rsoultanaev.sphinxproxy.database.AssembledMessage;
+import com.rsoultanaev.sphinxproxy.database.DB;
+import com.rsoultanaev.sphinxproxy.database.DBQuery;
+import com.rsoultanaev.sphinxproxy.database.Packet;
+
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -23,5 +30,44 @@ public class MainActivity extends AppCompatActivity {
     public void stopProxy(View view) {
         Intent proxyIntent = new Intent(this, ProxyService.class);
         stopService(proxyIntent);
+    }
+
+    public void triggerTest(View view) {
+        new Thread(new Runnable() {
+            public void run() {
+                String server = "localhost";
+                int port = 11000;
+                String username = "mort";
+                String password = "1234";
+
+                Pop3Puller pop3Puller = new Pop3Puller(server, port, username, password);
+
+                Packet[] newMessages = pop3Puller.pullMessages(false);
+
+                if (newMessages == null) {
+                    System.out.println("Message pull failed");
+                } else {
+                    System.out.println("Messages for mort: " + newMessages.length);
+
+                    if (newMessages.length > 0) {
+                        String uuid = newMessages[0].uuid;
+
+                        DB db = DB.getAppDatabase(getApplicationContext());
+                        DBQuery dao = db.getDao();
+                        dao.deleteEverything();
+
+                        for (Packet packet : newMessages) {
+                            dao.addPacket(packet);
+                        }
+
+                        List<Packet> fromDb = dao.getPackets(uuid);
+
+                        AssembledMessage msg = SphinxUtil.assemblePackets(fromDb);
+
+                        dao.addAssembledMessage(msg);
+                    }
+                }
+            }
+        }).start();
     }
 }
