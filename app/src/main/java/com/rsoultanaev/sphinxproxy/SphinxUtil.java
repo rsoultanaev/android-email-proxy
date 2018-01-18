@@ -16,6 +16,8 @@ import static com.robertsoultanaev.javasphinx.Util.decodeECPoint;
 import com.robertsoultanaev.javasphinx.SphinxClient;
 import com.robertsoultanaev.javasphinx.SphinxPacket;
 import com.robertsoultanaev.javasphinx.SphinxParams;
+import com.rsoultanaev.sphinxproxy.database.AssembledMessage;
+import com.rsoultanaev.sphinxproxy.database.Packet;
 
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.encoders.Hex;
@@ -25,6 +27,7 @@ import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 public class SphinxUtil {
@@ -189,6 +192,18 @@ public class SphinxUtil {
         }
 
         return packets;
+    }
+
+    // Assume all packets present and in sorted order
+    public static AssembledMessage assemblePackets(List<Packet> packets) {
+        String uuid = packets.get(0).uuid;
+        byte[][] payloads = new byte[packets.size()][];
+        for (int i = 0; i < packets.size(); i++) {
+            payloads[i] = packets.get(i).payload;
+        }
+        byte[] message = concatByteArrays(payloads);
+
+        return new AssembledMessage(uuid, message);
     }
 
     private static byte[] newUUID() {

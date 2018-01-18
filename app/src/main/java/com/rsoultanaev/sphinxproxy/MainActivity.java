@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
+import com.rsoultanaev.sphinxproxy.database.AssembledMessage;
 import com.rsoultanaev.sphinxproxy.database.DB;
 import com.rsoultanaev.sphinxproxy.database.DBQuery;
 import com.rsoultanaev.sphinxproxy.database.Packet;
@@ -60,15 +61,9 @@ public class MainActivity extends AppCompatActivity {
 
                     List<Packet> fromDb = dao.getPackets(uuid);
 
-                    for (Packet m : fromDb) {
-                        System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-                        System.out.println(m.uuid);
-                        System.out.println(m.packetsInMessage);
-                        System.out.println(m.sequenceNumber);
-                        System.out.println(m.payload.length);
-                        System.out.println(new String(m.payload));
-                        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-                    }
+                    AssembledMessage msg = SphinxUtil.assemblePackets(fromDb);
+                    System.out.println(msg.uuid);
+                    System.out.println(new String(msg.message));
                 }
             }
         }).start();
