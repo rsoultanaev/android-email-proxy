@@ -25,6 +25,15 @@ public abstract class DBQuery {
     @Query("DELETE FROM packetcount WHERE uuid=:uuid")
     protected abstract void deletePacketCount(String uuid);
 
+    @Query("DELETE FROM packet")
+    protected abstract void deleteAllPackets();
+
+    @Query("DELETE FROM PacketCount")
+    protected abstract void deleteAllPacketCounts();
+
+    @Query("DELETE FROM AssembledMessage")
+    protected abstract void deleteAllAssembledMessages();
+
 
     @Insert
     public abstract void insertAssembledMessage(AssembledMessage assembledMessage);
@@ -57,5 +66,12 @@ public abstract class DBQuery {
         insertAssembledMessage(assembledMessage);
         deletePackets(assembledMessage.uuid);
         deletePacketCount(assembledMessage.uuid);
+    }
+
+    @Transaction
+    public void deleteEverything() {
+        deleteAllAssembledMessages();
+        deleteAllPacketCounts();
+        deleteAllPackets();
     }
 }

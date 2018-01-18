@@ -9,6 +9,8 @@ import com.rsoultanaev.sphinxproxy.database.DB;
 import com.rsoultanaev.sphinxproxy.database.DBQuery;
 import com.rsoultanaev.sphinxproxy.database.Packet;
 
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -45,7 +47,20 @@ public class MainActivity extends AppCompatActivity {
                     System.out.println("Message pull failed");
                 } else {
                     System.out.println("Messages for mort: " + newMessages.length);
-                    for (Packet m : newMessages) {
+
+                    String uuid = newMessages[0].uuid;
+
+                    DB db = DB.getAppDatabase(getApplicationContext());
+                    DBQuery dao = db.getDao();
+                    dao.deleteEverything();
+
+                    for (Packet packet : newMessages) {
+                        dao.addPacket(packet);
+                    }
+
+                    List<Packet> fromDb = dao.getPackets(uuid);
+
+                    for (Packet m : fromDb) {
                         System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
                         System.out.println(m.uuid);
                         System.out.println(m.packetsInMessage);
