@@ -172,7 +172,7 @@ public class SphinxUtil {
     }
 
     public static byte[][] splitIntoSphinxPackets(byte[] dest, byte[] message, SphinxParams params, byte[][] nodesRouting, ECPoint[] nodeKeys) throws IOException {
-        int payloadSize = 1000;
+        int payloadSize = 300;
 
         int total = (int) Math.ceil((double) message.length / payloadSize);
         byte[] uuid = newUUID();
@@ -184,7 +184,8 @@ public class SphinxUtil {
             ByteBuffer byteBuffer = ByteBuffer.allocate(8);
             byteBuffer.putInt(total).putInt(i);
             byte[] sphinxPayload = concatByteArrays(uuid, byteBuffer.array(), payload);
-            packets[i] = createBinSphinxPacket(dest, sphinxPayload, params, nodesRouting, nodeKeys);
+            String encodedSphinxPayload = Hex.toHexString(sphinxPayload);
+            packets[i] = createBinSphinxPacket(dest, encodedSphinxPayload.getBytes(), params, nodesRouting, nodeKeys);
         }
 
         return packets;
@@ -192,6 +193,7 @@ public class SphinxUtil {
 
     private static byte[] newUUID() {
         UUID uuid = UUID.randomUUID();
+        System.out.println("Message UUID: " + uuid.toString());
         long hi = uuid.getMostSignificantBits();
         long lo = uuid.getLeastSignificantBits();
         return ByteBuffer.allocate(16).putLong(hi).putLong(lo).array();
