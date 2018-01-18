@@ -5,6 +5,7 @@ import com.rsoultanaev.sphinxproxy.database.Packet;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.net.pop3.POP3Client;
 import org.apache.commons.net.pop3.POP3MessageInfo;
+import org.bouncycastle.util.encoders.Hex;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -119,19 +120,17 @@ public class Pop3Puller {
     }
 
     private Packet parseMessageToPacket(BufferedReader reader) throws IOException {
-        byte[] message = getMessageBody(reader);
+        byte[] encodedMessage = getMessageBody(reader);
+        byte[] message = Hex.decode(encodedMessage);
 
-        System.out.println(message.length);
-
-        ByteBuffer byteBuffer = ByteBuffer.wrap(Arrays.copyOfRange(message, 0, 16));
+        byte[] headerBytes = Arrays.copyOfRange(message, 0, 24);
+        ByteBuffer byteBuffer = ByteBuffer.wrap(headerBytes);
         long uuidHigh = byteBuffer.getLong();
         long uuidLow = byteBuffer.getLong();
-        String uuid = new UUID(uuidHigh, uuidLow).toString();
 
-        byteBuffer = ByteBuffer.wrap(Arrays.copyOfRange(message, 16, 24));
         int packetsInMessage = byteBuffer.getInt();
         int sequenceNumber = byteBuffer.getInt();
-
+        String uuid = new UUID(uuidHigh, uuidLow).toString();
         byte[] payload = Arrays.copyOfRange(message, 24, message.length);
 
         return new Packet(uuid, packetsInMessage, sequenceNumber, payload);
