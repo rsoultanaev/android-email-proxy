@@ -47,6 +47,9 @@ public abstract class DBQuery {
     @Query("SELECT * FROM packet WHERE uuid=:uuid ORDER BY sequenceNumber")
     public abstract List<Packet> getPackets(String uuid);
 
+    @Query("SELECT * FROM assembledmessage")
+    public abstract List<AssembledMessage> getAssembledMessages();
+
     @Transaction
     public void addPacket(Packet packet) {
         // TODO: Think about receiving duplicates

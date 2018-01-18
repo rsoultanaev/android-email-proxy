@@ -49,21 +49,23 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     System.out.println("Messages for mort: " + newMessages.length);
 
-                    String uuid = newMessages[0].uuid;
+                    if (newMessages.length > 0) {
+                        String uuid = newMessages[0].uuid;
 
-                    DB db = DB.getAppDatabase(getApplicationContext());
-                    DBQuery dao = db.getDao();
-                    dao.deleteEverything();
+                        DB db = DB.getAppDatabase(getApplicationContext());
+                        DBQuery dao = db.getDao();
+                        dao.deleteEverything();
 
-                    for (Packet packet : newMessages) {
-                        dao.addPacket(packet);
+                        for (Packet packet : newMessages) {
+                            dao.addPacket(packet);
+                        }
+
+                        List<Packet> fromDb = dao.getPackets(uuid);
+
+                        AssembledMessage msg = SphinxUtil.assemblePackets(fromDb);
+
+                        dao.addAssembledMessage(msg);
                     }
-
-                    List<Packet> fromDb = dao.getPackets(uuid);
-
-                    AssembledMessage msg = SphinxUtil.assemblePackets(fromDb);
-                    System.out.println(msg.uuid);
-                    System.out.println(new String(msg.message));
                 }
             }
         }).start();

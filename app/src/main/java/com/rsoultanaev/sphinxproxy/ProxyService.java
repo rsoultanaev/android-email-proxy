@@ -40,7 +40,7 @@ public class ProxyService extends Service {
                     smtpServer.setPort(smtpPort);
                     smtpServer.start();
 
-                    pop3Server = new Pop3Server(pop3Port);
+                    pop3Server = new Pop3Server(pop3Port, getApplicationContext());
                     pop3Server.start();
                 }
             }).start();
