@@ -123,7 +123,7 @@ public class Pop3Puller {
         byte[] encodedMessage = getMessageBody(reader);
         byte[] message = Base64.decode(encodedMessage);
 
-        byte[] headerBytes = Arrays.copyOfRange(message, 0, 24);
+        byte[] headerBytes = Arrays.copyOfRange(message, 0, Constants.PACKET_HEADER_SIZE);
         ByteBuffer byteBuffer = ByteBuffer.wrap(headerBytes);
         long uuidHigh = byteBuffer.getLong();
         long uuidLow = byteBuffer.getLong();

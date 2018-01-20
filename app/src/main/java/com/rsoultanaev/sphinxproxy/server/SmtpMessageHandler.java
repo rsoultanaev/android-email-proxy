@@ -1,6 +1,7 @@
 package com.rsoultanaev.sphinxproxy.server;
 
-import org.subethamail.smtp.TooMuchDataException;
+import com.rsoultanaev.sphinxproxy.SphinxUtil;
+
 import org.subethamail.smtp.helper.SimpleMessageListener;
 
 import java.io.BufferedInputStream;
@@ -8,21 +9,22 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static com.rsoultanaev.sphinxproxy.SphinxUtil.sendMailWithSphinx;
-
 public class SmtpMessageHandler implements SimpleMessageListener {
     public boolean accept(String from, String recipient) {
         return true;
     }
 
-    public void deliver(String from, String recipient, InputStream data) throws TooMuchDataException, IOException {
+    public void deliver(String from, String recipient, InputStream data) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         data = new BufferedInputStream(data);
 
         int current;
-        while ((current = data.read()) >= 0)
-        {
-            out.write(current);
+        try {
+            while ((current = data.read()) >= 0) {
+                out.write(current);
+            }
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to read the email", ex);
         }
 
         byte[] email = out.toByteArray();
@@ -33,6 +35,7 @@ public class SmtpMessageHandler implements SimpleMessageListener {
         System.out.println("[SMTP] email length: " + email.length);
         System.out.println("-------------------------");
 
-        sendMailWithSphinx(email);
+        SphinxUtil sphinxUtil = new SphinxUtil();
+        sphinxUtil.sendMailWithSphinx(email, recipient);
     }
 }

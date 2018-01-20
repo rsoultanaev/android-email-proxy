@@ -1,10 +1,5 @@
 package com.rsoultanaev.sphinxproxy;
 
-import com.koushikdutta.async.AsyncServer;
-import com.koushikdutta.async.AsyncSocket;
-import com.koushikdutta.async.Util;
-import com.koushikdutta.async.callback.CompletedCallback;
-import com.koushikdutta.async.callback.ConnectCallback;
 import com.robertsoultanaev.javasphinx.DestinationAndMessage;
 import com.robertsoultanaev.javasphinx.HeaderAndDelta;
 import com.robertsoultanaev.javasphinx.ParamLengths;
@@ -24,175 +19,111 @@ import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 
 import java.io.IOException;
-import java.math.BigInteger;
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
 public class SphinxUtil {
-    public static void sendMailWithSphinx(byte[] email) throws IOException {
-        class PkiEntry {
-            BigInteger x;
-            ECPoint y;
 
-            public PkiEntry(BigInteger x, ECPoint y) {
-                this.x = x;
-                this.y = y;
-            }
-        }
-
-        SphinxParams params;
-        HashMap<Integer, PkiEntry> pkiPriv;
+    private class RoutingInformation {
         byte[][] nodesRouting;
         ECPoint[] nodeKeys;
-        int[] useNodes;
 
+        public RoutingInformation(byte[][] nodesRouting, ECPoint[] nodeKeys) {
+            this.nodesRouting = nodesRouting;
+            this.nodeKeys = nodeKeys;
+        }
+    }
+
+    private final SphinxParams params;
+    private final HashMap<Integer, ECPoint> publicKeys;
+
+    public SphinxUtil() {
         params = new SphinxParams();
+        publicKeys = new HashMap<Integer, ECPoint>();
 
-        int r = 5;
+        // TODO: Implement this
+        publicKeys.put(8000, decodeECPoint(Hex.decode("036457e713498b559afe446158aaa08613530022b25e418c59b8b2a624")));
+        publicKeys.put(8001, decodeECPoint(Hex.decode("039d95b858383fdeee0d493a1675d513c29671de322c367d23a08cd5bf")));
+        publicKeys.put(8002, decodeECPoint(Hex.decode("02739a6205b940db5dd4c62c17fe568dc1b061a150322df9a45543898f")));
+    }
 
-        pkiPriv = new HashMap<Integer, PkiEntry>();
-        HashMap<Integer, PkiEntry> pkiPub = new HashMap<Integer, PkiEntry>();
+    public void sendMailWithSphinx(byte[] email, String recipient) {
+        byte[] dest = recipient.getBytes();
 
-        for (int i = 0; i < 10; i++) {
-            BigInteger x = params.getGroup().genSecret();
-            ECPoint y = params.getGroup().expon(params.getGroup().getGenerator(), x);
+        UUID messageId = UUID.randomUUID();
+        int packetsInMessage = (int) Math.ceil((double) email.length / Constants.PACKET_PAYLOAD_SIZE);
 
-            PkiEntry privEntry = new PkiEntry(x, y);
-            PkiEntry pubEntry = new PkiEntry(null, y);
+        byte[][] sphinxPackets = new byte[packetsInMessage][];
+        for (int i = 0; i < packetsInMessage; i++) {
 
-            int port = 8000 + i;
+            ByteBuffer packetHeader = ByteBuffer.allocate(Constants.PACKET_HEADER_SIZE);
+            packetHeader.putLong(messageId.getMostSignificantBits());
+            packetHeader.putLong(messageId.getLeastSignificantBits());
+            packetHeader.putInt(packetsInMessage);
+            packetHeader.putInt(i);
 
-            pkiPriv.put(port, privEntry);
-            pkiPub.put(port, pubEntry);
+            byte[] packetPayload = copyUpToNum(email, Constants.PACKET_PAYLOAD_SIZE * i, Constants.PACKET_PAYLOAD_SIZE);
+            byte[] encodedSphinxPayload = Base64.encode(concatByteArrays(packetHeader.array(), packetPayload));
+
+            RoutingInformation routingInformation = generateRoutingInformation();
+
+            sphinxPackets[i] = createBinSphinxPacket(dest, encodedSphinxPayload, routingInformation);
         }
 
-        Object[] pubKeys = pkiPub.keySet().toArray();
-        int[] nodePool = new int[pubKeys.length];
-        for (int i = 0; i < nodePool.length; i++) {
-            nodePool[i] = (Integer) pubKeys[i];
+        AsyncTcpClient asyncTcpClient = new AsyncTcpClient("localhost", 10000);
+
+        for (byte[] binMessage : sphinxPackets) {
+            asyncTcpClient.sendMessage(binMessage);
         }
-        useNodes = SphinxClient.randSubset(nodePool, 3);
-        int[] mynodes = {8000, 8001, 8002};
-        useNodes = mynodes;
+    }
+
+    private byte[] createBinSphinxPacket(byte[] dest, byte[] message, RoutingInformation routingInformation) {
+        DestinationAndMessage destinationAndMessage = new DestinationAndMessage(dest, message);
+
+        HeaderAndDelta headerAndDelta;
+        try {
+            headerAndDelta = createForwardMessage(params, routingInformation.nodesRouting, routingInformation.nodeKeys, destinationAndMessage);
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to create forward message", ex);
+        }
+
+        ParamLengths paramLengths = new ParamLengths(params.getHeaderLength(), params.getBodyLength());
+        SphinxPacket sphinxPacket = new SphinxPacket(paramLengths, headerAndDelta);
+
+        byte[] binSphinxPacket;
+        try {
+            binSphinxPacket = packMessage(sphinxPacket);
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to pack forward message", ex);
+        }
+
+        return binSphinxPacket;
+    }
+
+    // TODO: Implement this
+    private RoutingInformation generateRoutingInformation() {
+        byte[][] nodesRouting;
+        ECPoint[] nodeKeys;
+
+        int[] useNodes = {8000, 8001, 8002};
 
         nodesRouting = new byte[useNodes.length][];
         for (int i = 0; i < useNodes.length; i++) {
-            nodesRouting[i] = SphinxClient.encodeNode(useNodes[i]);
+            try {
+                nodesRouting[i] = SphinxClient.encodeNode(useNodes[i]);
+            } catch (IOException ex) {
+                throw new RuntimeException("Failed to encode node", ex);
+            }
         }
 
         nodeKeys = new ECPoint[useNodes.length];
-        nodeKeys[0] = decodeECPoint(Hex.decode("036457e713498b559afe446158aaa08613530022b25e418c59b8b2a624"));
-        nodeKeys[1] = decodeECPoint(Hex.decode("039d95b858383fdeee0d493a1675d513c29671de322c367d23a08cd5bf"));
-        nodeKeys[2] = decodeECPoint(Hex.decode("02739a6205b940db5dd4c62c17fe568dc1b061a150322df9a45543898f"));
+        nodeKeys[0] = publicKeys.get(useNodes[0]);
+        nodeKeys[1] = publicKeys.get(useNodes[1]);
+        nodeKeys[2] = publicKeys.get(useNodes[2]);
 
-        byte[] dest = "mort@rsoultanaev.com".getBytes();
-        byte[][] splitMessage = splitIntoSphinxPackets(dest, email, params, nodesRouting, nodeKeys);
-
-        class Client {
-
-            private String host;
-            private int port;
-            private byte[] message;
-
-            public Client(String host, int port, byte[] message) {
-                this.host = host;
-                this.port = port;
-                this.message = message;
-                setup();
-            }
-
-            private void setup() {
-                AsyncServer.getDefault().connectSocket(new InetSocketAddress(host, port), new ConnectCallback() {
-                    @Override
-                    public void onConnectCompleted(Exception ex, final AsyncSocket socket) {
-                        handleConnectCompleted(ex, socket);
-                    }
-                });
-            }
-
-            private void handleConnectCompleted(Exception ex, final AsyncSocket socket) {
-                if(ex != null) throw new RuntimeException(ex);
-
-                Util.writeAll(socket, message, new CompletedCallback() {
-                    @Override
-                    public void onCompleted(Exception ex) {
-                        if (ex != null) throw new RuntimeException(ex);
-                        System.out.println("[Client] Successfully wrote message");
-                        System.out.println("[Client] Message length: " + message.length);
-                        System.out.println(new String(message));
-                    }
-                });
-
-                socket.setClosedCallback(new CompletedCallback() {
-                    @Override
-                    public void onCompleted(Exception ex) {
-                        if(ex != null) throw new RuntimeException(ex);
-                        System.out.println("[Client] Successfully closed connection");
-                    }
-                });
-
-                socket.setEndCallback(new CompletedCallback() {
-                    @Override
-                    public void onCompleted(Exception ex) {
-                        if(ex != null) throw new RuntimeException(ex);
-                        System.out.println("[Client] Successfully end connection");
-                    }
-                });
-
-                socket.close();
-            }
-        }
-
-        for (byte[] binMessage : splitMessage) {
-            new Client("localhost", 10000, binMessage);
-        }
-    }
-
-    public static byte[] genTestMessage(String repeatStr, int msgLen) {
-        StringBuilder sb = new StringBuilder();
-
-        for (int i = 0; i < msgLen; i += repeatStr.length()) {
-            for (int j = 0; j < repeatStr.length(); j++) {
-                if (i + j >= msgLen) {
-                    break;
-                }
-
-                sb.append(repeatStr.charAt(j));
-            }
-        }
-
-        return sb.toString().getBytes();
-    }
-
-    public static byte[] createBinSphinxPacket(byte[] dest, byte[] message, SphinxParams params, byte[][] nodesRouting, ECPoint[] nodeKeys) throws IOException {
-        DestinationAndMessage destinationAndMessage = new DestinationAndMessage(dest, message);
-        HeaderAndDelta headerAndDelta = createForwardMessage(params, nodesRouting, nodeKeys, destinationAndMessage);
-        ParamLengths paramLengths = new ParamLengths(params.getHeaderLength(), params.getBodyLength());
-        SphinxPacket sphinxPacket = new SphinxPacket(paramLengths, headerAndDelta);
-        return packMessage(sphinxPacket);
-    }
-
-    public static byte[][] splitIntoSphinxPackets(byte[] dest, byte[] message, SphinxParams params, byte[][] nodesRouting, ECPoint[] nodeKeys) throws IOException {
-        int payloadSize = 300;
-
-        int total = (int) Math.ceil((double) message.length / payloadSize);
-        byte[] uuid = newUUID();
-
-        byte[][] packets = new byte[total][];
-
-        for (int i = 0; i < total; i++) {
-            byte[] payload = copyNum(message, payloadSize * i, payloadSize);
-            ByteBuffer byteBuffer = ByteBuffer.allocate(8);
-            byteBuffer.putInt(total).putInt(i);
-            byte[] sphinxPayload = concatByteArrays(uuid, byteBuffer.array(), payload);
-            byte[] encodedSphinxPayload = Base64.encode(sphinxPayload);
-            packets[i] = createBinSphinxPacket(dest, encodedSphinxPayload, params, nodesRouting, nodeKeys);
-        }
-
-        return packets;
+        return new RoutingInformation(nodesRouting, nodeKeys);
     }
 
     // Assume all packets present and in sorted order
@@ -207,15 +138,8 @@ public class SphinxUtil {
         return new AssembledMessage(uuid, message);
     }
 
-    private static byte[] newUUID() {
-        UUID uuid = UUID.randomUUID();
-        System.out.println("Message UUID: " + uuid.toString());
-        long hi = uuid.getMostSignificantBits();
-        long lo = uuid.getLeastSignificantBits();
-        return ByteBuffer.allocate(16).putLong(hi).putLong(lo).array();
-    }
-
-    private static byte[] copyNum(byte[] source, int offset, int numBytes) {
+    // Copies numBytes from offset if possible, otherwise copies from offset to the end of source array
+    private byte[] copyUpToNum(byte[] source, int offset, int numBytes) {
         if (offset + numBytes > source.length) {
             numBytes = source.length - offset;
         }
