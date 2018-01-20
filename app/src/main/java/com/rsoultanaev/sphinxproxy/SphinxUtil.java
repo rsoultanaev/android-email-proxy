@@ -1,10 +1,5 @@
 package com.rsoultanaev.sphinxproxy;
 
-import com.koushikdutta.async.AsyncServer;
-import com.koushikdutta.async.AsyncSocket;
-import com.koushikdutta.async.Util;
-import com.koushikdutta.async.callback.CompletedCallback;
-import com.koushikdutta.async.callback.ConnectCallback;
 import com.robertsoultanaev.javasphinx.DestinationAndMessage;
 import com.robertsoultanaev.javasphinx.HeaderAndDelta;
 import com.robertsoultanaev.javasphinx.ParamLengths;
@@ -25,7 +20,6 @@ import org.bouncycastle.util.encoders.Hex;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
@@ -107,23 +101,25 @@ public class SphinxUtil {
     }
 
     public static byte[][] splitIntoSphinxPackets(byte[] dest, byte[] message, SphinxParams params, byte[][] nodesRouting, ECPoint[] nodeKeys) throws IOException {
-        int payloadSize = 300;
+        UUID uuid = UUID.randomUUID();
+        int total = (int) Math.ceil((double) message.length / Constants.PACKET_PAYLOAD_SIZE);
 
-        int total = (int) Math.ceil((double) message.length / payloadSize);
-        byte[] uuid = newUUID();
-
-        byte[][] packets = new byte[total][];
-
+        byte[][] sphinxPackets = new byte[total][];
         for (int i = 0; i < total; i++) {
-            byte[] payload = copyNum(message, payloadSize * i, payloadSize);
-            ByteBuffer byteBuffer = ByteBuffer.allocate(8);
-            byteBuffer.putInt(total).putInt(i);
-            byte[] sphinxPayload = concatByteArrays(uuid, byteBuffer.array(), payload);
-            byte[] encodedSphinxPayload = Base64.encode(sphinxPayload);
-            packets[i] = createBinSphinxPacket(dest, encodedSphinxPayload, params, nodesRouting, nodeKeys);
+
+            ByteBuffer packetHeader = ByteBuffer.allocate(Constants.PACKET_HEADER_SIZE);
+            packetHeader.putLong(uuid.getMostSignificantBits());
+            packetHeader.putLong(uuid.getLeastSignificantBits());
+            packetHeader.putInt(total);
+            packetHeader.putInt(i);
+
+            byte[] packetPayload = copyUpToNum(message, Constants.PACKET_PAYLOAD_SIZE * i, Constants.PACKET_PAYLOAD_SIZE);
+            byte[] encodedSphinxPayload = Base64.encode(concatByteArrays(packetHeader.array(), packetPayload));
+
+            sphinxPackets[i] = createBinSphinxPacket(dest, encodedSphinxPayload, params, nodesRouting, nodeKeys);
         }
 
-        return packets;
+        return sphinxPackets;
     }
 
     // Assume all packets present and in sorted order
@@ -138,15 +134,8 @@ public class SphinxUtil {
         return new AssembledMessage(uuid, message);
     }
 
-    private static byte[] newUUID() {
-        UUID uuid = UUID.randomUUID();
-        System.out.println("Message UUID: " + uuid.toString());
-        long hi = uuid.getMostSignificantBits();
-        long lo = uuid.getLeastSignificantBits();
-        return ByteBuffer.allocate(16).putLong(hi).putLong(lo).array();
-    }
-
-    private static byte[] copyNum(byte[] source, int offset, int numBytes) {
+    // Copies numBytes from offset if possible, otherwise copies from offset to the end of source array
+    private static byte[] copyUpToNum(byte[] source, int offset, int numBytes) {
         if (offset + numBytes > source.length) {
             numBytes = source.length - offset;
         }
