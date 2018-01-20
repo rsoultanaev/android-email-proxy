@@ -91,63 +91,10 @@ public class SphinxUtil {
         byte[] dest = "mort@rsoultanaev.com".getBytes();
         byte[][] splitMessage = splitIntoSphinxPackets(dest, email, params, nodesRouting, nodeKeys);
 
-        class Client {
-
-            private String host;
-            private int port;
-            private byte[] message;
-
-            public Client(String host, int port, byte[] message) {
-                this.host = host;
-                this.port = port;
-                this.message = message;
-                setup();
-            }
-
-            private void setup() {
-                AsyncServer.getDefault().connectSocket(new InetSocketAddress(host, port), new ConnectCallback() {
-                    @Override
-                    public void onConnectCompleted(Exception ex, final AsyncSocket socket) {
-                        handleConnectCompleted(ex, socket);
-                    }
-                });
-            }
-
-            private void handleConnectCompleted(Exception ex, final AsyncSocket socket) {
-                if(ex != null) throw new RuntimeException(ex);
-
-                Util.writeAll(socket, message, new CompletedCallback() {
-                    @Override
-                    public void onCompleted(Exception ex) {
-                        if (ex != null) throw new RuntimeException(ex);
-                        System.out.println("[Client] Successfully wrote message");
-                        System.out.println("[Client] Message length: " + message.length);
-                        System.out.println(new String(message));
-                    }
-                });
-
-                socket.setClosedCallback(new CompletedCallback() {
-                    @Override
-                    public void onCompleted(Exception ex) {
-                        if(ex != null) throw new RuntimeException(ex);
-                        System.out.println("[Client] Successfully closed connection");
-                    }
-                });
-
-                socket.setEndCallback(new CompletedCallback() {
-                    @Override
-                    public void onCompleted(Exception ex) {
-                        if(ex != null) throw new RuntimeException(ex);
-                        System.out.println("[Client] Successfully end connection");
-                    }
-                });
-
-                socket.close();
-            }
-        }
+        AsyncTcpClient asyncTcpClient = new AsyncTcpClient("localhost", 10000);
 
         for (byte[] binMessage : splitMessage) {
-            new Client("localhost", 10000, binMessage);
+            asyncTcpClient.sendMessage(binMessage);
         }
     }
 
