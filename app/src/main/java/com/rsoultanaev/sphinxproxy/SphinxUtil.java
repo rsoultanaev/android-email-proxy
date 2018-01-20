@@ -98,22 +98,6 @@ public class SphinxUtil {
         }
     }
 
-    public static byte[] genTestMessage(String repeatStr, int msgLen) {
-        StringBuilder sb = new StringBuilder();
-
-        for (int i = 0; i < msgLen; i += repeatStr.length()) {
-            for (int j = 0; j < repeatStr.length(); j++) {
-                if (i + j >= msgLen) {
-                    break;
-                }
-
-                sb.append(repeatStr.charAt(j));
-            }
-        }
-
-        return sb.toString().getBytes();
-    }
-
     public static byte[] createBinSphinxPacket(byte[] dest, byte[] message, SphinxParams params, byte[][] nodesRouting, ECPoint[] nodeKeys) throws IOException {
         DestinationAndMessage destinationAndMessage = new DestinationAndMessage(dest, message);
         HeaderAndDelta headerAndDelta = createForwardMessage(params, nodesRouting, nodeKeys, destinationAndMessage);
