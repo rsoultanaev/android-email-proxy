@@ -26,51 +26,33 @@ import java.util.List;
 import java.util.UUID;
 
 public class SphinxUtil {
-    public static void sendMailWithSphinx(byte[] email) throws IOException {
-        class PkiEntry {
-            BigInteger x;
-            ECPoint y;
+    private class PkiEntry {
+        BigInteger x;
+        ECPoint y;
 
-            public PkiEntry(BigInteger x, ECPoint y) {
-                this.x = x;
-                this.y = y;
-            }
+        public PkiEntry(BigInteger x, ECPoint y) {
+            this.x = x;
+            this.y = y;
         }
+    }
 
-        SphinxParams params;
-        HashMap<Integer, PkiEntry> pkiPriv;
+    HashMap<Integer, ECPoint> publicKeys;
+    SphinxParams params;
+
+    public SphinxUtil() {
+        params = new SphinxParams();
+        publicKeys = new HashMap<Integer, ECPoint>();
+
+        publicKeys.put(8000, decodeECPoint(Hex.decode("036457e713498b559afe446158aaa08613530022b25e418c59b8b2a624")));
+        publicKeys.put(8001, decodeECPoint(Hex.decode("039d95b858383fdeee0d493a1675d513c29671de322c367d23a08cd5bf")));
+        publicKeys.put(8002, decodeECPoint(Hex.decode("02739a6205b940db5dd4c62c17fe568dc1b061a150322df9a45543898f")));
+    }
+
+    public void sendMailWithSphinx(byte[] email) throws IOException {
         byte[][] nodesRouting;
         ECPoint[] nodeKeys;
-        int[] useNodes;
 
-        params = new SphinxParams();
-
-        int r = 5;
-
-        pkiPriv = new HashMap<Integer, PkiEntry>();
-        HashMap<Integer, PkiEntry> pkiPub = new HashMap<Integer, PkiEntry>();
-
-        for (int i = 0; i < 10; i++) {
-            BigInteger x = params.getGroup().genSecret();
-            ECPoint y = params.getGroup().expon(params.getGroup().getGenerator(), x);
-
-            PkiEntry privEntry = new PkiEntry(x, y);
-            PkiEntry pubEntry = new PkiEntry(null, y);
-
-            int port = 8000 + i;
-
-            pkiPriv.put(port, privEntry);
-            pkiPub.put(port, pubEntry);
-        }
-
-        Object[] pubKeys = pkiPub.keySet().toArray();
-        int[] nodePool = new int[pubKeys.length];
-        for (int i = 0; i < nodePool.length; i++) {
-            nodePool[i] = (Integer) pubKeys[i];
-        }
-        useNodes = SphinxClient.randSubset(nodePool, 3);
-        int[] mynodes = {8000, 8001, 8002};
-        useNodes = mynodes;
+        int[] useNodes = {8000, 8001, 8002};
 
         nodesRouting = new byte[useNodes.length][];
         for (int i = 0; i < useNodes.length; i++) {
@@ -78,9 +60,9 @@ public class SphinxUtil {
         }
 
         nodeKeys = new ECPoint[useNodes.length];
-        nodeKeys[0] = decodeECPoint(Hex.decode("036457e713498b559afe446158aaa08613530022b25e418c59b8b2a624"));
-        nodeKeys[1] = decodeECPoint(Hex.decode("039d95b858383fdeee0d493a1675d513c29671de322c367d23a08cd5bf"));
-        nodeKeys[2] = decodeECPoint(Hex.decode("02739a6205b940db5dd4c62c17fe568dc1b061a150322df9a45543898f"));
+        nodeKeys[0] = publicKeys.get(8000);
+        nodeKeys[1] = publicKeys.get(8001);
+        nodeKeys[2] = publicKeys.get(8002);
 
         byte[] dest = "mort@rsoultanaev.com".getBytes();
         byte[][] splitMessage = splitIntoSphinxPackets(dest, email, params, nodesRouting, nodeKeys);
@@ -92,7 +74,7 @@ public class SphinxUtil {
         }
     }
 
-    public static byte[] createBinSphinxPacket(byte[] dest, byte[] message, SphinxParams params, byte[][] nodesRouting, ECPoint[] nodeKeys) throws IOException {
+    private byte[] createBinSphinxPacket(byte[] dest, byte[] message, SphinxParams params, byte[][] nodesRouting, ECPoint[] nodeKeys) throws IOException {
         DestinationAndMessage destinationAndMessage = new DestinationAndMessage(dest, message);
         HeaderAndDelta headerAndDelta = createForwardMessage(params, nodesRouting, nodeKeys, destinationAndMessage);
         ParamLengths paramLengths = new ParamLengths(params.getHeaderLength(), params.getBodyLength());
@@ -100,7 +82,7 @@ public class SphinxUtil {
         return packMessage(sphinxPacket);
     }
 
-    public static byte[][] splitIntoSphinxPackets(byte[] dest, byte[] message, SphinxParams params, byte[][] nodesRouting, ECPoint[] nodeKeys) throws IOException {
+    private byte[][] splitIntoSphinxPackets(byte[] dest, byte[] message, SphinxParams params, byte[][] nodesRouting, ECPoint[] nodeKeys) throws IOException {
         UUID uuid = UUID.randomUUID();
         int total = (int) Math.ceil((double) message.length / Constants.PACKET_PAYLOAD_SIZE);
 
@@ -135,7 +117,7 @@ public class SphinxUtil {
     }
 
     // Copies numBytes from offset if possible, otherwise copies from offset to the end of source array
-    private static byte[] copyUpToNum(byte[] source, int offset, int numBytes) {
+    private byte[] copyUpToNum(byte[] source, int offset, int numBytes) {
         if (offset + numBytes > source.length) {
             numBytes = source.length - offset;
         }
