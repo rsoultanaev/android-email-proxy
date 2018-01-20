@@ -49,13 +49,32 @@ public class SphinxUtil {
         publicKeys.put(8002, decodeECPoint(Hex.decode("02739a6205b940db5dd4c62c17fe568dc1b061a150322df9a45543898f")));
     }
 
-    public void sendMailWithSphinx(byte[] email) {
-        byte[] dest = "mort@rsoultanaev.com".getBytes();
-        byte[][] splitMessage = splitIntoSphinxPackets(dest, email);
+    public void sendMailWithSphinx(byte[] email, String recipient) {
+        byte[] dest = recipient.getBytes();
+
+        UUID messageId = UUID.randomUUID();
+        int packetsInMessage = (int) Math.ceil((double) email.length / Constants.PACKET_PAYLOAD_SIZE);
+
+        byte[][] sphinxPackets = new byte[packetsInMessage][];
+        for (int i = 0; i < packetsInMessage; i++) {
+
+            ByteBuffer packetHeader = ByteBuffer.allocate(Constants.PACKET_HEADER_SIZE);
+            packetHeader.putLong(messageId.getMostSignificantBits());
+            packetHeader.putLong(messageId.getLeastSignificantBits());
+            packetHeader.putInt(packetsInMessage);
+            packetHeader.putInt(i);
+
+            byte[] packetPayload = copyUpToNum(email, Constants.PACKET_PAYLOAD_SIZE * i, Constants.PACKET_PAYLOAD_SIZE);
+            byte[] encodedSphinxPayload = Base64.encode(concatByteArrays(packetHeader.array(), packetPayload));
+
+            RoutingInformation routingInformation = generateRoutingInformation();
+
+            sphinxPackets[i] = createBinSphinxPacket(dest, encodedSphinxPayload, routingInformation);
+        }
 
         AsyncTcpClient asyncTcpClient = new AsyncTcpClient("localhost", 10000);
 
-        for (byte[] binMessage : splitMessage) {
+        for (byte[] binMessage : sphinxPackets) {
             asyncTcpClient.sendMessage(binMessage);
         }
     }
@@ -81,30 +100,6 @@ public class SphinxUtil {
         }
 
         return binSphinxPacket;
-    }
-
-    private byte[][] splitIntoSphinxPackets(byte[] dest, byte[] message) {
-        UUID uuid = UUID.randomUUID();
-        int total = (int) Math.ceil((double) message.length / Constants.PACKET_PAYLOAD_SIZE);
-
-        byte[][] sphinxPackets = new byte[total][];
-        for (int i = 0; i < total; i++) {
-
-            ByteBuffer packetHeader = ByteBuffer.allocate(Constants.PACKET_HEADER_SIZE);
-            packetHeader.putLong(uuid.getMostSignificantBits());
-            packetHeader.putLong(uuid.getLeastSignificantBits());
-            packetHeader.putInt(total);
-            packetHeader.putInt(i);
-
-            byte[] packetPayload = copyUpToNum(message, Constants.PACKET_PAYLOAD_SIZE * i, Constants.PACKET_PAYLOAD_SIZE);
-            byte[] encodedSphinxPayload = Base64.encode(concatByteArrays(packetHeader.array(), packetPayload));
-
-            RoutingInformation routingInformation = generateRoutingInformation();
-
-            sphinxPackets[i] = createBinSphinxPacket(dest, encodedSphinxPayload, routingInformation);
-        }
-
-        return sphinxPackets;
     }
 
     // TODO: Implement this
