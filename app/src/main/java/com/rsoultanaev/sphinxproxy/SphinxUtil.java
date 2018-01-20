@@ -20,6 +20,7 @@ import com.rsoultanaev.sphinxproxy.database.AssembledMessage;
 import com.rsoultanaev.sphinxproxy.database.Packet;
 
 import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 
 import java.io.IOException;
@@ -187,8 +188,8 @@ public class SphinxUtil {
             ByteBuffer byteBuffer = ByteBuffer.allocate(8);
             byteBuffer.putInt(total).putInt(i);
             byte[] sphinxPayload = concatByteArrays(uuid, byteBuffer.array(), payload);
-            String encodedSphinxPayload = Hex.toHexString(sphinxPayload);
-            packets[i] = createBinSphinxPacket(dest, encodedSphinxPayload.getBytes(), params, nodesRouting, nodeKeys);
+            byte[] encodedSphinxPayload = Base64.encode(sphinxPayload);
+            packets[i] = createBinSphinxPacket(dest, encodedSphinxPayload, params, nodesRouting, nodeKeys);
         }
 
         return packets;

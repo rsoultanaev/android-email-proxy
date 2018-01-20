@@ -5,7 +5,7 @@ import com.rsoultanaev.sphinxproxy.database.Packet;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.net.pop3.POP3Client;
 import org.apache.commons.net.pop3.POP3MessageInfo;
-import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.encoders.Base64;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -121,7 +121,7 @@ public class Pop3Puller {
 
     private Packet parseMessageToPacket(BufferedReader reader) throws IOException {
         byte[] encodedMessage = getMessageBody(reader);
-        byte[] message = Hex.decode(encodedMessage);
+        byte[] message = Base64.decode(encodedMessage);
 
         byte[] headerBytes = Arrays.copyOfRange(message, 0, 24);
         ByteBuffer byteBuffer = ByteBuffer.wrap(headerBytes);
