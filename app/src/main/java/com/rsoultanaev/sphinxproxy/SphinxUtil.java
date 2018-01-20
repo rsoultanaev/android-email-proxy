@@ -26,18 +26,19 @@ import java.util.List;
 import java.util.UUID;
 
 public class SphinxUtil {
-    private class PkiEntry {
-        BigInteger x;
-        ECPoint y;
 
-        public PkiEntry(BigInteger x, ECPoint y) {
-            this.x = x;
-            this.y = y;
+    private class RoutingInformation {
+        byte[][] nodesRouting;
+        ECPoint[] nodeKeys;
+
+        public RoutingInformation(byte[][] nodesRouting, ECPoint[] nodeKeys) {
+            this.nodesRouting = nodesRouting;
+            this.nodeKeys = nodeKeys;
         }
     }
 
-    HashMap<Integer, ECPoint> publicKeys;
-    SphinxParams params;
+    private final SphinxParams params;
+    private final HashMap<Integer, ECPoint> publicKeys;
 
     public SphinxUtil() {
         params = new SphinxParams();
@@ -48,24 +49,9 @@ public class SphinxUtil {
         publicKeys.put(8002, decodeECPoint(Hex.decode("02739a6205b940db5dd4c62c17fe568dc1b061a150322df9a45543898f")));
     }
 
-    public void sendMailWithSphinx(byte[] email) throws IOException {
-        byte[][] nodesRouting;
-        ECPoint[] nodeKeys;
-
-        int[] useNodes = {8000, 8001, 8002};
-
-        nodesRouting = new byte[useNodes.length][];
-        for (int i = 0; i < useNodes.length; i++) {
-            nodesRouting[i] = SphinxClient.encodeNode(useNodes[i]);
-        }
-
-        nodeKeys = new ECPoint[useNodes.length];
-        nodeKeys[0] = publicKeys.get(8000);
-        nodeKeys[1] = publicKeys.get(8001);
-        nodeKeys[2] = publicKeys.get(8002);
-
+    public void sendMailWithSphinx(byte[] email) {
         byte[] dest = "mort@rsoultanaev.com".getBytes();
-        byte[][] splitMessage = splitIntoSphinxPackets(dest, email, params, nodesRouting, nodeKeys);
+        byte[][] splitMessage = splitIntoSphinxPackets(dest, email);
 
         AsyncTcpClient asyncTcpClient = new AsyncTcpClient("localhost", 10000);
 
@@ -74,15 +60,30 @@ public class SphinxUtil {
         }
     }
 
-    private byte[] createBinSphinxPacket(byte[] dest, byte[] message, SphinxParams params, byte[][] nodesRouting, ECPoint[] nodeKeys) throws IOException {
+    private byte[] createBinSphinxPacket(byte[] dest, byte[] message, RoutingInformation routingInformation) {
         DestinationAndMessage destinationAndMessage = new DestinationAndMessage(dest, message);
-        HeaderAndDelta headerAndDelta = createForwardMessage(params, nodesRouting, nodeKeys, destinationAndMessage);
+
+        HeaderAndDelta headerAndDelta;
+        try {
+            headerAndDelta = createForwardMessage(params, routingInformation.nodesRouting, routingInformation.nodeKeys, destinationAndMessage);
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to create forward message", ex);
+        }
+
         ParamLengths paramLengths = new ParamLengths(params.getHeaderLength(), params.getBodyLength());
         SphinxPacket sphinxPacket = new SphinxPacket(paramLengths, headerAndDelta);
-        return packMessage(sphinxPacket);
+
+        byte[] binSphinxPacket;
+        try {
+            binSphinxPacket = packMessage(sphinxPacket);
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to pack forward message", ex);
+        }
+
+        return binSphinxPacket;
     }
 
-    private byte[][] splitIntoSphinxPackets(byte[] dest, byte[] message, SphinxParams params, byte[][] nodesRouting, ECPoint[] nodeKeys) throws IOException {
+    private byte[][] splitIntoSphinxPackets(byte[] dest, byte[] message) {
         UUID uuid = UUID.randomUUID();
         int total = (int) Math.ceil((double) message.length / Constants.PACKET_PAYLOAD_SIZE);
 
@@ -98,10 +99,35 @@ public class SphinxUtil {
             byte[] packetPayload = copyUpToNum(message, Constants.PACKET_PAYLOAD_SIZE * i, Constants.PACKET_PAYLOAD_SIZE);
             byte[] encodedSphinxPayload = Base64.encode(concatByteArrays(packetHeader.array(), packetPayload));
 
-            sphinxPackets[i] = createBinSphinxPacket(dest, encodedSphinxPayload, params, nodesRouting, nodeKeys);
+            RoutingInformation routingInformation = generateRoutingInformation();
+
+            sphinxPackets[i] = createBinSphinxPacket(dest, encodedSphinxPayload, routingInformation);
         }
 
         return sphinxPackets;
+    }
+
+    private RoutingInformation generateRoutingInformation() {
+        byte[][] nodesRouting;
+        ECPoint[] nodeKeys;
+
+        int[] useNodes = {8000, 8001, 8002};
+
+        nodesRouting = new byte[useNodes.length][];
+        for (int i = 0; i < useNodes.length; i++) {
+            try {
+                nodesRouting[i] = SphinxClient.encodeNode(useNodes[i]);
+            } catch (IOException ex) {
+                throw new RuntimeException("Failed to encode node", ex);
+            }
+        }
+
+        nodeKeys = new ECPoint[useNodes.length];
+        nodeKeys[0] = publicKeys.get(useNodes[0]);
+        nodeKeys[1] = publicKeys.get(useNodes[1]);
+        nodeKeys[2] = publicKeys.get(useNodes[2]);
+
+        return new RoutingInformation(nodesRouting, nodeKeys);
     }
 
     // Assume all packets present and in sorted order
