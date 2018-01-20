@@ -44,6 +44,7 @@ public class SphinxUtil {
         params = new SphinxParams();
         publicKeys = new HashMap<Integer, ECPoint>();
 
+        // TODO: Implement this
         publicKeys.put(8000, decodeECPoint(Hex.decode("036457e713498b559afe446158aaa08613530022b25e418c59b8b2a624")));
         publicKeys.put(8001, decodeECPoint(Hex.decode("039d95b858383fdeee0d493a1675d513c29671de322c367d23a08cd5bf")));
         publicKeys.put(8002, decodeECPoint(Hex.decode("02739a6205b940db5dd4c62c17fe568dc1b061a150322df9a45543898f")));
@@ -107,6 +108,7 @@ public class SphinxUtil {
         return sphinxPackets;
     }
 
+    // TODO: Implement this
     private RoutingInformation generateRoutingInformation() {
         byte[][] nodesRouting;
         ECPoint[] nodeKeys;
