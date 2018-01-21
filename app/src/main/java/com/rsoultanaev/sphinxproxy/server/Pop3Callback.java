@@ -57,7 +57,7 @@ public class Pop3Callback implements ListenCallback {
 
                 System.out.println("[POP3] Received Message: " + receivedString + "\n");
 
-                final String response = respondToCommand(receivedString);
+                final String response = getResponse(receivedString);
                 sendResponse(socket, response);
             }
         });
@@ -110,46 +110,6 @@ public class Pop3Callback implements ListenCallback {
         System.out.println("[POP3] Successfully shutdown server");
     }
 
-    private String respondToCommand(String argString) {
-        String[] args = argString.split("[\\r\\n ]");
-        String command = args[0].toUpperCase();
-
-        switch (command) {
-            case "USER":
-            case "PASS":
-            case "QUIT":
-                return "+OK\r\n";
-            case "STAT":
-                int numMessages = numberToMsg.size();
-                int totalLength = 0;
-                for (AssembledMessage msg : numberToMsg.values()) {
-                    totalLength += msg.message.length;
-                }
-                return "+OK" + " " + numMessages + " " + totalLength + "\r\n";
-            case "LIST":
-                StringBuilder listResponse = new StringBuilder();
-                for (int number : numberToMsg.keySet()) {
-                    listResponse.append(number + " " + numberToMsg.get(number).message.length + "\r\n");
-                }
-                listResponse.append(".\r\n");
-                return "+OK\r\n" + listResponse.toString();
-            case "UIDL":
-                StringBuilder uidlResponse = new StringBuilder();
-                for (int number : numberToMsg.keySet()) {
-                    uidlResponse.append(number + " " + numberToMsg.get(number).uuid + "\r\n");
-                }
-                uidlResponse.append(".\r\n");
-                return "+OK\r\n" + uidlResponse.toString();
-            case "RETR":
-                int retrNum = Integer.parseInt(args[1]);
-                AssembledMessage message = numberToMsg.get(retrNum);
-                String messageStr = new String(message.message);
-                return "+OK " + message.message.length + "\r\n" + messageStr + ".\r\n";
-            default:
-                return "-ERR unsupported command\r\n";
-        }
-    }
-
     private void sendResponse(final AsyncSocket socket, final String response) {
         Util.writeAll(socket, response.getBytes(), new CompletedCallback() {
             @Override
@@ -163,5 +123,67 @@ public class Pop3Callback implements ListenCallback {
     private void clearState() {
         numberToMsg.clear();
         markedForDeletion.clear();
+    }
+
+    private String getResponse(String queryStr) {
+        String[] args = queryStr.split("[\\r\\n ]");
+        String command = args[0].toUpperCase();
+
+        String response = "-ERR unsupported command\r\n";
+
+        switch (command) {
+            case "USER":
+            case "PASS":
+            case "QUIT":
+                response = "+OK\r\n";
+                break;
+            case "STAT":
+                response = getStatResponse();
+                break;
+            case "LIST":
+                response = getListResponse();
+                break;
+            case "UIDL":
+                response = getUidlResponse();
+                break;
+            case "RETR":
+                response = getRetrResponse(Integer.parseInt(args[1]));
+                break;
+        }
+
+        return response;
+    }
+
+    private String getStatResponse() {
+        int numMessages = numberToMsg.size();
+        int totalLength = 0;
+        for (AssembledMessage msg : numberToMsg.values()) {
+            totalLength += msg.message.length;
+        }
+        return "+OK" + " " + numMessages + " " + totalLength + "\r\n";
+    }
+
+    private String getListResponse() {
+        StringBuilder response = new StringBuilder();
+        for (int number : numberToMsg.keySet()) {
+            response.append(number + " " + numberToMsg.get(number).message.length + "\r\n");
+        }
+        response.append(".\r\n");
+        return "+OK\r\n" + response.toString();
+    }
+
+    private String getUidlResponse() {
+        StringBuilder response = new StringBuilder();
+        for (int number : numberToMsg.keySet()) {
+            response.append(number + " " + numberToMsg.get(number).uuid + "\r\n");
+        }
+        response.append(".\r\n");
+        return "+OK\r\n" + response.toString();
+    }
+
+    private String getRetrResponse(int retrNum) {
+        AssembledMessage message = numberToMsg.get(retrNum);
+        String messageStr = new String(message.message);
+        return "+OK " + message.message.length + "\r\n" + messageStr + ".\r\n";
     }
 }
