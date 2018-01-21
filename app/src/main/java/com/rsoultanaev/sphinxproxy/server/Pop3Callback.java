@@ -23,9 +23,9 @@ import java.util.TreeMap;
 
 public class Pop3Callback implements ListenCallback {
 
-    SortedMap<Integer, AssembledMessage> numberToMsg;
-    Set<String> markedForDeletion;
-    Context context;
+    private SortedMap<Integer, AssembledMessage> numberToMsg;
+    private Set<String> markedForDeletion;
+    private Context context;
 
     public Pop3Callback(Context context) {
         this.numberToMsg = new TreeMap<>();
