@@ -1,0 +1,190 @@
+package com.rsoultanaev.sphinxproxy.server;
+
+import android.content.Context;
+
+import com.koushikdutta.async.AsyncServerSocket;
+import com.koushikdutta.async.AsyncSocket;
+import com.koushikdutta.async.ByteBufferList;
+import com.koushikdutta.async.DataEmitter;
+import com.koushikdutta.async.Util;
+import com.koushikdutta.async.callback.CompletedCallback;
+import com.koushikdutta.async.callback.DataCallback;
+import com.koushikdutta.async.callback.ListenCallback;
+import com.rsoultanaev.sphinxproxy.database.AssembledMessage;
+import com.rsoultanaev.sphinxproxy.database.DB;
+import com.rsoultanaev.sphinxproxy.database.DBQuery;
+
+import java.net.SocketException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+public class Pop3Callback implements ListenCallback {
+
+    private SortedMap<Integer, AssembledMessage> numberToMsg;
+    private Set<String> markedForDeletion;
+    private Context context;
+    private static final String CRLF = "\r\n";
+
+    public Pop3Callback(Context context) {
+        this.numberToMsg = new TreeMap<>();
+        this.markedForDeletion = new HashSet<>();
+        this.context = context;
+    }
+
+    @Override
+    public void onAccepted(final AsyncSocket socket) {
+        System.out.println("[POP3] New Connection " + socket.toString());
+
+        clearState();
+
+        DB db = DB.getAppDatabase(context);
+        DBQuery dao = db.getDao();
+        List<AssembledMessage> assembledMessages = dao.getAssembledMessages();
+        for (int i = 1; i <= assembledMessages.size(); i++) {
+            numberToMsg.put(i, assembledMessages.get(i - 1));
+        }
+
+        final String serverGreeting = "+OK Hello there\n";
+        sendResponse(socket, serverGreeting);
+
+        socket.setDataCallback(new DataCallback() {
+            @Override
+            public void onDataAvailable(DataEmitter emitter, ByteBufferList bb) {
+                byte[] receivedBytes = bb.getAllByteArray();
+                String receivedString = new String(receivedBytes);
+
+                System.out.println("[POP3] Received Message: " + receivedString + "\n");
+
+                final String response = getResponse(receivedString);
+                sendResponse(socket, response);
+            }
+        });
+
+        socket.setClosedCallback(new CompletedCallback() {
+            @Override
+            public void onCompleted(Exception ex) {
+                clearState();
+
+                if (ex != null) {
+                    if (ex instanceof SocketException) {
+                        System.out.println("[POP3] Socket exception while closing connection:\n");
+                        System.out.println(ex.getMessage());
+                    } else {
+                        throw new RuntimeException(ex);
+                    }
+                } else {
+                    System.out.println("[POP3] Successfully closed connection");
+                }
+            }
+        });
+
+        socket.setEndCallback(new CompletedCallback() {
+            @Override
+            public void onCompleted(Exception ex) {
+                clearState();
+
+                if (ex != null) {
+                    if (ex instanceof SocketException) {
+                        System.out.println("[POP3] Socket exception while ending connection:\n");
+                        System.out.println(ex.getMessage());
+                    } else {
+                        throw new RuntimeException(ex);
+                    }
+                } else {
+                    System.out.println("[POP3] Successfully end connection");
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onListening(AsyncServerSocket socket) {
+        System.out.println("[POP3] Server started listening for connections");
+    }
+
+    @Override
+    public void onCompleted(Exception ex) {
+        if(ex != null) throw new RuntimeException(ex);
+        System.out.println("[POP3] Successfully shutdown server");
+    }
+
+    private void sendResponse(final AsyncSocket socket, final String response) {
+        Util.writeAll(socket, response.getBytes(), new CompletedCallback() {
+            @Override
+            public void onCompleted(Exception ex) {
+                if (ex != null) throw new RuntimeException(ex);
+                System.out.println("[Server] Successfully wrote message: " + response + "\n");
+            }
+        });
+    }
+
+    private void clearState() {
+        numberToMsg.clear();
+        markedForDeletion.clear();
+    }
+
+    private String getResponse(String queryStr) {
+        String[] args = queryStr.split("[\\r\\n ]");
+        String command = args[0].toUpperCase();
+
+        String response = "-ERR unsupported command" + CRLF;
+
+        switch (command) {
+            case "USER":
+            case "PASS":
+            case "QUIT":
+                response = "+OK" + CRLF;
+                break;
+            case "STAT":
+                response = getStatResponse();
+                break;
+            case "LIST":
+                response = getListResponse();
+                break;
+            case "UIDL":
+                response = getUidlResponse();
+                break;
+            case "RETR":
+                response = getRetrResponse(Integer.parseInt(args[1]));
+                break;
+        }
+
+        return response;
+    }
+
+    private String getStatResponse() {
+        int numMessages = numberToMsg.size();
+        int totalLength = 0;
+        for (AssembledMessage msg : numberToMsg.values()) {
+            totalLength += msg.message.length;
+        }
+        return "+OK" + " " + numMessages + " " + totalLength + CRLF;
+    }
+
+    private String getListResponse() {
+        StringBuilder response = new StringBuilder();
+        for (int number : numberToMsg.keySet()) {
+            response.append(number + " " + numberToMsg.get(number).message.length + CRLF);
+        }
+        response.append("." + CRLF);
+        return "+OK" + CRLF + response.toString();
+    }
+
+    private String getUidlResponse() {
+        StringBuilder response = new StringBuilder();
+        for (int number : numberToMsg.keySet()) {
+            response.append(number + " " + numberToMsg.get(number).uuid + CRLF);
+        }
+        response.append("." + CRLF);
+        return "+OK" + CRLF + response.toString();
+    }
+
+    private String getRetrResponse(int retrNum) {
+        AssembledMessage message = numberToMsg.get(retrNum);
+        String messageStr = new String(message.message);
+        return "+OK " + message.message.length + CRLF + messageStr + "." + CRLF;
+    }
+}
