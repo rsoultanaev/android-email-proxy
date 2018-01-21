@@ -26,6 +26,7 @@ public class Pop3Callback implements ListenCallback {
     private SortedMap<Integer, AssembledMessage> numberToMsg;
     private Set<String> markedForDeletion;
     private Context context;
+    private static final String CRLF = "\r\n";
 
     public Pop3Callback(Context context) {
         this.numberToMsg = new TreeMap<>();
@@ -129,13 +130,13 @@ public class Pop3Callback implements ListenCallback {
         String[] args = queryStr.split("[\\r\\n ]");
         String command = args[0].toUpperCase();
 
-        String response = "-ERR unsupported command\r\n";
+        String response = "-ERR unsupported command" + CRLF;
 
         switch (command) {
             case "USER":
             case "PASS":
             case "QUIT":
-                response = "+OK\r\n";
+                response = "+OK" + CRLF;
                 break;
             case "STAT":
                 response = getStatResponse();
@@ -160,30 +161,30 @@ public class Pop3Callback implements ListenCallback {
         for (AssembledMessage msg : numberToMsg.values()) {
             totalLength += msg.message.length;
         }
-        return "+OK" + " " + numMessages + " " + totalLength + "\r\n";
+        return "+OK" + " " + numMessages + " " + totalLength + CRLF;
     }
 
     private String getListResponse() {
         StringBuilder response = new StringBuilder();
         for (int number : numberToMsg.keySet()) {
-            response.append(number + " " + numberToMsg.get(number).message.length + "\r\n");
+            response.append(number + " " + numberToMsg.get(number).message.length + CRLF);
         }
-        response.append(".\r\n");
-        return "+OK\r\n" + response.toString();
+        response.append("." + CRLF);
+        return "+OK" + CRLF + response.toString();
     }
 
     private String getUidlResponse() {
         StringBuilder response = new StringBuilder();
         for (int number : numberToMsg.keySet()) {
-            response.append(number + " " + numberToMsg.get(number).uuid + "\r\n");
+            response.append(number + " " + numberToMsg.get(number).uuid + CRLF);
         }
-        response.append(".\r\n");
-        return "+OK\r\n" + response.toString();
+        response.append("." + CRLF);
+        return "+OK" + CRLF + response.toString();
     }
 
     private String getRetrResponse(int retrNum) {
         AssembledMessage message = numberToMsg.get(retrNum);
         String messageStr = new String(message.message);
-        return "+OK " + message.message.length + "\r\n" + messageStr + ".\r\n";
+        return "+OK " + message.message.length + CRLF + messageStr + "." + CRLF;
     }
 }
