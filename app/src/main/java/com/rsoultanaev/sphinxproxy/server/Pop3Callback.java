@@ -114,9 +114,6 @@ public class Pop3Callback implements ListenCallback {
         String[] args = argString.split("[\\r\\n ]");
         String command = args[0].toUpperCase();
 
-        DB db = DB.getAppDatabase(context);
-        DBQuery dao = db.getDao();
-
         switch (command) {
             case "USER":
             case "PASS":
