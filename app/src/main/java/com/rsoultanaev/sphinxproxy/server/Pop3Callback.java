@@ -136,6 +136,7 @@ public class Pop3Callback implements ListenCallback {
             case "USER":
             case "PASS":
             case "QUIT":
+            case "NOOP":
                 response = "+OK";
                 break;
             case "STAT":
@@ -189,7 +190,7 @@ public class Pop3Callback implements ListenCallback {
         return response.toString();
     }
 
-    private String getUidlResponse(String[] args) {
+    private String getUidlResponse(String[] a<rgs) {
         if (args.length > 1) {
             int argNum;
             try {
