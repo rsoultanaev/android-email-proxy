@@ -324,7 +324,7 @@ public class Pop3Callback implements ListenCallback {
 
             // Append the message headers
             while (line != null) {
-                response.append(line);
+                response.append(line).append(CRLF);
 
                 if (line.isEmpty()) {
                     break;
@@ -336,7 +336,8 @@ public class Pop3Callback implements ListenCallback {
             // Append requested lines
             line = reader.readLine();
             for (int i = 0; line != null && i < argLines; i++) {
-                response.append(line);
+                response.append(line).append(CRLF);
+                line = reader.readLine();
             }
         } catch (IOException ex) {
             throw new RuntimeException("Failed to read the message", ex);
