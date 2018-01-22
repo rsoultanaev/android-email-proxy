@@ -190,7 +190,7 @@ public class Pop3Callback implements ListenCallback {
         return response.toString();
     }
 
-    private String getUidlResponse(String[] a<rgs) {
+    private String getUidlResponse(String[] args) {
         if (args.length > 1) {
             int argNum;
             try {
