@@ -140,29 +140,29 @@ public class Pop3Callback implements ListenCallback {
                 response = "+OK";
                 break;
             case "STAT":
-                response = getStatResponse();
+                response = handleStat();
                 break;
             case "LIST":
-                response = getListResponse(args);
+                response = handleList(args);
                 break;
             case "UIDL":
-                response = getUidlResponse(args);
+                response = handleUidl(args);
                 break;
             case "RETR":
-                response = getRetrResponse(args);
+                response = handleRetr(args);
                 break;
             case "DELE":
-                response = getDeleResponse(args);
+                response = handleDele(args);
                 break;
             case "RSET":
-                response = getRsetResponse();
+                response = handleRset();
                 break;
         }
 
         return response + CRLF;
     }
 
-    private String getStatResponse() {
+    private String handleStat() {
         int numMessages = numberToMsg.size();
         int totalLength = 0;
         for (AssembledMessage msg : numberToMsg.values()) {
@@ -171,7 +171,7 @@ public class Pop3Callback implements ListenCallback {
         return "+OK" + " " + numMessages + " " + totalLength;
     }
 
-    private String getListResponse(String[] args) {
+    private String handleList(String[] args) {
         if (args.length > 1) {
             int argNum;
             try {
@@ -200,7 +200,7 @@ public class Pop3Callback implements ListenCallback {
         return response.toString();
     }
 
-    private String getUidlResponse(String[] args) {
+    private String handleUidl(String[] args) {
         if (args.length > 1) {
             int argNum;
             try {
@@ -229,7 +229,7 @@ public class Pop3Callback implements ListenCallback {
         return response.toString();
     }
 
-    private String getRetrResponse(String[] args) {
+    private String handleRetr(String[] args) {
         if (args.length < 2) {
             return "-ERR command expects more arguments";
         }
@@ -254,7 +254,7 @@ public class Pop3Callback implements ListenCallback {
         return "+OK" + " " + message.messageBody.length + CRLF + messageStr + ".";
     }
 
-    private String getDeleResponse(String[] args) {
+    private String handleDele(String[] args) {
         if (args.length < 2) {
             return "-ERR command expects more arguments";
         }
@@ -275,7 +275,7 @@ public class Pop3Callback implements ListenCallback {
         return "+OK";
     }
 
-    private String getRsetResponse() {
+    private String handleRset() {
         markedForDeletion.clear();
 
         return "+OK";
