@@ -130,13 +130,13 @@ public class Pop3Callback implements ListenCallback {
         String[] args = queryStr.split("[\\r\\n ]");
         String command = args[0].toUpperCase();
 
-        String response = "-ERR unsupported command" + CRLF;
+        String response = "-ERR unsupported command";
 
         switch (command) {
             case "USER":
             case "PASS":
             case "QUIT":
-                response = "+OK" + CRLF;
+                response = "+OK";
                 break;
             case "STAT":
                 response = getStatResponse();
@@ -152,7 +152,7 @@ public class Pop3Callback implements ListenCallback {
                 break;
         }
 
-        return response;
+        return response + CRLF;
     }
 
     private String getStatResponse() {
@@ -161,7 +161,7 @@ public class Pop3Callback implements ListenCallback {
         for (AssembledMessage msg : numberToMsg.values()) {
             totalLength += msg.messageBody.length;
         }
-        return "+OK" + " " + numMessages + " " + totalLength + CRLF;
+        return "+OK" + " " + numMessages + " " + totalLength;
     }
 
     private String getListResponse(String[] args) {
@@ -170,21 +170,21 @@ public class Pop3Callback implements ListenCallback {
             try {
                 argNum = Integer.parseInt(args[1]);
             } catch (NumberFormatException ex) {
-                return "-ERR failed to parse arguments" + CRLF;
+                return "-ERR failed to parse arguments";
             }
 
             if (!numberToMsg.containsKey(argNum)) {
-                return "-ERR no such message" + CRLF;
+                return "-ERR no such message";
             }
 
-            return "+OK" + " " + argNum + " " + numberToMsg.get(argNum).messageBody.length + CRLF;
+            return "+OK" + " " + argNum + " " + numberToMsg.get(argNum).messageBody.length;
         }
 
         StringBuilder response = new StringBuilder();
         for (int number : numberToMsg.keySet()) {
             response.append(number + " " + numberToMsg.get(number).messageBody.length + CRLF);
         }
-        response.append("." + CRLF);
+        response.append(".");
         return "+OK" + CRLF + response.toString();
     }
 
@@ -194,42 +194,42 @@ public class Pop3Callback implements ListenCallback {
             try {
                 argNum = Integer.parseInt(args[1]);
             } catch (NumberFormatException ex) {
-                return "-ERR failed to parse arguments" + CRLF;
+                return "-ERR failed to parse arguments";
             }
 
             if (!numberToMsg.containsKey(argNum)) {
-                return "-ERR no such message" + CRLF;
+                return "-ERR no such message";
             }
 
-            return "+OK" + " " + argNum + " " + numberToMsg.get(argNum).uuid + CRLF;
+            return "+OK" + " " + argNum + " " + numberToMsg.get(argNum).uuid;
         }
 
         StringBuilder response = new StringBuilder();
         for (int number : numberToMsg.keySet()) {
             response.append(number + " " + numberToMsg.get(number).uuid + CRLF);
         }
-        response.append("." + CRLF);
+        response.append(".");
         return "+OK" + CRLF + response.toString();
     }
 
     private String getRetrResponse(String[] args) {
         if (args.length < 2) {
-            return "-ERR command expects more arguments" + CRLF;
+            return "-ERR command expects more arguments";
         }
 
         int argNum;
         try {
             argNum = Integer.parseInt(args[1]);
         } catch (NumberFormatException ex) {
-            return "-ERR failed to parse arguments" + CRLF;
+            return "-ERR failed to parse arguments";
         }
 
         if (!numberToMsg.containsKey(argNum)) {
-            return "-ERR no such message" + CRLF;
+            return "-ERR no such message";
         }
 
         AssembledMessage message = numberToMsg.get(argNum);
         String messageStr = new String(message.messageBody);
-        return "+OK " + message.messageBody.length + CRLF + messageStr + "." + CRLF;
+        return "+OK" + " " + message.messageBody.length + CRLF + messageStr + ".";
     }
 }
