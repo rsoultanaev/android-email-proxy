@@ -38,7 +38,8 @@ public class Pop3Callback implements ListenCallback {
     public void onAccepted(final AsyncSocket socket) {
         System.out.println("[POP3] New Connection " + socket.toString());
 
-        clearState();
+        numberToMsg.clear();
+        markedForDeletion.clear();
 
         DB db = DB.getAppDatabase(context);
         DBQuery dao = db.getDao();
@@ -66,7 +67,7 @@ public class Pop3Callback implements ListenCallback {
         socket.setClosedCallback(new CompletedCallback() {
             @Override
             public void onCompleted(Exception ex) {
-                clearState();
+                update();
 
                 if (ex != null) {
                     if (ex instanceof SocketException) {
@@ -84,7 +85,7 @@ public class Pop3Callback implements ListenCallback {
         socket.setEndCallback(new CompletedCallback() {
             @Override
             public void onCompleted(Exception ex) {
-                clearState();
+                update();
 
                 if (ex != null) {
                     if (ex instanceof SocketException) {
@@ -121,7 +122,14 @@ public class Pop3Callback implements ListenCallback {
         });
     }
 
-    private void clearState() {
+    private void update() {
+        DB db = DB.getAppDatabase(context);
+        DBQuery dao = db.getDao();
+
+        for (String uuid : markedForDeletion) {
+            dao.deleteAssembledMessage(uuid);
+        }
+
         numberToMsg.clear();
         markedForDeletion.clear();
     }
