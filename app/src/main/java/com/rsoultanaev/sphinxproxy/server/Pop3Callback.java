@@ -189,6 +189,7 @@ public class Pop3Callback implements ListenCallback {
         return response.toString();
     }
 
+    // test intellij commit kb shortcut
     private String getUidlResponse(String[] args) {
         if (args.length > 1) {
             int argNum;
