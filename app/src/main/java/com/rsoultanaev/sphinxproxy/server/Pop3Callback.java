@@ -14,6 +14,9 @@ import com.rsoultanaev.sphinxproxy.database.AssembledMessage;
 import com.rsoultanaev.sphinxproxy.database.DB;
 import com.rsoultanaev.sphinxproxy.database.DBQuery;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
 import java.net.SocketException;
 import java.util.HashSet;
 import java.util.List;
@@ -165,6 +168,9 @@ public class Pop3Callback implements ListenCallback {
             case "RSET":
                 response = handleRset();
                 break;
+            case "TOP":
+                response = handleTop(args);
+                break;
         }
 
         return response + CRLF;
@@ -287,5 +293,57 @@ public class Pop3Callback implements ListenCallback {
         markedForDeletion.clear();
 
         return "+OK";
+    }
+
+    private String handleTop(String[] args) {
+        if (args.length < 3) {
+            return "-ERR command expects more arguments";
+        }
+
+        int argNum;
+        int argLines;
+        try {
+            argNum = Integer.parseInt(args[1]);
+            argLines = Integer.parseInt(args[2]);
+        } catch (NumberFormatException ex) {
+            return "-ERR failed to parse arguments";
+        }
+
+        if (!numberToMsg.containsKey(argNum)) {
+            return "-ERR no such message";
+        }
+
+        String messageStr = new String(numberToMsg.get(argNum).messageBody);
+        BufferedReader reader = new BufferedReader(new StringReader(messageStr));
+
+        StringBuilder response = new StringBuilder();
+        response.append("+OK").append(CRLF);
+
+        try {
+            String line = reader.readLine();
+
+            // Append the message headers
+            while (line != null) {
+                response.append(line);
+
+                if (line.isEmpty()) {
+                    break;
+                }
+
+                line = reader.readLine();
+            }
+
+            // Append requested lines
+            line = reader.readLine();
+            for (int i = 0; line != null && i < argLines; i++) {
+                response.append(line);
+            }
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to read the message", ex);
+        }
+
+        response.append(".");
+
+        return response.toString();
     }
 }
