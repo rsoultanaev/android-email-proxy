@@ -181,11 +181,12 @@ public class Pop3Callback implements ListenCallback {
         }
 
         StringBuilder response = new StringBuilder();
+        response.append("+OK").append(CRLF);
         for (int number : numberToMsg.keySet()) {
             response.append(number + " " + numberToMsg.get(number).messageBody.length + CRLF);
         }
         response.append(".");
-        return "+OK" + CRLF + response.toString();
+        return response.toString();
     }
 
     private String getUidlResponse(String[] args) {
@@ -205,11 +206,12 @@ public class Pop3Callback implements ListenCallback {
         }
 
         StringBuilder response = new StringBuilder();
+        response.append("+OK").append(CRLF);
         for (int number : numberToMsg.keySet()) {
             response.append(number + " " + numberToMsg.get(number).uuid + CRLF);
         }
         response.append(".");
-        return "+OK" + CRLF + response.toString();
+        return response.toString();
     }
 
     private String getRetrResponse(String[] args) {
