@@ -142,13 +142,13 @@ public class Pop3Callback implements ListenCallback {
                 response = getStatResponse();
                 break;
             case "LIST":
-                response = getListResponse();
+                response = getListResponse(args);
                 break;
             case "UIDL":
-                response = getUidlResponse();
+                response = getUidlResponse(args);
                 break;
             case "RETR":
-                response = getRetrResponse(Integer.parseInt(args[1]));
+                response = getRetrResponse(args);
                 break;
         }
 
@@ -159,21 +159,51 @@ public class Pop3Callback implements ListenCallback {
         int numMessages = numberToMsg.size();
         int totalLength = 0;
         for (AssembledMessage msg : numberToMsg.values()) {
-            totalLength += msg.message.length;
+            totalLength += msg.messageBody.length;
         }
         return "+OK" + " " + numMessages + " " + totalLength + CRLF;
     }
 
-    private String getListResponse() {
+    private String getListResponse(String[] args) {
+        if (args.length > 1) {
+            int argNum;
+            try {
+                argNum = Integer.parseInt(args[1]);
+            } catch (NumberFormatException ex) {
+                return "-ERR failed to parse arguments" + CRLF;
+            }
+
+            if (!numberToMsg.containsKey(argNum)) {
+                return "-ERR no such message" + CRLF;
+            }
+
+            return "+OK" + " " + argNum + " " + numberToMsg.get(argNum).messageBody.length + CRLF;
+        }
+
         StringBuilder response = new StringBuilder();
         for (int number : numberToMsg.keySet()) {
-            response.append(number + " " + numberToMsg.get(number).message.length + CRLF);
+            response.append(number + " " + numberToMsg.get(number).messageBody.length + CRLF);
         }
         response.append("." + CRLF);
         return "+OK" + CRLF + response.toString();
     }
 
-    private String getUidlResponse() {
+    private String getUidlResponse(String[] args) {
+        if (args.length > 1) {
+            int argNum;
+            try {
+                argNum = Integer.parseInt(args[1]);
+            } catch (NumberFormatException ex) {
+                return "-ERR failed to parse arguments" + CRLF;
+            }
+
+            if (!numberToMsg.containsKey(argNum)) {
+                return "-ERR no such message" + CRLF;
+            }
+
+            return "+OK" + " " + argNum + " " + numberToMsg.get(argNum).uuid + CRLF;
+        }
+
         StringBuilder response = new StringBuilder();
         for (int number : numberToMsg.keySet()) {
             response.append(number + " " + numberToMsg.get(number).uuid + CRLF);
@@ -182,9 +212,24 @@ public class Pop3Callback implements ListenCallback {
         return "+OK" + CRLF + response.toString();
     }
 
-    private String getRetrResponse(int retrNum) {
-        AssembledMessage message = numberToMsg.get(retrNum);
-        String messageStr = new String(message.message);
-        return "+OK " + message.message.length + CRLF + messageStr + "." + CRLF;
+    private String getRetrResponse(String[] args) {
+        if (args.length < 2) {
+            return "-ERR command expects more arguments" + CRLF;
+        }
+
+        int argNum;
+        try {
+            argNum = Integer.parseInt(args[1]);
+        } catch (NumberFormatException ex) {
+            return "-ERR failed to parse arguments" + CRLF;
+        }
+
+        if (!numberToMsg.containsKey(argNum)) {
+            return "-ERR no such message" + CRLF;
+        }
+
+        AssembledMessage message = numberToMsg.get(argNum);
+        String messageStr = new String(message.messageBody);
+        return "+OK " + message.messageBody.length + CRLF + messageStr + "." + CRLF;
     }
 }
