@@ -151,6 +151,9 @@ public class Pop3Callback implements ListenCallback {
             case "RETR":
                 response = getRetrResponse(args);
                 break;
+            case "DELE":
+                response = getDeleResponse(args);
+                break;
         }
 
         return response + CRLF;
@@ -178,6 +181,10 @@ public class Pop3Callback implements ListenCallback {
                 return "-ERR no such message";
             }
 
+            if (markedForDeletion.contains(numberToMsg.get(argNum).uuid)) {
+                return "-ERR message deleted";
+            }
+
             return "+OK" + " " + argNum + " " + numberToMsg.get(argNum).messageBody.length;
         }
 
@@ -201,6 +208,10 @@ public class Pop3Callback implements ListenCallback {
 
             if (!numberToMsg.containsKey(argNum)) {
                 return "-ERR no such message";
+            }
+
+            if (markedForDeletion.contains(numberToMsg.get(argNum).uuid)) {
+                return "-ERR message deleted";
             }
 
             return "+OK" + " " + argNum + " " + numberToMsg.get(argNum).uuid;
@@ -231,8 +242,33 @@ public class Pop3Callback implements ListenCallback {
             return "-ERR no such message";
         }
 
+        if (markedForDeletion.contains(numberToMsg.get(argNum).uuid)) {
+            return "-ERR message deleted";
+        }
+
         AssembledMessage message = numberToMsg.get(argNum);
         String messageStr = new String(message.messageBody);
         return "+OK" + " " + message.messageBody.length + CRLF + messageStr + ".";
+    }
+
+    private String getDeleResponse(String[] args) {
+        if (args.length < 2) {
+            return "-ERR command expects more arguments";
+        }
+
+        int argNum;
+        try {
+            argNum = Integer.parseInt(args[1]);
+        } catch (NumberFormatException ex) {
+            return "-ERR failed to parse arguments";
+        }
+
+        if (!numberToMsg.containsKey(argNum)) {
+            return "-ERR no such message";
+        }
+
+        markedForDeletion.add(numberToMsg.get(argNum).uuid);
+
+        return "+OK";
     }
 }
