@@ -12,10 +12,10 @@ public class AssembledMessage {
     public String uuid;
 
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
-    public byte[] message;
+    public byte[] messageBody;
 
-    public AssembledMessage(String uuid, byte[] message) {
+    public AssembledMessage(String uuid, byte[] messageBody) {
         this.uuid = uuid;
-        this.message = message;
+        this.messageBody = messageBody;
     }
 }
