@@ -154,6 +154,9 @@ public class Pop3Callback implements ListenCallback {
             case "DELE":
                 response = getDeleResponse(args);
                 break;
+            case "RSET":
+                response = getRsetResponse();
+                break;
         }
 
         return response + CRLF;
@@ -268,6 +271,12 @@ public class Pop3Callback implements ListenCallback {
         }
 
         markedForDeletion.add(numberToMsg.get(argNum).uuid);
+
+        return "+OK";
+    }
+
+    private String getRsetResponse() {
+        markedForDeletion.clear();
 
         return "+OK";
     }
