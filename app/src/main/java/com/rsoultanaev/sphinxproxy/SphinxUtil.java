@@ -49,7 +49,7 @@ public class SphinxUtil {
         publicKeys.put(8002, decodeECPoint(Hex.decode("02739a6205b940db5dd4c62c17fe568dc1b061a150322df9a45543898f")));
     }
 
-    public void sendMailWithSphinx(byte[] email, String recipient) {
+    public byte[][] splitIntoSphinxPackets(byte[] email, String recipient) {
         byte[] dest = recipient.getBytes();
 
         UUID messageId = UUID.randomUUID();
@@ -72,11 +72,7 @@ public class SphinxUtil {
             sphinxPackets[i] = createBinSphinxPacket(dest, encodedSphinxPayload, routingInformation);
         }
 
-        AsyncTcpClient asyncTcpClient = new AsyncTcpClient("localhost", 10000);
-
-        for (byte[] binMessage : sphinxPackets) {
-            asyncTcpClient.sendMessage(binMessage);
-        }
+        return sphinxPackets;
     }
 
     private byte[] createBinSphinxPacket(byte[] dest, byte[] message, RoutingInformation routingInformation) {
