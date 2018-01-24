@@ -26,6 +26,9 @@ import java.util.UUID;
 
 public class SphinxUtil {
 
+    public static int PACKET_HEADER_SIZE = 24;
+    public static int PACKET_PAYLOAD_SIZE = 300;
+
     private class RoutingInformation {
         byte[][] nodesRouting;
         ECPoint[] nodeKeys;
@@ -53,18 +56,18 @@ public class SphinxUtil {
         byte[] dest = recipient.getBytes();
 
         UUID messageId = UUID.randomUUID();
-        int packetsInMessage = (int) Math.ceil((double) email.length / Constants.PACKET_PAYLOAD_SIZE);
+        int packetsInMessage = (int) Math.ceil((double) email.length / SphinxUtil.PACKET_PAYLOAD_SIZE);
 
         byte[][] sphinxPackets = new byte[packetsInMessage][];
         for (int i = 0; i < packetsInMessage; i++) {
 
-            ByteBuffer packetHeader = ByteBuffer.allocate(Constants.PACKET_HEADER_SIZE);
+            ByteBuffer packetHeader = ByteBuffer.allocate(SphinxUtil.PACKET_HEADER_SIZE);
             packetHeader.putLong(messageId.getMostSignificantBits());
             packetHeader.putLong(messageId.getLeastSignificantBits());
             packetHeader.putInt(packetsInMessage);
             packetHeader.putInt(i);
 
-            byte[] packetPayload = copyUpToNum(email, Constants.PACKET_PAYLOAD_SIZE * i, Constants.PACKET_PAYLOAD_SIZE);
+            byte[] packetPayload = copyUpToNum(email, SphinxUtil.PACKET_PAYLOAD_SIZE * i, SphinxUtil.PACKET_PAYLOAD_SIZE);
             byte[] encodedSphinxPayload = Base64.encode(concatByteArrays(packetHeader.array(), packetPayload));
 
             RoutingInformation routingInformation = generateRoutingInformation();
