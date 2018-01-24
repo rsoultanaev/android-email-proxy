@@ -1,5 +1,6 @@
 package com.rsoultanaev.sphinxproxy.server;
 
+import com.rsoultanaev.sphinxproxy.AsyncTcpClient;
 import com.rsoultanaev.sphinxproxy.SphinxUtil;
 
 import org.subethamail.smtp.helper.SimpleMessageListener;
@@ -36,6 +37,12 @@ public class SmtpMessageHandler implements SimpleMessageListener {
         System.out.println("-------------------------");
 
         SphinxUtil sphinxUtil = new SphinxUtil();
-        sphinxUtil.sendMailWithSphinx(email, recipient);
+        byte[][] sphinxPackets = sphinxUtil.splitIntoSphinxPackets(email, recipient);
+
+        AsyncTcpClient asyncTcpClient = new AsyncTcpClient("localhost", 10000);
+
+        for (byte[] binMessage : sphinxPackets) {
+            asyncTcpClient.sendMessage(binMessage);
+        }
     }
 }

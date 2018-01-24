@@ -5,6 +5,7 @@ import com.robertsoultanaev.javasphinx.HeaderAndDelta;
 import com.robertsoultanaev.javasphinx.ParamLengths;
 import static com.robertsoultanaev.javasphinx.SphinxClient.createForwardMessage;
 import static com.robertsoultanaev.javasphinx.SphinxClient.packMessage;
+import static com.robertsoultanaev.javasphinx.SphinxClient.getMaxPayloadSize;
 import static com.robertsoultanaev.javasphinx.Util.concatByteArrays;
 import static com.robertsoultanaev.javasphinx.Util.decodeECPoint;
 
@@ -25,6 +26,8 @@ import java.util.List;
 import java.util.UUID;
 
 public class SphinxUtil {
+
+    public static int PACKET_HEADER_SIZE = 24;
 
     private class RoutingInformation {
         byte[][] nodesRouting;
@@ -49,22 +52,27 @@ public class SphinxUtil {
         publicKeys.put(8002, decodeECPoint(Hex.decode("02739a6205b940db5dd4c62c17fe568dc1b061a150322df9a45543898f")));
     }
 
-    public void sendMailWithSphinx(byte[] email, String recipient) {
+    public byte[][] splitIntoSphinxPackets(byte[] email, String recipient) {
+        UUID messageId = UUID.randomUUID();
         byte[] dest = recipient.getBytes();
 
-        UUID messageId = UUID.randomUUID();
-        int packetsInMessage = (int) Math.ceil((double) email.length / Constants.PACKET_PAYLOAD_SIZE);
-
+        // Compute the size of the packet payload such that if we append
+        // the header to it and then base64 encode it, we arrive close to
+        // but not above the sphinx max payload limit
+        int targetEncodedSize = getMaxPayloadSize(params) - dest.length;
+        int packetPayloadSize = (int) (((double) (3 * targetEncodedSize) / 4) - PACKET_HEADER_SIZE - 3);
+        int packetsInMessage = (int) Math.ceil((double) email.length / packetPayloadSize);
         byte[][] sphinxPackets = new byte[packetsInMessage][];
+
         for (int i = 0; i < packetsInMessage; i++) {
 
-            ByteBuffer packetHeader = ByteBuffer.allocate(Constants.PACKET_HEADER_SIZE);
+            ByteBuffer packetHeader = ByteBuffer.allocate(SphinxUtil.PACKET_HEADER_SIZE);
             packetHeader.putLong(messageId.getMostSignificantBits());
             packetHeader.putLong(messageId.getLeastSignificantBits());
             packetHeader.putInt(packetsInMessage);
             packetHeader.putInt(i);
 
-            byte[] packetPayload = copyUpToNum(email, Constants.PACKET_PAYLOAD_SIZE * i, Constants.PACKET_PAYLOAD_SIZE);
+            byte[] packetPayload = copyUpToNum(email, packetPayloadSize * i, packetPayloadSize);
             byte[] encodedSphinxPayload = Base64.encode(concatByteArrays(packetHeader.array(), packetPayload));
 
             RoutingInformation routingInformation = generateRoutingInformation();
@@ -72,11 +80,7 @@ public class SphinxUtil {
             sphinxPackets[i] = createBinSphinxPacket(dest, encodedSphinxPayload, routingInformation);
         }
 
-        AsyncTcpClient asyncTcpClient = new AsyncTcpClient("localhost", 10000);
-
-        for (byte[] binMessage : sphinxPackets) {
-            asyncTcpClient.sendMessage(binMessage);
-        }
+        return sphinxPackets;
     }
 
     private byte[] createBinSphinxPacket(byte[] dest, byte[] message, RoutingInformation routingInformation) {

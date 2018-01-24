@@ -8,7 +8,7 @@ import com.koushikdutta.async.callback.ConnectCallback;
 
 import java.net.InetSocketAddress;
 
-class AsyncTcpClient {
+public class AsyncTcpClient {
 
     private String host;
     private int port;
