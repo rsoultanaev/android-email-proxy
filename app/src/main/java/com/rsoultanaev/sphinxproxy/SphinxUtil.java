@@ -5,6 +5,7 @@ import com.robertsoultanaev.javasphinx.HeaderAndDelta;
 import com.robertsoultanaev.javasphinx.ParamLengths;
 import static com.robertsoultanaev.javasphinx.SphinxClient.createForwardMessage;
 import static com.robertsoultanaev.javasphinx.SphinxClient.packMessage;
+import static com.robertsoultanaev.javasphinx.SphinxClient.getMaxPayloadSize;
 import static com.robertsoultanaev.javasphinx.Util.concatByteArrays;
 import static com.robertsoultanaev.javasphinx.Util.decodeECPoint;
 
@@ -27,7 +28,6 @@ import java.util.UUID;
 public class SphinxUtil {
 
     public static int PACKET_HEADER_SIZE = 24;
-    public static int PACKET_PAYLOAD_SIZE = 300;
 
     private class RoutingInformation {
         byte[][] nodesRouting;
@@ -53,12 +53,17 @@ public class SphinxUtil {
     }
 
     public byte[][] splitIntoSphinxPackets(byte[] email, String recipient) {
+        UUID messageId = UUID.randomUUID();
         byte[] dest = recipient.getBytes();
 
-        UUID messageId = UUID.randomUUID();
-        int packetsInMessage = (int) Math.ceil((double) email.length / SphinxUtil.PACKET_PAYLOAD_SIZE);
-
+        // Compute the size of the packet payload such that if we append
+        // the header to it and then base64 encode it, we arrive close to
+        // but not above the sphinx max payload limit
+        int targetEncodedSize = getMaxPayloadSize(params) - dest.length;
+        int packetPayloadSize = (int) (((double) (3 * targetEncodedSize) / 4) - PACKET_HEADER_SIZE - 3);
+        int packetsInMessage = (int) Math.ceil((double) email.length / packetPayloadSize);
         byte[][] sphinxPackets = new byte[packetsInMessage][];
+
         for (int i = 0; i < packetsInMessage; i++) {
 
             ByteBuffer packetHeader = ByteBuffer.allocate(SphinxUtil.PACKET_HEADER_SIZE);
@@ -67,7 +72,7 @@ public class SphinxUtil {
             packetHeader.putInt(packetsInMessage);
             packetHeader.putInt(i);
 
-            byte[] packetPayload = copyUpToNum(email, SphinxUtil.PACKET_PAYLOAD_SIZE * i, SphinxUtil.PACKET_PAYLOAD_SIZE);
+            byte[] packetPayload = copyUpToNum(email, packetPayloadSize * i, packetPayloadSize);
             byte[] encodedSphinxPayload = Base64.encode(concatByteArrays(packetHeader.array(), packetPayload));
 
             RoutingInformation routingInformation = generateRoutingInformation();
