@@ -1,5 +1,10 @@
 package com.rsoultanaev.sphinxproxy;
 
+import android.content.Context;
+
+import com.rsoultanaev.sphinxproxy.database.AssembledMessage;
+import com.rsoultanaev.sphinxproxy.database.DB;
+import com.rsoultanaev.sphinxproxy.database.DBQuery;
 import com.rsoultanaev.sphinxproxy.database.Packet;
 
 import org.apache.commons.io.IOUtils;
@@ -11,24 +16,52 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
-public class Pop3Puller {
+public class Pop3Mailbox {
     private String server;
     private int port;
     private String username;
     private String password;
     private POP3Client pop3Client;
+    private Context context;
 
 
-    public Pop3Puller(String server, int port, String username, String password) {
+    public Pop3Mailbox(String server, int port, String username, String password, Context context) {
         this.server = server;
         this.port = port;
         this.username = username;
         this.password = password;
+        this.context = context;
 
         pop3Client = new POP3Client();
         pop3Client.setDefaultTimeout(60000);
+    }
+
+    public void updateMailbox() {
+        DB db = DB.getAppDatabase(context);
+        DBQuery dao = db.getDao();
+
+        Packet[] newMessages = pullMessages(true);
+
+        if (newMessages == null) {
+            System.out.println("Message pull failed");
+        } else {
+            System.out.println("Messages for " + username + ": " + newMessages.length);
+
+            for (Packet packet : newMessages) {
+                dao.addPacket(packet);
+            }
+        }
+
+        List<String> readyPacketIds = dao.getReadyPacketIds();
+
+        for (String uuid : readyPacketIds) {
+            List<Packet> orderedPackets = dao.getPackets(uuid);
+            AssembledMessage msg = SphinxUtil.assemblePackets(orderedPackets);
+            dao.addAssembledMessage(msg);
+        }
     }
 
     public Packet[] pullMessages(boolean deleteAfterFetching) {
