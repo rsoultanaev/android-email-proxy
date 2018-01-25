@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-public class Pop3Mailbox {
+public class Mailbox {
     private String server;
     private int port;
     private String username;
@@ -28,7 +28,7 @@ public class Pop3Mailbox {
     private Context context;
 
 
-    public Pop3Mailbox(String server, int port, String username, String password, Context context) {
+    public Mailbox(String server, int port, String username, String password, Context context) {
         this.server = server;
         this.port = port;
         this.username = username;
@@ -64,7 +64,7 @@ public class Pop3Mailbox {
         }
     }
 
-    public Packet[] pullMessages(boolean deleteAfterFetching) {
+    private Packet[] pullMessages(boolean deleteAfterFetching) {
         try
         {
             pop3Client.connect(server, port);

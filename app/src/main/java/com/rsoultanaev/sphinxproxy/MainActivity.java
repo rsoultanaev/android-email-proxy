@@ -33,8 +33,8 @@ public class MainActivity extends AppCompatActivity {
                 String username = "mort";
                 String password = "1234";
 
-                Pop3Mailbox pop3Mailbox = new Pop3Mailbox(server, port, username, password, getApplicationContext());
-                pop3Mailbox.updateMailbox();
+                Mailbox mailbox = new Mailbox(server, port, username, password, getApplicationContext());
+                mailbox.updateMailbox();
             }
         }).start();
     }
