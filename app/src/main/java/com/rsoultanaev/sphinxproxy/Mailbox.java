@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class Mailbox {
-    private String server;
+    private String mailServer;
     private int port;
     private String username;
     private String password;
@@ -28,8 +28,8 @@ public class Mailbox {
     private Context context;
 
 
-    public Mailbox(String server, int port, String username, String password, Context context) {
-        this.server = server;
+    public Mailbox(String mailServer, int port, String username, String password, Context context) {
+        this.mailServer = mailServer;
         this.port = port;
         this.username = username;
         this.password = password;
@@ -67,11 +67,11 @@ public class Mailbox {
     private Packet[] pullMessages(boolean deleteAfterFetching) {
         try
         {
-            pop3Client.connect(server, port);
+            pop3Client.connect(mailServer, port);
         }
         catch (IOException e)
         {
-            System.err.println("Could not connect to server.");
+            System.err.println("Could not connect to mailServer.");
             e.printStackTrace();
             return null;
         }
@@ -79,7 +79,7 @@ public class Mailbox {
         try
         {
             if (!pop3Client.login(username, password)) {
-                System.err.println("Could not login to server.");
+                System.err.println("Could not login to mailServer.");
                 pop3Client.disconnect();
                 return null;
             }
