@@ -7,13 +7,8 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 
-import com.rsoultanaev.sphinxproxy.server.Pop3Server;
-import com.rsoultanaev.sphinxproxy.server.SmtpMessageHandler;
-
 import org.subethamail.smtp.helper.SimpleMessageListenerAdapter;
 import org.subethamail.smtp.server.SMTPServer;
-
-import com.robertsoultanaev.javasphinx.SphinxParams;
 
 public class ProxyService extends Service {
 

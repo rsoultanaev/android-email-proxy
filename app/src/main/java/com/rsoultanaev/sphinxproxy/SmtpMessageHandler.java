@@ -1,7 +1,4 @@
-package com.rsoultanaev.sphinxproxy.server;
-
-import com.rsoultanaev.sphinxproxy.AsyncTcpClient;
-import com.rsoultanaev.sphinxproxy.SphinxUtil;
+package com.rsoultanaev.sphinxproxy;
 
 import org.subethamail.smtp.helper.SimpleMessageListener;
 

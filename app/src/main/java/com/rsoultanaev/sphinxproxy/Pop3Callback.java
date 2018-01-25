@@ -1,4 +1,4 @@
-package com.rsoultanaev.sphinxproxy.server;
+package com.rsoultanaev.sphinxproxy;
 
 import android.content.Context;
 
