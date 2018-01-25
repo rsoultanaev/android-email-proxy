@@ -1,4 +1,4 @@
-package com.rsoultanaev.sphinxproxy;
+package com.robertsoultanaev.sphinxproxy;
 
 import com.robertsoultanaev.javasphinx.DestinationAndMessage;
 import com.robertsoultanaev.javasphinx.HeaderAndDelta;
@@ -12,8 +12,8 @@ import static com.robertsoultanaev.javasphinx.Util.decodeECPoint;
 import com.robertsoultanaev.javasphinx.SphinxClient;
 import com.robertsoultanaev.javasphinx.SphinxPacket;
 import com.robertsoultanaev.javasphinx.SphinxParams;
-import com.rsoultanaev.sphinxproxy.database.AssembledMessage;
-import com.rsoultanaev.sphinxproxy.database.Packet;
+import com.robertsoultanaev.sphinxproxy.database.AssembledMessage;
+import com.robertsoultanaev.sphinxproxy.database.Packet;
 
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.encoders.Base64;

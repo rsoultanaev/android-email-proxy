@@ -1,4 +1,4 @@
-package com.rsoultanaev.sphinxproxy;
+package com.robertsoultanaev.sphinxproxy;
 
 import com.koushikdutta.async.AsyncServer;
 import com.koushikdutta.async.AsyncSocket;

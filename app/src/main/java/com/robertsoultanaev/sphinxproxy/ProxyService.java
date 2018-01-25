@@ -1,4 +1,4 @@
-package com.rsoultanaev.sphinxproxy;
+package com.robertsoultanaev.sphinxproxy;
 
 import android.app.Notification;
 import android.app.PendingIntent;

@@ -1,4 +1,4 @@
-package com.rsoultanaev.sphinxproxy;
+package com.robertsoultanaev.sphinxproxy;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

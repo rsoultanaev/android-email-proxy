@@ -1,11 +1,11 @@
-package com.rsoultanaev.sphinxproxy;
+package com.robertsoultanaev.sphinxproxy;
 
 import android.content.Context;
 
-import com.rsoultanaev.sphinxproxy.database.AssembledMessage;
-import com.rsoultanaev.sphinxproxy.database.DB;
-import com.rsoultanaev.sphinxproxy.database.DBQuery;
-import com.rsoultanaev.sphinxproxy.database.Packet;
+import com.robertsoultanaev.sphinxproxy.database.AssembledMessage;
+import com.robertsoultanaev.sphinxproxy.database.DB;
+import com.robertsoultanaev.sphinxproxy.database.DBQuery;
+import com.robertsoultanaev.sphinxproxy.database.Packet;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.net.pop3.POP3Client;

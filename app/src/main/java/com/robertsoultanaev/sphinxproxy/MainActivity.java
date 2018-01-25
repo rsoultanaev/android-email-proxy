@@ -1,4 +1,4 @@
-package com.rsoultanaev.sphinxproxy;
+package com.robertsoultanaev.sphinxproxy;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;

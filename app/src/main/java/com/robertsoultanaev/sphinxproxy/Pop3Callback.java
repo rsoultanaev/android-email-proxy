@@ -1,4 +1,4 @@
-package com.rsoultanaev.sphinxproxy;
+package com.robertsoultanaev.sphinxproxy;
 
 import android.content.Context;
 
@@ -10,9 +10,9 @@ import com.koushikdutta.async.Util;
 import com.koushikdutta.async.callback.CompletedCallback;
 import com.koushikdutta.async.callback.DataCallback;
 import com.koushikdutta.async.callback.ListenCallback;
-import com.rsoultanaev.sphinxproxy.database.AssembledMessage;
-import com.rsoultanaev.sphinxproxy.database.DB;
-import com.rsoultanaev.sphinxproxy.database.DBQuery;
+import com.robertsoultanaev.sphinxproxy.database.AssembledMessage;
+import com.robertsoultanaev.sphinxproxy.database.DB;
+import com.robertsoultanaev.sphinxproxy.database.DBQuery;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package com.rsoultanaev.sphinxproxy.database;
+package com.robertsoultanaev.sphinxproxy.database;
 
 import android.arch.persistence.room.Database;
 import android.arch.persistence.room.Room;
