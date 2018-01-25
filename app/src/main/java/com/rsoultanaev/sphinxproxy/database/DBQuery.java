@@ -34,6 +34,9 @@ public abstract class DBQuery {
     @Query("DELETE FROM AssembledMessage")
     protected abstract void deleteAllAssembledMessages();
 
+    @Query("SELECT * FROM packetcount WHERE uuid=:uuid")
+    protected abstract PacketCount getPacketCount(String uuid);
+
 
     @Insert
     public abstract void insertAssembledMessage(AssembledMessage assembledMessage);
@@ -41,14 +44,14 @@ public abstract class DBQuery {
     @Query("DELETE FROM assembledmessage WHERE uuid=:uuid")
     public abstract void deleteAssembledMessage(String uuid);
 
-    @Query("SELECT * FROM packetcount WHERE uuid=:uuid")
-    public abstract PacketCount getPacketCount(String uuid);
-
     @Query("SELECT * FROM packet WHERE uuid=:uuid ORDER BY sequenceNumber")
     public abstract List<Packet> getPackets(String uuid);
 
     @Query("SELECT * FROM assembledmessage")
     public abstract List<AssembledMessage> getAssembledMessages();
+
+    @Query("SELECT uuid FROM packetcount WHERE packetsInMessage=packetsReceived")
+    public abstract List<String> getReadyPacketIds();
 
     @Transaction
     public void addPacket(Packet packet) {

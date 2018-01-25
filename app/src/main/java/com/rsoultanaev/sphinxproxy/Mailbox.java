@@ -1,5 +1,10 @@
 package com.rsoultanaev.sphinxproxy;
 
+import android.content.Context;
+
+import com.rsoultanaev.sphinxproxy.database.AssembledMessage;
+import com.rsoultanaev.sphinxproxy.database.DB;
+import com.rsoultanaev.sphinxproxy.database.DBQuery;
 import com.rsoultanaev.sphinxproxy.database.Packet;
 
 import org.apache.commons.io.IOUtils;
@@ -11,34 +16,62 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
-public class Pop3Puller {
-    private String server;
+public class Mailbox {
+    private String mailServer;
     private int port;
     private String username;
     private String password;
     private POP3Client pop3Client;
+    private Context context;
 
 
-    public Pop3Puller(String server, int port, String username, String password) {
-        this.server = server;
+    public Mailbox(String mailServer, int port, String username, String password, Context context) {
+        this.mailServer = mailServer;
         this.port = port;
         this.username = username;
         this.password = password;
+        this.context = context;
 
         pop3Client = new POP3Client();
         pop3Client.setDefaultTimeout(60000);
     }
 
-    public Packet[] pullMessages(boolean deleteAfterFetching) {
+    public void updateMailbox() {
+        DB db = DB.getAppDatabase(context);
+        DBQuery dao = db.getDao();
+
+        Packet[] newMessages = pullMessages(true);
+
+        if (newMessages == null) {
+            System.out.println("Message pull failed");
+        } else {
+            System.out.println("Messages for " + username + ": " + newMessages.length);
+
+            for (Packet packet : newMessages) {
+                dao.addPacket(packet);
+            }
+        }
+
+        List<String> readyPacketIds = dao.getReadyPacketIds();
+
+        for (String uuid : readyPacketIds) {
+            List<Packet> orderedPackets = dao.getPackets(uuid);
+            AssembledMessage msg = SphinxUtil.assemblePackets(orderedPackets);
+            dao.addAssembledMessage(msg);
+        }
+    }
+
+    private Packet[] pullMessages(boolean deleteAfterFetching) {
         try
         {
-            pop3Client.connect(server, port);
+            pop3Client.connect(mailServer, port);
         }
         catch (IOException e)
         {
-            System.err.println("Could not connect to server.");
+            System.err.println("Could not connect to mailServer.");
             e.printStackTrace();
             return null;
         }
@@ -46,7 +79,7 @@ public class Pop3Puller {
         try
         {
             if (!pop3Client.login(username, password)) {
-                System.err.println("Could not login to server.");
+                System.err.println("Could not login to mailServer.");
                 pop3Client.disconnect();
                 return null;
             }
