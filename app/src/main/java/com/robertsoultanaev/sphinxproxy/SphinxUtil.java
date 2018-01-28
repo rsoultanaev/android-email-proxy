@@ -1,5 +1,7 @@
 package com.robertsoultanaev.sphinxproxy;
 
+import android.content.Context;
+
 import com.robertsoultanaev.javasphinx.DestinationAndMessage;
 import com.robertsoultanaev.javasphinx.HeaderAndDelta;
 import com.robertsoultanaev.javasphinx.ParamLengths;
@@ -19,7 +21,9 @@ import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
@@ -42,14 +46,26 @@ public class SphinxUtil {
     private final SphinxParams params;
     private final HashMap<Integer, ECPoint> publicKeys;
 
-    public SphinxUtil() {
+    public SphinxUtil(Context context) {
         params = new SphinxParams();
         publicKeys = new HashMap<Integer, ECPoint>();
 
-        // TODO: Implement this
-        publicKeys.put(8000, decodeECPoint(Hex.decode("036457e713498b559afe446158aaa08613530022b25e418c59b8b2a624")));
-        publicKeys.put(8001, decodeECPoint(Hex.decode("039d95b858383fdeee0d493a1675d513c29671de322c367d23a08cd5bf")));
-        publicKeys.put(8002, decodeECPoint(Hex.decode("02739a6205b940db5dd4c62c17fe568dc1b061a150322df9a45543898f")));
+        // Read config file that stores the public keys
+        try {
+            String fileName = context.getString(R.string.mix_network_filename);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(context.getAssets().open(fileName)));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] splitLine = line.split(",");
+                int port = Integer.parseInt(splitLine[0]);
+                ECPoint publicKey = decodeECPoint(Hex.decode(splitLine[1]));
+                publicKeys.put(port, publicKey);
+            }
+            reader.close();
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to read the mix network configuration", ex);
+        }
     }
 
     public byte[][] splitIntoSphinxPackets(byte[] email, String recipient) {

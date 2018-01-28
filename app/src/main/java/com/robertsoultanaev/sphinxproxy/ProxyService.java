@@ -30,7 +30,7 @@ public class ProxyService extends Service {
             // Initialising SMTPServer blocks, so we need to do it in a separate thread
             new Thread(new Runnable() {
                 public void run() {
-                    SmtpMessageHandler smtpMessageHandler = new SmtpMessageHandler();
+                    SmtpMessageHandler smtpMessageHandler = new SmtpMessageHandler(getApplicationContext());
                     smtpServer = new SMTPServer(new SimpleMessageListenerAdapter(smtpMessageHandler));
                     smtpServer.setPort(smtpPort);
                     smtpServer.start();

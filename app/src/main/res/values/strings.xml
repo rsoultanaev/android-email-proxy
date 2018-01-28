@@ -3,6 +3,7 @@
     <string name="start_service">Start Service</string>
     <string name="stop_service">Stop Service</string>
     <string name="trigger_test">Trigger Test</string>
+
     <string name="key_preference_file">preferenceFile</string>
     <string name="key_proxy_pop3_port">proxyPop3Port</string>
     <string name="key_proxy_smtp_port">proxySmtpPort</string>
@@ -12,4 +13,6 @@
     <string name="key_mailbox_port">mailboxPort</string>
     <string name="key_mailbox_username">mailboxUsername</string>
     <string name="key_mailbox_password">mailboxPassword</string>
+
+    <string name="mix_network_filename">mix_network.csv</string>
 </resources>
