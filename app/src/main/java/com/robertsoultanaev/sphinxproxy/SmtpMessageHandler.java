@@ -1,5 +1,7 @@
 package com.robertsoultanaev.sphinxproxy;
 
+import android.content.Context;
+
 import org.subethamail.smtp.helper.SimpleMessageListener;
 
 import java.io.BufferedInputStream;
@@ -8,6 +10,12 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class SmtpMessageHandler implements SimpleMessageListener {
+    private Context context;
+
+    public SmtpMessageHandler(Context context) {
+        this.context = context;
+    }
+
     public boolean accept(String from, String recipient) {
         return true;
     }
@@ -33,7 +41,7 @@ public class SmtpMessageHandler implements SimpleMessageListener {
         System.out.println("[SMTP] email length: " + email.length);
         System.out.println("-------------------------");
 
-        SphinxUtil sphinxUtil = new SphinxUtil();
+        SphinxUtil sphinxUtil = new SphinxUtil(context);
         byte[][] sphinxPackets = sphinxUtil.splitIntoSphinxPackets(email, recipient);
 
         AsyncTcpClient asyncTcpClient = new AsyncTcpClient("localhost", 10000);
