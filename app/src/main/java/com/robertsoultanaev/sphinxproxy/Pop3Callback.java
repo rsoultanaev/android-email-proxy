@@ -37,19 +37,19 @@ public class Pop3Callback implements ListenCallback {
     private Set<String> markedForDeletion;
     private Context context;
     private State sessionState;
-    private String user;
-    private String pass;
-    private String providedUser;
+    private String username;
+    private String password;
+    private String providedUsername;
 
-    public Pop3Callback(Context context) {
+    public Pop3Callback(Context context, String username, String password) {
         this.numberToMsg = new TreeMap<>();
         this.markedForDeletion = new HashSet<>();
         this.context = context;
         this.sessionState = State.AUTHORIZATION;
 
-        this.user = "proxyuser";
-        this.pass = "12345";
-        this.providedUser = null;
+        this.username = username;
+        this.password = password;
+        this.providedUsername = null;
     }
 
     @Override
@@ -402,7 +402,7 @@ public class Pop3Callback implements ListenCallback {
             return "-ERR command expects more arguments";
         }
 
-        providedUser = args[1];
+        providedUsername = args[1];
 
         return "+OK";
     }
@@ -412,19 +412,19 @@ public class Pop3Callback implements ListenCallback {
             return "-ERR command expects more arguments";
         }
 
-        if (providedUser == null) {
-            return "-ERR user not specified";
+        if (providedUsername == null) {
+            return "-ERR username not specified";
         }
 
-        String providedPass = args[1];
+        String providedPassword = args[1];
         String response = "-ERR authentication failed";
 
-        if (providedUser.equals(user) && providedPass.equals(pass)) {
+        if (providedUsername.equals(username) && providedPassword.equals(password)) {
             sessionState = State.TRANSACTION;
             return "+OK";
         }
 
-        providedUser = null;
+        providedUsername = null;
         return response;
     }
 }

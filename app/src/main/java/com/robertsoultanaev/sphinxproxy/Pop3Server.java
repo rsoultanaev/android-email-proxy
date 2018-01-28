@@ -25,7 +25,7 @@ public class Pop3Server {
     }
 
     public void start() {
-        Pop3Callback callback = new Pop3Callback(context);
+        Pop3Callback callback = new Pop3Callback(context, "proxyuser", "12345");
         AsyncServer.getDefault().listen(host, port, callback);
     }
 
