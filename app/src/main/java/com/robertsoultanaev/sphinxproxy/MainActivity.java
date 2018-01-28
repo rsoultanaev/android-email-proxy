@@ -44,12 +44,13 @@ public class MainActivity extends AppCompatActivity {
     public void triggerTest(View view) {
         new Thread(new Runnable() {
             public void run() {
-                String server = "localhost";
-                int port = 11000;
-                String username = "mort";
-                String password = "1234";
+                Context context = getApplicationContext();
+                String server = Config.getKey(R.string.key_mailbox_hostname, context);
+                int port = Integer.parseInt(Config.getKey(R.string.key_mailbox_port, context));
+                String username = Config.getKey(R.string.key_mailbox_username, context);
+                String password = Config.getKey(R.string.key_mailbox_password, context);
 
-                Mailbox mailbox = new Mailbox(server, port, username, password, getApplicationContext());
+                Mailbox mailbox = new Mailbox(server, port, username, password, context);
                 mailbox.updateMailbox();
             }
         }).start();
