@@ -198,6 +198,10 @@ public class Pop3Callback implements ListenCallback {
     }
 
     private String handleStat() {
+        if (sessionState != State.TRANSACTION) {
+            return "-ERR unauthorized access";
+        }
+
         int numMessages = numberToMsg.size();
         int totalLength = 0;
         for (AssembledMessage msg : numberToMsg.values()) {
@@ -207,6 +211,10 @@ public class Pop3Callback implements ListenCallback {
     }
 
     private String handleList(String[] args) {
+        if (sessionState != State.TRANSACTION) {
+            return "-ERR unauthorized access";
+        }
+
         if (args.length > 1) {
             int argNum;
             try {
@@ -236,6 +244,10 @@ public class Pop3Callback implements ListenCallback {
     }
 
     private String handleUidl(String[] args) {
+        if (sessionState != State.TRANSACTION) {
+            return "-ERR unauthorized access";
+        }
+
         if (args.length > 1) {
             int argNum;
             try {
@@ -265,6 +277,10 @@ public class Pop3Callback implements ListenCallback {
     }
 
     private String handleRetr(String[] args) {
+        if (sessionState != State.TRANSACTION) {
+            return "-ERR unauthorized access";
+        }
+
         if (args.length < 2) {
             return "-ERR command expects more arguments";
         }
@@ -290,6 +306,10 @@ public class Pop3Callback implements ListenCallback {
     }
 
     private String handleDele(String[] args) {
+        if (sessionState != State.TRANSACTION) {
+            return "-ERR unauthorized access";
+        }
+
         if (args.length < 2) {
             return "-ERR command expects more arguments";
         }
@@ -311,12 +331,20 @@ public class Pop3Callback implements ListenCallback {
     }
 
     private String handleRset() {
+        if (sessionState != State.TRANSACTION) {
+            return "-ERR unauthorized access";
+        }
+
         markedForDeletion.clear();
 
         return "+OK";
     }
 
     private String handleTop(String[] args) {
+        if (sessionState != State.TRANSACTION) {
+            return "-ERR unauthorized access";
+        }
+
         if (args.length < 3) {
             return "-ERR command expects more arguments";
         }
