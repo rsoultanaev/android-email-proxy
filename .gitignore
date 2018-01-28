@@ -58,3 +58,5 @@ freeline_project_description.json
 
 # JAR libs for testing
 libs/
+
+assets/
