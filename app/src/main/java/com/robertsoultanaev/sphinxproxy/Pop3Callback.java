@@ -26,15 +26,30 @@ import java.util.TreeMap;
 
 public class Pop3Callback implements ListenCallback {
 
+    private static final String CRLF = "\r\n";
+
+    private enum State {
+        AUTHORIZATION,
+        TRANSACTION
+    }
+
     private SortedMap<Integer, AssembledMessage> numberToMsg;
     private Set<String> markedForDeletion;
     private Context context;
-    private static final String CRLF = "\r\n";
+    private State sessionState;
+    private String username;
+    private String password;
+    private String providedUsername;
 
-    public Pop3Callback(Context context) {
+    public Pop3Callback(Context context, String username, String password) {
         this.numberToMsg = new TreeMap<>();
         this.markedForDeletion = new HashSet<>();
         this.context = context;
+        this.sessionState = State.AUTHORIZATION;
+
+        this.username = username;
+        this.password = password;
+        this.providedUsername = null;
     }
 
     @Override
@@ -126,6 +141,8 @@ public class Pop3Callback implements ListenCallback {
     }
 
     private void update() {
+        sessionState = State.AUTHORIZATION;
+
         DB db = DB.getAppDatabase(context);
         DBQuery dao = db.getDao();
 
@@ -144,11 +161,15 @@ public class Pop3Callback implements ListenCallback {
         String response = "-ERR unsupported command";
 
         switch (command) {
-            case "USER":
-            case "PASS":
             case "QUIT":
             case "NOOP":
                 response = "+OK";
+                break;
+            case "USER":
+                response = handleUser(args);
+                break;
+            case "PASS":
+                response = handlePass(args);
                 break;
             case "STAT":
                 response = handleStat();
@@ -177,6 +198,10 @@ public class Pop3Callback implements ListenCallback {
     }
 
     private String handleStat() {
+        if (sessionState != State.TRANSACTION) {
+            return "-ERR unauthorized access";
+        }
+
         int numMessages = numberToMsg.size();
         int totalLength = 0;
         for (AssembledMessage msg : numberToMsg.values()) {
@@ -186,6 +211,10 @@ public class Pop3Callback implements ListenCallback {
     }
 
     private String handleList(String[] args) {
+        if (sessionState != State.TRANSACTION) {
+            return "-ERR unauthorized access";
+        }
+
         if (args.length > 1) {
             int argNum;
             try {
@@ -215,6 +244,10 @@ public class Pop3Callback implements ListenCallback {
     }
 
     private String handleUidl(String[] args) {
+        if (sessionState != State.TRANSACTION) {
+            return "-ERR unauthorized access";
+        }
+
         if (args.length > 1) {
             int argNum;
             try {
@@ -244,6 +277,10 @@ public class Pop3Callback implements ListenCallback {
     }
 
     private String handleRetr(String[] args) {
+        if (sessionState != State.TRANSACTION) {
+            return "-ERR unauthorized access";
+        }
+
         if (args.length < 2) {
             return "-ERR command expects more arguments";
         }
@@ -269,6 +306,10 @@ public class Pop3Callback implements ListenCallback {
     }
 
     private String handleDele(String[] args) {
+        if (sessionState != State.TRANSACTION) {
+            return "-ERR unauthorized access";
+        }
+
         if (args.length < 2) {
             return "-ERR command expects more arguments";
         }
@@ -290,12 +331,20 @@ public class Pop3Callback implements ListenCallback {
     }
 
     private String handleRset() {
+        if (sessionState != State.TRANSACTION) {
+            return "-ERR unauthorized access";
+        }
+
         markedForDeletion.clear();
 
         return "+OK";
     }
 
     private String handleTop(String[] args) {
+        if (sessionState != State.TRANSACTION) {
+            return "-ERR unauthorized access";
+        }
+
         if (args.length < 3) {
             return "-ERR command expects more arguments";
         }
@@ -346,5 +395,36 @@ public class Pop3Callback implements ListenCallback {
         response.append(".");
 
         return response.toString();
+    }
+
+    private String handleUser(String[] args) {
+        if (args.length < 2) {
+            return "-ERR command expects more arguments";
+        }
+
+        providedUsername = args[1];
+
+        return "+OK";
+    }
+
+    private String handlePass(String[] args) {
+        if (args.length < 2) {
+            return "-ERR command expects more arguments";
+        }
+
+        if (providedUsername == null) {
+            return "-ERR username not specified";
+        }
+
+        String providedPassword = args[1];
+        String response = "-ERR authentication failed";
+
+        if (providedUsername.equals(username) && providedPassword.equals(password)) {
+            sessionState = State.TRANSACTION;
+            return "+OK";
+        }
+
+        providedUsername = null;
+        return response;
     }
 }
