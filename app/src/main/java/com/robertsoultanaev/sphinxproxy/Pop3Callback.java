@@ -41,14 +41,14 @@ public class Pop3Callback implements ListenCallback {
     private String password;
     private String providedUsername;
 
-    public Pop3Callback(Context context, String username, String password) {
+    public Pop3Callback(Context context) {
         this.numberToMsg = new TreeMap<>();
         this.markedForDeletion = new HashSet<>();
         this.context = context;
         this.sessionState = State.AUTHORIZATION;
 
-        this.username = username;
-        this.password = password;
+        this.username = Config.getKey(R.string.key_proxy_username, context);
+        this.password = Config.getKey(R.string.key_proxy_password, context);;
         this.providedUsername = null;
     }
 
