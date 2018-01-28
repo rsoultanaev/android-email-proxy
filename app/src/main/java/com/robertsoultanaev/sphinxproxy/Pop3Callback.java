@@ -412,14 +412,19 @@ public class Pop3Callback implements ListenCallback {
             return "-ERR command expects more arguments";
         }
 
+        if (providedUser == null) {
+            return "-ERR user not specified";
+        }
+
         String providedPass = args[1];
+        String response = "-ERR authentication failed";
 
         if (providedUser.equals(user) && providedPass.equals(pass)) {
             sessionState = State.TRANSACTION;
             return "+OK";
-        } else {
-            sessionState = State.AUTHORIZATION;
-            return "-ERR authentication failed";
         }
+
+        providedUser = null;
+        return response;
     }
 }
