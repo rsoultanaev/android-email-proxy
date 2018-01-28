@@ -26,9 +26,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void startProxy(View view) {
+        Context context = getApplicationContext();
+        int pop3Port = Integer.parseInt(Config.getKey(R.string.key_proxy_pop3_port, context));
+        int smtpPort = Integer.parseInt(Config.getKey(R.string.key_proxy_smtp_port, context));
+
         Intent proxyIntent = new Intent(this, ProxyService.class);
-        proxyIntent.putExtra("pop3Port", 27000);
-        proxyIntent.putExtra("smtpPort", 28000);
+        proxyIntent.putExtra("pop3Port", pop3Port);
+        proxyIntent.putExtra("smtpPort", smtpPort);
         startService(proxyIntent);
     }
 
