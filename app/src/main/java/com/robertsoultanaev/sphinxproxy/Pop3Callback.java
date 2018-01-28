@@ -26,15 +26,30 @@ import java.util.TreeMap;
 
 public class Pop3Callback implements ListenCallback {
 
+    private static final String CRLF = "\r\n";
+
+    private enum State {
+        AUTHORIZATION,
+        TRANSACTION
+    }
+
     private SortedMap<Integer, AssembledMessage> numberToMsg;
     private Set<String> markedForDeletion;
     private Context context;
-    private static final String CRLF = "\r\n";
+    private State sessionState;
+    private String user;
+    private String pass;
+    private String providedUser;
 
     public Pop3Callback(Context context) {
         this.numberToMsg = new TreeMap<>();
         this.markedForDeletion = new HashSet<>();
         this.context = context;
+        this.sessionState = State.AUTHORIZATION;
+
+        this.user = "proxyuser";
+        this.pass = "12345";
+        this.providedUser = null;
     }
 
     @Override
@@ -126,6 +141,8 @@ public class Pop3Callback implements ListenCallback {
     }
 
     private void update() {
+        sessionState = State.AUTHORIZATION;
+
         DB db = DB.getAppDatabase(context);
         DBQuery dao = db.getDao();
 
@@ -144,11 +161,15 @@ public class Pop3Callback implements ListenCallback {
         String response = "-ERR unsupported command";
 
         switch (command) {
-            case "USER":
-            case "PASS":
             case "QUIT":
             case "NOOP":
                 response = "+OK";
+                break;
+            case "USER":
+                response = handleUser(args);
+                break;
+            case "PASS":
+                response = handlePass(args);
                 break;
             case "STAT":
                 response = handleStat();
@@ -346,5 +367,31 @@ public class Pop3Callback implements ListenCallback {
         response.append(".");
 
         return response.toString();
+    }
+
+    private String handleUser(String[] args) {
+        if (args.length < 2) {
+            return "-ERR command expects more arguments";
+        }
+
+        providedUser = args[1];
+
+        return "+OK";
+    }
+
+    private String handlePass(String[] args) {
+        if (args.length < 2) {
+            return "-ERR command expects more arguments";
+        }
+
+        String providedPass = args[1];
+
+        if (providedUser.equals(user) && providedPass.equals(pass)) {
+            sessionState = State.TRANSACTION;
+            return "+OK";
+        } else {
+            sessionState = State.AUTHORIZATION;
+            return "-ERR authentication failed";
+        }
     }
 }
