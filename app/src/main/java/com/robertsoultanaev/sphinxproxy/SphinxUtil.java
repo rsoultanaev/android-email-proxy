@@ -1,7 +1,5 @@
 package com.robertsoultanaev.sphinxproxy;
 
-import android.content.Context;
-
 import com.robertsoultanaev.javasphinx.DestinationAndMessage;
 import com.robertsoultanaev.javasphinx.HeaderAndDelta;
 import com.robertsoultanaev.javasphinx.ParamLengths;
@@ -15,6 +13,8 @@ import com.robertsoultanaev.javasphinx.SphinxClient;
 import com.robertsoultanaev.javasphinx.SphinxPacket;
 import com.robertsoultanaev.javasphinx.SphinxParams;
 import com.robertsoultanaev.sphinxproxy.database.AssembledMessage;
+import com.robertsoultanaev.sphinxproxy.database.DBQuery;
+import com.robertsoultanaev.sphinxproxy.database.MixNode;
 import com.robertsoultanaev.sphinxproxy.database.Packet;
 
 import org.bouncycastle.math.ec.ECPoint;
@@ -46,25 +46,13 @@ public class SphinxUtil {
     private final SphinxParams params;
     private final HashMap<Integer, ECPoint> publicKeys;
 
-    public SphinxUtil(Context context) {
+    public SphinxUtil(DBQuery dbQuery) {
         params = new SphinxParams();
         publicKeys = new HashMap<Integer, ECPoint>();
 
-        // Read config file that stores the public keys
-        try {
-            String fileName = context.getString(R.string.mix_network_filename);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(context.getAssets().open(fileName)));
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] splitLine = line.split(",");
-                int port = Integer.parseInt(splitLine[0]);
-                ECPoint publicKey = decodeECPoint(Hex.decode(splitLine[1]));
-                publicKeys.put(port, publicKey);
-            }
-            reader.close();
-        } catch (IOException ex) {
-            throw new RuntimeException("Failed to read the mix network configuration", ex);
+        for (MixNode mixNode : dbQuery.getMixNodes()) {
+            ECPoint publicKey = decodeECPoint(Hex.decode(mixNode.encodedPublicKey));
+            publicKeys.put(mixNode.port, publicKey);
         }
     }
 

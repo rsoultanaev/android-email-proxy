@@ -1,7 +1,5 @@
 package com.robertsoultanaev.sphinxproxy;
 
-import android.content.Context;
-
 import com.koushikdutta.async.AsyncServerSocket;
 import com.koushikdutta.async.AsyncSocket;
 import com.koushikdutta.async.ByteBufferList;
@@ -11,7 +9,6 @@ import com.koushikdutta.async.callback.CompletedCallback;
 import com.koushikdutta.async.callback.DataCallback;
 import com.koushikdutta.async.callback.ListenCallback;
 import com.robertsoultanaev.sphinxproxy.database.AssembledMessage;
-import com.robertsoultanaev.sphinxproxy.database.DB;
 import com.robertsoultanaev.sphinxproxy.database.DBQuery;
 
 import java.io.BufferedReader;
@@ -35,20 +32,20 @@ public class Pop3Callback implements ListenCallback {
 
     private SortedMap<Integer, AssembledMessage> numberToMsg;
     private Set<String> markedForDeletion;
-    private Context context;
     private State sessionState;
     private String username;
     private String password;
     private String providedUsername;
+    private DBQuery dbQuery;
 
-    public Pop3Callback(Context context) {
+    public Pop3Callback(String username, String password, DBQuery dbQuery) {
+        this.dbQuery = dbQuery;
+        this.username = username;
+        this.password = password;
+
         this.numberToMsg = new TreeMap<>();
         this.markedForDeletion = new HashSet<>();
-        this.context = context;
         this.sessionState = State.AUTHORIZATION;
-
-        this.username = Config.getKey(R.string.key_proxy_username, context);
-        this.password = Config.getKey(R.string.key_proxy_password, context);;
         this.providedUsername = null;
     }
 
@@ -59,9 +56,7 @@ public class Pop3Callback implements ListenCallback {
         numberToMsg.clear();
         markedForDeletion.clear();
 
-        DB db = DB.getAppDatabase(context);
-        DBQuery dao = db.getDao();
-        List<AssembledMessage> assembledMessages = dao.getAssembledMessages();
+        List<AssembledMessage> assembledMessages = dbQuery.getAssembledMessages();
         for (int i = 1; i <= assembledMessages.size(); i++) {
             numberToMsg.put(i, assembledMessages.get(i - 1));
         }
@@ -143,11 +138,8 @@ public class Pop3Callback implements ListenCallback {
     private void update() {
         sessionState = State.AUTHORIZATION;
 
-        DB db = DB.getAppDatabase(context);
-        DBQuery dao = db.getDao();
-
         for (String uuid : markedForDeletion) {
-            dao.deleteAssembledMessage(uuid);
+            dbQuery.deleteAssembledMessage(uuid);
         }
 
         numberToMsg.clear();

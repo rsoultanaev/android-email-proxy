@@ -3,9 +3,13 @@ package com.robertsoultanaev.sphinxproxy;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
+
+import com.robertsoultanaev.sphinxproxy.database.DB;
+import com.robertsoultanaev.sphinxproxy.database.DBQuery;
 
 import org.subethamail.smtp.helper.SimpleMessageListenerAdapter;
 import org.subethamail.smtp.server.SMTPServer;
@@ -30,12 +34,18 @@ public class ProxyService extends Service {
             // Initialising SMTPServer blocks, so we need to do it in a separate thread
             new Thread(new Runnable() {
                 public void run() {
-                    SmtpMessageHandler smtpMessageHandler = new SmtpMessageHandler(getApplicationContext());
+                    Context context = getApplicationContext();
+                    DB db = DB.getAppDatabase(getApplicationContext());
+                    DBQuery dbQuery = db.getDao();
+
+                    SmtpMessageHandler smtpMessageHandler = new SmtpMessageHandler(dbQuery);
                     smtpServer = new SMTPServer(new SimpleMessageListenerAdapter(smtpMessageHandler));
                     smtpServer.setPort(smtpPort);
                     smtpServer.start();
 
-                    pop3Server = new Pop3Server(pop3Port, getApplicationContext());
+                    String username = Config.getKey(R.string.key_proxy_username, context);
+                    String password = Config.getKey(R.string.key_proxy_password, context);
+                    pop3Server = new Pop3Server(pop3Port, username, password, dbQuery);
                     pop3Server.start();
                 }
             }).start();

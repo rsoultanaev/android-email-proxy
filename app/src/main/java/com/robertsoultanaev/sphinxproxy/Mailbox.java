@@ -1,9 +1,6 @@
 package com.robertsoultanaev.sphinxproxy;
 
-import android.content.Context;
-
 import com.robertsoultanaev.sphinxproxy.database.AssembledMessage;
-import com.robertsoultanaev.sphinxproxy.database.DB;
 import com.robertsoultanaev.sphinxproxy.database.DBQuery;
 import com.robertsoultanaev.sphinxproxy.database.Packet;
 
@@ -25,24 +22,20 @@ public class Mailbox {
     private String username;
     private String password;
     private POP3Client pop3Client;
-    private Context context;
+    private DBQuery dbQuery;
 
-
-    public Mailbox(String mailServer, int port, String username, String password, Context context) {
+    public Mailbox(String mailServer, int port, String username, String password, DBQuery dbQuery) {
         this.mailServer = mailServer;
         this.port = port;
         this.username = username;
         this.password = password;
-        this.context = context;
+        this.dbQuery = dbQuery;
 
         pop3Client = new POP3Client();
         pop3Client.setDefaultTimeout(60000);
     }
 
     public void updateMailbox() {
-        DB db = DB.getAppDatabase(context);
-        DBQuery dao = db.getDao();
-
         Packet[] newMessages = pullMessages(true);
 
         if (newMessages == null) {
@@ -51,16 +44,16 @@ public class Mailbox {
             System.out.println("Messages for " + username + ": " + newMessages.length);
 
             for (Packet packet : newMessages) {
-                dao.addPacket(packet);
+                dbQuery.addPacket(packet);
             }
         }
 
-        List<String> readyPacketIds = dao.getReadyPacketIds();
+        List<String> readyPacketIds = dbQuery.getReadyPacketIds();
 
         for (String uuid : readyPacketIds) {
-            List<Packet> orderedPackets = dao.getPackets(uuid);
+            List<Packet> orderedPackets = dbQuery.getPackets(uuid);
             AssembledMessage msg = SphinxUtil.assemblePackets(orderedPackets);
-            dao.addAssembledMessage(msg);
+            dbQuery.addAssembledMessage(msg);
         }
     }
 
