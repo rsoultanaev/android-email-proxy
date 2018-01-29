@@ -1,7 +1,5 @@
 package com.robertsoultanaev.sphinxproxy;
 
-import android.content.Context;
-
 import com.robertsoultanaev.sphinxproxy.database.DBQuery;
 
 import org.subethamail.smtp.helper.SimpleMessageListener;

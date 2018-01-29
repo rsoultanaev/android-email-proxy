@@ -1,7 +1,5 @@
 package com.robertsoultanaev.sphinxproxy;
 
-import android.content.Context;
-
 import com.robertsoultanaev.javasphinx.DestinationAndMessage;
 import com.robertsoultanaev.javasphinx.HeaderAndDelta;
 import com.robertsoultanaev.javasphinx.ParamLengths;
