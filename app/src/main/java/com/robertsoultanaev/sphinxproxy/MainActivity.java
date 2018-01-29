@@ -6,6 +6,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
+import com.robertsoultanaev.sphinxproxy.database.DB;
+import com.robertsoultanaev.sphinxproxy.database.DBQuery;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -50,7 +53,9 @@ public class MainActivity extends AppCompatActivity {
                 String username = Config.getKey(R.string.key_mailbox_username, context);
                 String password = Config.getKey(R.string.key_mailbox_password, context);
 
-                Mailbox mailbox = new Mailbox(server, port, username, password, context);
+                DB db = DB.getAppDatabase(getApplicationContext());
+                DBQuery dbQuery = db.getDao();
+                Mailbox mailbox = new Mailbox(server, port, username, password, dbQuery);
                 mailbox.updateMailbox();
             }
         }).start();

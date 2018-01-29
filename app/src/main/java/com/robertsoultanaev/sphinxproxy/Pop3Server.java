@@ -1,8 +1,7 @@
 package com.robertsoultanaev.sphinxproxy;
 
-import android.content.Context;
-
 import com.koushikdutta.async.AsyncServer;
+import com.robertsoultanaev.sphinxproxy.database.DBQuery;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -11,9 +10,11 @@ public class Pop3Server {
 
     private InetAddress host;
     private int port;
-    private Context context;
+    private DBQuery dbQuery;
+    private String username;
+    private String password;
 
-    public Pop3Server(int port, Context context) {
+    public Pop3Server(int port, String username, String password, DBQuery dbQuery) {
         try {
             this.host = InetAddress.getByName("localhost");
         } catch (UnknownHostException e) {
@@ -21,11 +22,13 @@ public class Pop3Server {
         }
 
         this.port = port;
-        this.context = context;
+        this.dbQuery = dbQuery;
+        this.username = username;
+        this.password = password;
     }
 
     public void start() {
-        Pop3Callback callback = new Pop3Callback(context);
+        Pop3Callback callback = new Pop3Callback(username, password, dbQuery);
         AsyncServer.getDefault().listen(host, port, callback);
     }
 
