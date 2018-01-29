@@ -25,31 +25,35 @@ public class MainActivity extends AppCompatActivity {
         // Read mix network configuration and save into database when first installed
         String sharedPreferencesFile = getString(R.string.key_preference_file);
         String setupDoneKey = getString(R.string.key_setup_done);
-        SharedPreferences sharedPreferences = getSharedPreferences(sharedPreferencesFile, Context.MODE_PRIVATE);
+        final SharedPreferences sharedPreferences = getSharedPreferences(sharedPreferencesFile, Context.MODE_PRIVATE);
         if (!sharedPreferences.getBoolean(setupDoneKey, false)) {
-            DB db = DB.getAppDatabase(getApplicationContext());
-            DBQuery dbQuery = db.getDao();
+            new Thread(new Runnable() {
+                public void run() {
+                    DB db = DB.getAppDatabase(getApplicationContext());
+                    DBQuery dbQuery = db.getDao();
 
-            try {
-                String fileName = getString(R.string.mix_network_filename);
-                BufferedReader reader = new BufferedReader(new InputStreamReader(getAssets().open(fileName)));
+                    try {
+                        String fileName = getString(R.string.mix_network_filename);
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(getAssets().open(fileName)));
 
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    String[] splitLine = line.split(",");
-                    int port = Integer.parseInt(splitLine[0]);
-                    String encodedPublicKey = splitLine[1];
-                    dbQuery.insertMixNode(new MixNode(port, encodedPublicKey));
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            String[] splitLine = line.split(",");
+                            int port = Integer.parseInt(splitLine[0]);
+                            String encodedPublicKey = splitLine[1];
+                            dbQuery.insertMixNode(new MixNode(port, encodedPublicKey));
+                        }
+
+                        reader.close();
+
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putBoolean(getString(R.string.key_setup_done), true);
+                        editor.apply();
+                    } catch (IOException ex) {
+                        throw new RuntimeException("Failed to read the mix network configuration", ex);
+                    }
                 }
-
-                reader.close();
-
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(getString(R.string.key_setup_done), true);
-                editor.apply();
-            } catch (IOException ex) {
-                throw new RuntimeException("Failed to read the mix network configuration", ex);
-            }
+            }).start();
         }
 
         // Test Config key setting
