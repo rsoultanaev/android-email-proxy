@@ -5,6 +5,7 @@
     <string name="trigger_test">Trigger Test</string>
 
     <string name="key_preference_file">preferenceFile</string>
+    <string name="key_setup_done">setupDone</string>
     <string name="key_proxy_pop3_port">proxyPop3Port</string>
     <string name="key_proxy_smtp_port">proxySmtpPort</string>
     <string name="key_proxy_username">proxyUsername</string>

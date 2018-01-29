@@ -2,12 +2,18 @@ package com.robertsoultanaev.sphinxproxy;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
 import com.robertsoultanaev.sphinxproxy.database.DB;
 import com.robertsoultanaev.sphinxproxy.database.DBQuery;
+import com.robertsoultanaev.sphinxproxy.database.MixNode;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -15,6 +21,36 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Read mix network configuration and save into database when first installed
+        String sharedPreferencesFile = getString(R.string.key_preference_file);
+        String setupDoneKey = getString(R.string.key_setup_done);
+        SharedPreferences sharedPreferences = getSharedPreferences(sharedPreferencesFile, Context.MODE_PRIVATE);
+        if (!sharedPreferences.getBoolean(setupDoneKey, false)) {
+            DB db = DB.getAppDatabase(getApplicationContext());
+            DBQuery dbQuery = db.getDao();
+
+            try {
+                String fileName = getString(R.string.mix_network_filename);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(getAssets().open(fileName)));
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] splitLine = line.split(",");
+                    int port = Integer.parseInt(splitLine[0]);
+                    String encodedPublicKey = splitLine[1];
+                    dbQuery.insertMixNode(new MixNode(port, encodedPublicKey));
+                }
+
+                reader.close();
+
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean(getString(R.string.key_setup_done), true);
+                editor.apply();
+            } catch (IOException ex) {
+                throw new RuntimeException("Failed to read the mix network configuration", ex);
+            }
+        }
 
         // Test Config key setting
         Context context = getApplicationContext();

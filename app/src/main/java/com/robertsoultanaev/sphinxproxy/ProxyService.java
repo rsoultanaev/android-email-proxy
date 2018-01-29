@@ -35,16 +35,16 @@ public class ProxyService extends Service {
             new Thread(new Runnable() {
                 public void run() {
                     Context context = getApplicationContext();
+                    DB db = DB.getAppDatabase(getApplicationContext());
+                    DBQuery dbQuery = db.getDao();
 
-                    SmtpMessageHandler smtpMessageHandler = new SmtpMessageHandler(context);
+                    SmtpMessageHandler smtpMessageHandler = new SmtpMessageHandler(dbQuery);
                     smtpServer = new SMTPServer(new SimpleMessageListenerAdapter(smtpMessageHandler));
                     smtpServer.setPort(smtpPort);
                     smtpServer.start();
 
                     String username = Config.getKey(R.string.key_proxy_username, context);
                     String password = Config.getKey(R.string.key_proxy_password, context);
-                    DB db = DB.getAppDatabase(getApplicationContext());
-                    DBQuery dbQuery = db.getDao();
                     pop3Server = new Pop3Server(pop3Port, username, password, dbQuery);
                     pop3Server.start();
                 }
