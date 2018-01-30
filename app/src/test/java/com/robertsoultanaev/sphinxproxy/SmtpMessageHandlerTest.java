@@ -65,22 +65,4 @@ public class SmtpMessageHandlerTest {
 
         assertThat(result, is(true));
     }
-
-    @Test
-    public void testTest() {
-        MixNode node1 = new MixNode(1, "123");
-        MixNode node2 = new MixNode(2, "456");
-
-        ArrayList<MixNode> nodeList = new ArrayList<MixNode>();
-        nodeList.add(node1);
-        nodeList.add(node2);
-
-        String s = "1 123\n2 456\n";
-
-        when(dbQuery.getMixNodes()).thenReturn(nodeList);
-        TestObject t = new TestObject(dbQuery);
-        String res = t.doThing();
-
-        assertThat(res, is(s));
-    }
 }
