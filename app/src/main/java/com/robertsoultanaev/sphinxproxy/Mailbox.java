@@ -16,6 +16,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static com.robertsoultanaev.sphinxproxy.SphinxUtil.parseMessageToPacket;
+
 public class Mailbox {
     private String mailServer;
     private int port;
@@ -131,34 +133,5 @@ public class Mailbox {
             e.printStackTrace();
             return null;
         }
-    }
-
-    private byte[] getMessageBody(BufferedReader reader) throws IOException {
-        String line = reader.readLine();
-        while(line != null) {
-            if (line.isEmpty()) {
-                break;
-            }
-            line = reader.readLine();
-        }
-
-        return IOUtils.toString(reader).getBytes();
-    }
-
-    private Packet parseMessageToPacket(BufferedReader reader) throws IOException {
-        byte[] encodedMessage = getMessageBody(reader);
-        byte[] message = Base64.decode(encodedMessage);
-
-        byte[] headerBytes = Arrays.copyOfRange(message, 0, SphinxUtil.PACKET_HEADER_SIZE);
-        ByteBuffer byteBuffer = ByteBuffer.wrap(headerBytes);
-        long uuidHigh = byteBuffer.getLong();
-        long uuidLow = byteBuffer.getLong();
-
-        int packetsInMessage = byteBuffer.getInt();
-        int sequenceNumber = byteBuffer.getInt();
-        String uuid = new UUID(uuidHigh, uuidLow).toString();
-        byte[] payload = Arrays.copyOfRange(message, 24, message.length);
-
-        return new Packet(uuid, packetsInMessage, sequenceNumber, payload);
     }
 }
