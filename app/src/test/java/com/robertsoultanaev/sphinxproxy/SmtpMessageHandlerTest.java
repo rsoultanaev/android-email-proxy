@@ -8,18 +8,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.robertsoultanaev.sphinxproxy.database.DBQuery;
-import com.robertsoultanaev.sphinxproxy.database.MixNode;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SmtpMessageHandlerTest {
-
-    @Mock
-    private DBQuery dbQuery;
 
     @Mock
     private SphinxUtil sphinxUtil;
