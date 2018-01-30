@@ -38,7 +38,9 @@ public class ProxyService extends Service {
                     DB db = DB.getAppDatabase(getApplicationContext());
                     DBQuery dbQuery = db.getDao();
 
-                    SmtpMessageHandler smtpMessageHandler = new SmtpMessageHandler(dbQuery);
+                    SphinxUtil sphinxUtil = new SphinxUtil(dbQuery);
+                    AsyncTcpClient asyncTcpClient = new AsyncTcpClient("localhost", 10000);
+                    SmtpMessageHandler smtpMessageHandler = new SmtpMessageHandler(sphinxUtil, asyncTcpClient);
                     smtpServer = new SMTPServer(new SimpleMessageListenerAdapter(smtpMessageHandler));
                     smtpServer.setPort(smtpPort);
                     smtpServer.start();
