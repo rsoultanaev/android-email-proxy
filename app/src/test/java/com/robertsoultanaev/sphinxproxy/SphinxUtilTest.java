@@ -1,35 +1,65 @@
 package com.robertsoultanaev.sphinxproxy;
 
+import com.robertsoultanaev.javasphinx.HeaderAndDelta;
+import com.robertsoultanaev.javasphinx.ProcessedPacket;
+import com.robertsoultanaev.javasphinx.SphinxClient;
+import com.robertsoultanaev.javasphinx.SphinxNode;
+import com.robertsoultanaev.javasphinx.SphinxParams;
+import com.robertsoultanaev.sphinxproxy.database.AssembledMessage;
 import com.robertsoultanaev.sphinxproxy.database.DBQuery;
 import com.robertsoultanaev.sphinxproxy.database.MixNode;
+import com.robertsoultanaev.sphinxproxy.database.Packet;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.CoreMatchers.*;
 import static org.mockito.Mockito.*;
+
+import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.util.encoders.Hex;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.msgpack.core.MessagePack;
+import org.msgpack.core.MessageUnpacker;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SphinxUtilTest {
+
+    class PkiEntry {
+        BigInteger priv;
+        ECPoint pub;
+
+        public PkiEntry(BigInteger priv, ECPoint pub) {
+            this.priv = priv;
+            this.pub = pub;
+        }
+    }
 
     @Mock
     private DBQuery dbQuery;
 
     @Test
-    public void splitIntoSphinxPacketsTest() throws Exception {
-        MixNode node1 = new MixNode(8000, "0221ad76d2fd0ec503ff72f55e5afb93605f8133c947b800bb2d386e5c");
-        MixNode node2 = new MixNode(8001, "037d9959a0ce756953cfad237efa3531a23f297e2b66901862deefdd58");
-        MixNode node3 = new MixNode(8002, "033e8682257991788cb911f54661f4f71ba769ae460f66a3c8f515447d");
+    public void splitProcessParseAndReassembleTest() throws Exception {
+        SphinxParams params = new SphinxParams();
+
+        int basePort = 8000;
+        HashMap<Integer, PkiEntry> pki = new HashMap<Integer, PkiEntry>();
         ArrayList<MixNode> nodeList = new ArrayList<MixNode>();
-        nodeList.add(node1);
-        nodeList.add(node2);
-        nodeList.add(node3);
+
+        for (int i = 0; i < 3; i++) {
+            BigInteger priv = params.getGroup().genSecret();
+            ECPoint pub = params.getGroup().expon(params.getGroup().getGenerator(), priv);
+
+            int port = basePort + i;
+            pki.put(port,  new PkiEntry(priv, pub));
+            nodeList.add(new MixNode(port, Hex.toHexString(pub.getEncoded(true))));
+        }
 
         when(dbQuery.getMixNodes()).thenReturn(nodeList);
 
@@ -39,16 +69,60 @@ public class SphinxUtilTest {
         while (sb.length() < 1500) {
             sb.append("0123456789");
         }
-        byte[] email = sb.toString().getBytes();
+        String emailStr = sb.toString();
+        byte[] email = emailStr.getBytes();
         String recipient = "mort@rsoultanaev.com";
 
-        sphinxUtil.splitIntoSphinxPackets(email, recipient);
+        byte[][] sphinxPackets = sphinxUtil.splitIntoSphinxPackets(email, recipient);
 
-        assertThat(true, is(false));
-    }
+        byte[][] processedMessages = new byte[sphinxPackets.length][];
 
-    @Test
-    public void assemblePacketsTest() throws Exception {
-        assertThat(true, is(false));
+        // Process each sphinx packet by a sequence of mixes
+        for (int i = 0; i < sphinxPackets.length; i++) {
+            byte[] binMessage = sphinxPackets[i];
+            HeaderAndDelta headerAndDelta = SphinxClient.unpackMessage(binMessage).headerAndDelta;
+
+            BigInteger currentPrivKey = pki.get(8000).priv;
+
+            MessageUnpacker unpacker;
+
+            while (true) {
+                ProcessedPacket ret = SphinxNode.sphinxProcess(params, currentPrivKey, headerAndDelta);
+                headerAndDelta = ret.headerAndDelta;
+
+                byte[] encodedRouting = ret.routing;
+
+                unpacker = MessagePack.newDefaultUnpacker(encodedRouting);
+                unpacker.unpackArrayHeader();
+                String flag = unpacker.unpackString();
+
+                if (flag.equals(SphinxClient.RELAY_FLAG)) {
+                    int addr = unpacker.unpackInt();
+                    currentPrivKey = pki.get(addr).priv;
+
+                    unpacker.close();
+                } else if (flag.equals(SphinxClient.DEST_FLAG)) {
+                    unpacker.close();
+
+                    byte[] zeroes = new byte[params.getKeyLength()];
+                    java.util.Arrays.fill(zeroes, (byte) 0x00);
+
+                    byte[] processedMessage = SphinxClient.receiveForward(params, ret.headerAndDelta.delta).message;
+                    processedMessages[i] = processedMessage;
+
+                    break;
+                }
+            }
+        }
+
+        List<Packet> packetList = new ArrayList<Packet>();
+        for (byte[] processedMessage : processedMessages) {
+            packetList.add(SphinxUtil.parseMessageToPacket(processedMessage));
+        }
+
+        AssembledMessage assembledMessage = SphinxUtil.assemblePackets(packetList);
+        String assembledMessageStr = new String(assembledMessage.messageBody);
+
+        assertThat(emailStr, is(equalTo(assembledMessageStr)));
     }
 }
