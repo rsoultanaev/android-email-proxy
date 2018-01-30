@@ -1,7 +1,5 @@
 package com.robertsoultanaev.sphinxproxy;
 
-import com.robertsoultanaev.sphinxproxy.database.DBQuery;
-
 import org.subethamail.smtp.helper.SimpleMessageListener;
 
 import java.io.BufferedInputStream;
@@ -10,10 +8,12 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class SmtpMessageHandler implements SimpleMessageListener {
-    private DBQuery dbQuery;
+    private SphinxUtil sphinxUtil;
+    private AsyncTcpClient asyncTcpClient;
 
-    public SmtpMessageHandler(DBQuery dbQuery) {
-        this.dbQuery = dbQuery;
+    public SmtpMessageHandler(SphinxUtil sphinxUtil, AsyncTcpClient asyncTcpClient) {
+        this.sphinxUtil = sphinxUtil;
+        this.asyncTcpClient = asyncTcpClient;
     }
 
     public boolean accept(String from, String recipient) {
@@ -41,10 +41,7 @@ public class SmtpMessageHandler implements SimpleMessageListener {
         System.out.println("[SMTP] email length: " + email.length);
         System.out.println("-------------------------");
 
-        SphinxUtil sphinxUtil = new SphinxUtil(dbQuery);
         byte[][] sphinxPackets = sphinxUtil.splitIntoSphinxPackets(email, recipient);
-
-        AsyncTcpClient asyncTcpClient = new AsyncTcpClient("localhost", 10000);
 
         for (byte[] binMessage : sphinxPackets) {
             asyncTcpClient.sendMessage(binMessage);
