@@ -21,10 +21,9 @@ import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -158,5 +157,21 @@ public class SphinxUtil {
         }
 
         return result;
+    }
+
+    public static Packet parseMessageToPacket(byte[] encodedMessage) throws IOException {
+        byte[] message = Base64.decode(encodedMessage);
+
+        byte[] headerBytes = Arrays.copyOfRange(message, 0, SphinxUtil.PACKET_HEADER_SIZE);
+        ByteBuffer byteBuffer = ByteBuffer.wrap(headerBytes);
+        long uuidHigh = byteBuffer.getLong();
+        long uuidLow = byteBuffer.getLong();
+
+        int packetsInMessage = byteBuffer.getInt();
+        int sequenceNumber = byteBuffer.getInt();
+        String uuid = new UUID(uuidHigh, uuidLow).toString();
+        byte[] payload = Arrays.copyOfRange(message, 24, message.length);
+
+        return new Packet(uuid, packetsInMessage, sequenceNumber, payload);
     }
 }
