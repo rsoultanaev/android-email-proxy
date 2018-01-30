@@ -17,14 +17,11 @@ import com.robertsoultanaev.sphinxproxy.database.DBQuery;
 import com.robertsoultanaev.sphinxproxy.database.MixNode;
 import com.robertsoultanaev.sphinxproxy.database.Packet;
 
-import org.apache.commons.io.IOUtils;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -162,20 +159,7 @@ public class SphinxUtil {
         return result;
     }
 
-    private static byte[] getMessageBody(BufferedReader reader) throws IOException {
-        String line = reader.readLine();
-        while(line != null) {
-            if (line.isEmpty()) {
-                break;
-            }
-            line = reader.readLine();
-        }
-
-        return IOUtils.toString(reader).getBytes();
-    }
-
-    public static Packet parseMessageToPacket(BufferedReader reader) throws IOException {
-        byte[] encodedMessage = getMessageBody(reader);
+    public static Packet parseMessageToPacket(byte[] encodedMessage) throws IOException {
         byte[] message = Base64.decode(encodedMessage);
 
         byte[] headerBytes = Arrays.copyOfRange(message, 0, SphinxUtil.PACKET_HEADER_SIZE);

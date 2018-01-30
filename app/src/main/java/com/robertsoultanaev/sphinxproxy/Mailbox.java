@@ -110,7 +110,8 @@ public class Mailbox {
                 BufferedReader reader = (BufferedReader) pop3Client.retrieveMessage(messages[i].number);
 
                 try {
-                    pulledMessages[i] = parseMessageToPacket(reader);
+                    byte[] encodedMessage = getMessageBody(reader);
+                    pulledMessages[i] = parseMessageToPacket(encodedMessage);
                 } catch (Exception e) {
                     e.printStackTrace();
                     return null;
@@ -133,5 +134,17 @@ public class Mailbox {
             e.printStackTrace();
             return null;
         }
+    }
+
+    private byte[] getMessageBody(BufferedReader reader) throws IOException {
+        String line = reader.readLine();
+        while(line != null) {
+            if (line.isEmpty()) {
+                break;
+            }
+            line = reader.readLine();
+        }
+
+        return IOUtils.toString(reader).getBytes();
     }
 }
