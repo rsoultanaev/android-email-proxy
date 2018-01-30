@@ -15,23 +15,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-/*
-        SMTPServer smtpServer = new SMTPServer(new SimpleMessageListenerAdapter(smtpMessageHandler));
-
-        smtpServer.setPort(smtpPort);
-        smtpServer.start();
-
-        SmartClient client = new SmartClient("localhost", smtpPort,"localhost");
-        client.from("robert@sphinx.com");
-        client.to(dest);
-        client.dataStart();
-        client.dataWrite(email, email.length);
-        client.dataEnd();
-        client.quit();
-
-        smtpServer.stop();
-*/
-
 @RunWith(MockitoJUnitRunner.class)
 public class SmtpMessageHandlerTest {
 
