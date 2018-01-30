@@ -12,8 +12,6 @@ import org.subethamail.smtp.client.SmartClient;
 import org.subethamail.smtp.helper.SimpleMessageListenerAdapter;
 import org.subethamail.smtp.server.SMTPServer;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
 
 @RunWith(MockitoJUnitRunner.class)
