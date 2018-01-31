@@ -51,6 +51,7 @@ public class Pop3Server {
         this.password = password;
         this.numberToMsg = new TreeMap<>();
         this.markedForDeletion = new HashSet<>();
+        this.sessionState = State.AUTHORIZATION;
     }
 
     public void start() {
@@ -95,6 +96,8 @@ public class Pop3Server {
                                 + port + " or listening for a connection");
                         System.out.println(e.getMessage());
                     }
+
+                    update();
 
                     try {
                         in.close();
@@ -373,6 +376,10 @@ public class Pop3Server {
     }
 
     private String handleUser(String[] args) {
+        if (sessionState != State.AUTHORIZATION) {
+            return "-ERR command only allowed in AUTHORIZATION state";
+        }
+
         if (args.length < 2) {
             return "-ERR command expects more arguments";
         }
@@ -383,6 +390,10 @@ public class Pop3Server {
     }
 
     private String handlePass(String[] args) {
+        if (sessionState != State.AUTHORIZATION) {
+            return "-ERR command only allowed in AUTHORIZATION state";
+        }
+
         if (args.length < 2) {
             return "-ERR command expects more arguments";
         }

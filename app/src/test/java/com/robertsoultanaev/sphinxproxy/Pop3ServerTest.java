@@ -53,7 +53,9 @@ public class Pop3ServerTest {
         pop3Client.connect(host, pop3Port);
 
         // USER & PASS
-        pop3Client.login(username, password);
+        boolean loginSuccessful = pop3Client.login(username, password);
+
+        assertThat(loginSuccessful, is(equalTo(true)));
 
         // STAT
         POP3MessageInfo status = pop3Client.status();
@@ -150,7 +152,9 @@ public class Pop3ServerTest {
         pop3Client.connect(host, pop3Port);
 
         // USER & PASS
-        pop3Client.login(username, password);
+        boolean loginSuccessful = pop3Client.login(username, password);
+
+        assertThat(loginSuccessful, is(equalTo(true)));
 
         // STAT
         POP3MessageInfo status = pop3Client.status();
@@ -219,20 +223,28 @@ public class Pop3ServerTest {
         Thread.sleep(1000);
 
         POP3Client pop3Client = new POP3Client();
+        boolean loginSuccessful = false;
+        POP3MessageInfo msgInfo = null;
 
         pop3Client.connect(host, pop3Port);
-        pop3Client.login(username, password);
-        pop3Client.status();
+        loginSuccessful = pop3Client.login(username, password);
+        assertThat(loginSuccessful, is(equalTo(true)));
+        msgInfo = pop3Client.status();
+        assertThat(msgInfo, is(notNullValue()));
         pop3Client.logout();
 
         pop3Client.connect(host, pop3Port);
-        pop3Client.login(username, password);
-        pop3Client.status();
+        loginSuccessful = pop3Client.login(username, password);
+        assertThat(loginSuccessful, is(equalTo(true)));
+        msgInfo = pop3Client.status();
+        assertThat(msgInfo, is(notNullValue()));
         pop3Client.logout();
 
         pop3Client.connect(host, pop3Port);
-        pop3Client.login(username, password);
-        pop3Client.status();
+        loginSuccessful = pop3Client.login(username, password);
+        assertThat(loginSuccessful, is(equalTo(true)));
+        msgInfo = pop3Client.status();
+        assertThat(msgInfo, is(notNullValue()));
         pop3Client.logout();
 
         pop3Server.stop();
