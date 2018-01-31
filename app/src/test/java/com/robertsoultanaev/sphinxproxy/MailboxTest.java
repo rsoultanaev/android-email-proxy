@@ -83,6 +83,15 @@ public class MailboxTest {
         msgInfos[0] = msg1Info;
         msgInfos[1] = msg2Info;
 
+        List<String> readyPacketIds = new ArrayList<String>();
+        readyPacketIds.add(msgId.toString());
+
+        List<Packet> orderedPackets = new ArrayList<Packet>();
+        Packet p1 = new Packet(msgId.toString(), 0, 2, packet1Str.getBytes());
+        Packet p2 = new Packet(msgId.toString(), 1, 2, packet2Str.getBytes());
+        orderedPackets.add(p1);
+        orderedPackets.add(p2);
+
         doNothing().when(pop3Client).connect(pop3Server, port);
         when(pop3Client.login(username, password)).thenReturn(true);
         when(pop3Client.status()).thenReturn(status);
@@ -93,15 +102,6 @@ public class MailboxTest {
         when(pop3Client.deleteMessage(2)).thenReturn(true);
         when(pop3Client.logout()).thenReturn(true);
         doNothing().when(pop3Client).disconnect();
-
-        List<String> readyPacketIds = new ArrayList<String>();
-        readyPacketIds.add(msgId.toString());
-
-        List<Packet> orderedPackets = new ArrayList<Packet>();
-        Packet p1 = new Packet(msgId.toString(), 0, 2, packet1Str.getBytes());
-        Packet p2 = new Packet(msgId.toString(), 1, 2, packet2Str.getBytes());
-        orderedPackets.add(p1);
-        orderedPackets.add(p2);
 
         doNothing().when(dbQuery).addPacket(any(Packet.class));
         when(dbQuery.getReadyPacketIds()).thenReturn(readyPacketIds);
