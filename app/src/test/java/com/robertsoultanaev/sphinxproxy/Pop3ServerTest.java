@@ -18,10 +18,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -124,6 +120,26 @@ public class Pop3ServerTest {
         }
 
 
+        pop3Client.logout();
+    }
+
+    @Test
+    public void multipleSessionsTest() throws Exception {
+        POP3Client pop3Client = new POP3Client();
+
+        pop3Client.connect(host, pop3Port);
+        pop3Client.login(username, password);
+        pop3Client.status();
+        pop3Client.logout();
+
+        pop3Client.connect(host, pop3Port);
+        pop3Client.login(username, password);
+        pop3Client.status();
+        pop3Client.logout();
+
+        pop3Client.connect(host, pop3Port);
+        pop3Client.login(username, password);
+        pop3Client.status();
         pop3Client.logout();
     }
 }
