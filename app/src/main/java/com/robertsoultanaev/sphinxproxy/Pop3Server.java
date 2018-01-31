@@ -41,7 +41,10 @@ public class Pop3Server {
     private PrintWriter out;
     private BufferedReader in;
 
+    private boolean shuttingDown;
+
     public Pop3Server(int port, String username, String password, DBQuery dbQuery) {
+        this.shuttingDown = false;
         this.port = port;
         this.dbQuery = dbQuery;
         this.username = username;
@@ -55,42 +58,59 @@ public class Pop3Server {
             public void run() {
                 try {
                     serverSocket = new ServerSocket(port);
-                    clientSocket = serverSocket.accept();
-                    out = new PrintWriter(clientSocket.getOutputStream(), true);
-                    in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                } catch (IOException ex) {
+                    throw new RuntimeException("Failed to create socket", ex);
+                }
 
-                    String inputLine, outputLine;
+                while (!shuttingDown) {
+                    try {
+                        clientSocket = serverSocket.accept();
+                        out = new PrintWriter(clientSocket.getOutputStream(), true);
+                        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-                    numberToMsg.clear();
-                    markedForDeletion.clear();
+                        String inputLine, output;
 
-                    List<AssembledMessage> assembledMessages = dbQuery.getAssembledMessages();
-                    for (int i = 1; i <= assembledMessages.size(); i++) {
-                        numberToMsg.put(i, assembledMessages.get(i - 1));
+                        numberToMsg.clear();
+                        markedForDeletion.clear();
+
+                        List<AssembledMessage> assembledMessages = dbQuery.getAssembledMessages();
+                        for (int i = 1; i <= assembledMessages.size(); i++) {
+                            numberToMsg.put(i, assembledMessages.get(i - 1));
+                        }
+
+                        output = "+OK Hello there" + "\r";
+                        out.println(output);
+
+                        while ((inputLine = in.readLine()) != null) {
+                            String[] args = inputLine.split("[\\r\\n ]");
+                            String command = args[0].toUpperCase();
+
+                            output = handleCommand(command, args);
+                            out.println(output);
+                            if (command.equals("QUIT"))
+                                break;
+                        }
+                    } catch (IOException e) {
+                        System.out.println("Exception caught when trying to listen on port "
+                                + port + " or listening for a connection");
+                        System.out.println(e.getMessage());
                     }
 
-                    outputLine = "+OK Hello there" + "\r";
-                    out.println(outputLine);
-
-                    while ((inputLine = in.readLine()) != null) {
-                        String[] args = inputLine.split("[\\r\\n ]");
-                        String command = args[0].toUpperCase();
-
-                        outputLine = handleCommand(command, args);
-                        out.println(outputLine);
-                        if (command.equals("QUIT"))
-                            break;
+                    try {
+                        in.close();
+                        out.close();
+                        clientSocket.close();
+                    } catch (IOException ex) {
+                        throw new RuntimeException("Failed to close the connection", ex);
                     }
-                } catch (IOException e) {
-                    System.out.println("Exception caught when trying to listen on port "
-                            + port + " or listening for a connection");
-                    System.out.println(e.getMessage());
                 }
             }
         }).start();
     }
 
     public void stop() {
+        this.shuttingDown = true;
+
         try {
             in.close();
             out.close();
