@@ -41,7 +41,6 @@ public class Pop3ServerTest {
         String password = "12345";
         String host = "localhost";
 
-        doNothing().when(dbQuery).deleteAssembledMessage(anyString());
         when(dbQuery.getAssembledMessages()).thenReturn(msgList);
 
         Pop3Server pop3Server = new Pop3Server(pop3Port, username, password, dbQuery);
@@ -108,7 +107,6 @@ public class Pop3ServerTest {
         pop3Server.stop();
     }
 
-
     @Test
     public void topSessionTest() throws Exception {
         int topLines = 10;
@@ -140,7 +138,6 @@ public class Pop3ServerTest {
         String password = "12345";
         String host = "localhost";
 
-        doNothing().when(dbQuery).deleteAssembledMessage(anyString());
         when(dbQuery.getAssembledMessages()).thenReturn(msgList);
 
         Pop3Server pop3Server = new Pop3Server(pop3Port, username, password, dbQuery);
@@ -204,6 +201,84 @@ public class Pop3ServerTest {
 
         pop3Client.logout();
         pop3Server.stop();
+    }
+
+    @Test
+    public void deleSessionTest() throws Exception {
+        String msg1Body = "hello" + Pop3Server.CRLF;
+        String msg2Body = "bye" + Pop3Server.CRLF;
+        AssembledMessage msg1 = new AssembledMessage("1", msg1Body.getBytes());
+        AssembledMessage msg2 = new AssembledMessage("2", msg2Body.getBytes());
+
+        List<AssembledMessage> msgList = new ArrayList<AssembledMessage>();
+        msgList.add(msg1);
+        msgList.add(msg2);
+
+        int pop3Port = 27000;
+        String username = "proxyuser";
+        String password = "12345";
+        String host = "localhost";
+
+        doNothing().when(dbQuery).deleteAssembledMessage(msg1.uuid);
+        doNothing().when(dbQuery).deleteAssembledMessage(msg2.uuid);
+        when(dbQuery.getAssembledMessages()).thenReturn(msgList);
+
+        Pop3Server pop3Server = new Pop3Server(pop3Port, username, password, dbQuery);
+        pop3Server.start();
+        Thread.sleep(1000);
+
+        POP3Client pop3Client = new POP3Client();
+
+        pop3Client.connect(host, pop3Port);
+
+        // USER & PASS
+        boolean loginSuccessful = pop3Client.login(username, password);
+
+        assertThat(loginSuccessful, is(equalTo(true)));
+
+        // STAT
+        POP3MessageInfo status = pop3Client.status();
+
+        int expectedNumber = msgList.size();
+        int expectedSize = 0;
+        for (AssembledMessage msg : msgList) {
+            expectedSize += msg.messageBody.length;
+        }
+
+        assertThat(status.number, is(equalTo(expectedNumber)));
+        assertThat(status.size, is(equalTo(expectedSize)));
+
+        // LIST
+        POP3MessageInfo[] msgInfo = pop3Client.listMessages();
+
+        expectedNumber = msgList.size();
+
+        assertThat(msgInfo.length, is(equalTo(expectedNumber)));
+        for (int i = 0; i < msgInfo.length; i++) {
+            assertThat(msgInfo[i].number, is(equalTo(i + 1)));
+            assertThat(msgInfo[i].size, is(equalTo(msgList.get(i).messageBody.length)));
+        }
+
+        // UIDL
+        msgInfo = pop3Client.listUniqueIdentifiers();
+
+        expectedNumber = msgList.size();
+
+        assertThat(msgInfo.length, is(equalTo(expectedNumber)));
+        for (int i = 0; i < msgInfo.length; i++) {
+            assertThat(msgInfo[i].number, is(equalTo(i + 1)));
+            assertThat(msgInfo[i].identifier, is(equalTo(msgList.get(i).uuid)));
+        }
+
+        for (int i = 1; i <= msgList.size(); i++) {
+            pop3Client.deleteMessage(i);
+        }
+
+        pop3Client.logout();
+        pop3Server.stop();
+
+        verify(dbQuery, times(1)).deleteAssembledMessage(msg1.uuid);
+        verify(dbQuery, times(1)).deleteAssembledMessage(msg2.uuid);
     }
 
     @Test
