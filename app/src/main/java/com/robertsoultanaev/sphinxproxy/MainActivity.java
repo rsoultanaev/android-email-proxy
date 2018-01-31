@@ -11,6 +11,8 @@ import com.robertsoultanaev.sphinxproxy.database.DB;
 import com.robertsoultanaev.sphinxproxy.database.DBQuery;
 import com.robertsoultanaev.sphinxproxy.database.MixNode;
 
+import org.apache.commons.net.pop3.POP3Client;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -95,7 +97,9 @@ public class MainActivity extends AppCompatActivity {
 
                 DB db = DB.getAppDatabase(getApplicationContext());
                 DBQuery dbQuery = db.getDao();
-                Mailbox mailbox = new Mailbox(server, port, username, password, dbQuery);
+                POP3Client pop3Client = new POP3Client();
+                pop3Client.setDefaultTimeout(60000);
+                Mailbox mailbox = new Mailbox(server, port, username, password, dbQuery, pop3Client);
                 mailbox.updateMailbox();
             }
         }).start();

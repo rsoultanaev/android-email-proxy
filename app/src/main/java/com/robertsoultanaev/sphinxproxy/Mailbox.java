@@ -7,14 +7,10 @@ import com.robertsoultanaev.sphinxproxy.database.Packet;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.net.pop3.POP3Client;
 import org.apache.commons.net.pop3.POP3MessageInfo;
-import org.bouncycastle.util.encoders.Base64;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 import static com.robertsoultanaev.sphinxproxy.SphinxUtil.parseMessageToPacket;
 
@@ -26,15 +22,13 @@ public class Mailbox {
     private POP3Client pop3Client;
     private DBQuery dbQuery;
 
-    public Mailbox(String mailServer, int port, String username, String password, DBQuery dbQuery) {
+    public Mailbox(String mailServer, int port, String username, String password, DBQuery dbQuery, POP3Client pop3Client) {
         this.mailServer = mailServer;
         this.port = port;
         this.username = username;
         this.password = password;
         this.dbQuery = dbQuery;
-
-        pop3Client = new POP3Client();
-        pop3Client.setDefaultTimeout(60000);
+        this.pop3Client = pop3Client;
     }
 
     public void updateMailbox() {
