@@ -26,7 +26,7 @@ public class Pop3ServerTest {
     private DBQuery dbQuery;
 
     @Test
-    public void normalSessionTest() throws Exception {
+    public void retrSessionTest() throws Exception {
         String msg1Body = "hello" + Pop3Server.CRLF;
         String msg2Body = "bye" + Pop3Server.CRLF;
         AssembledMessage msg1 = new AssembledMessage("1", msg1Body.getBytes());
@@ -100,6 +100,102 @@ public class Pop3ServerTest {
         for (int i = 0; i < retrievedMessages.size(); i++) {
             String expectedMsg = new String(msgList.get(i).messageBody);
             assertThat(retrievedMessages.get(i), is(equalTo(expectedMsg)));
+        }
+
+        pop3Client.logout();
+        pop3Server.stop();
+    }
+
+
+    @Test
+    public void topSessionTest() throws Exception {
+        int topLines = 10;
+
+        StringBuilder fullMessage = new StringBuilder();
+        StringBuilder expectedTopMessageSb = new StringBuilder();
+        for (int i = 0; i < 10; i++) {
+            String line = "header" + Pop3Server.CRLF;
+            fullMessage.append(line);
+            expectedTopMessageSb.append(line);
+        }
+        fullMessage.append(Pop3Server.CRLF);
+        expectedTopMessageSb.append(Pop3Server.CRLF);
+        for (int i = 0; i < 20; i++) {
+            String line = "body" + Pop3Server.CRLF;
+            fullMessage.append(line);
+            if (i < topLines) {
+                expectedTopMessageSb.append(line);
+            }
+        }
+
+        String expectedTopMessage = expectedTopMessageSb.toString();
+
+        List<AssembledMessage> msgList = new ArrayList<AssembledMessage>();
+        msgList.add(new AssembledMessage("1", fullMessage.toString().getBytes()));
+
+        int pop3Port = 27000;
+        String username = "proxyuser";
+        String password = "12345";
+        String host = "localhost";
+
+        doNothing().when(dbQuery).deleteAssembledMessage(anyString());
+        when(dbQuery.getAssembledMessages()).thenReturn(msgList);
+
+        Pop3Server pop3Server = new Pop3Server(pop3Port, username, password, dbQuery);
+        pop3Server.start();
+        Thread.sleep(1000);
+
+        POP3Client pop3Client = new POP3Client();
+
+        pop3Client.connect(host, pop3Port);
+
+        // USER & PASS
+        pop3Client.login(username, password);
+
+        // STAT
+        POP3MessageInfo status = pop3Client.status();
+
+        int expectedNumber = msgList.size();
+        int expectedSize = 0;
+        for (AssembledMessage msg : msgList) {
+            expectedSize += msg.messageBody.length;
+        }
+
+        assertThat(status.number, is(equalTo(expectedNumber)));
+        assertThat(status.size, is(equalTo(expectedSize)));
+
+        // LIST
+        POP3MessageInfo[] msgInfo = pop3Client.listMessages();
+
+        expectedNumber = msgList.size();
+
+        assertThat(msgInfo.length, is(equalTo(expectedNumber)));
+        for (int i = 0; i < msgInfo.length; i++) {
+            assertThat(msgInfo[i].number, is(equalTo(i + 1)));
+            assertThat(msgInfo[i].size, is(equalTo(msgList.get(i).messageBody.length)));
+        }
+
+        // UIDL
+        msgInfo = pop3Client.listUniqueIdentifiers();
+
+        expectedNumber = msgList.size();
+
+        assertThat(msgInfo.length, is(equalTo(expectedNumber)));
+        for (int i = 0; i < msgInfo.length; i++) {
+            assertThat(msgInfo[i].number, is(equalTo(i + 1)));
+            assertThat(msgInfo[i].identifier, is(equalTo(msgList.get(i).uuid)));
+        }
+
+        // TOP
+        List<String> retrievedMessages = new ArrayList<String>();
+        for (int i = 1; i <= msgList.size(); i++) {
+            BufferedReader reader = (BufferedReader) pop3Client.retrieveMessageTop(i, topLines);
+            retrievedMessages.add(IOUtils.toString(reader));
+        }
+
+        assertThat(retrievedMessages.size(), is(equalTo(msgList.size())));
+        for (int i = 0; i < retrievedMessages.size(); i++) {
+            assertThat(retrievedMessages.get(i), is(equalTo(expectedTopMessage)));
         }
 
         pop3Client.logout();
