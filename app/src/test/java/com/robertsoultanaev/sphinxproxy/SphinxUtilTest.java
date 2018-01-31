@@ -124,5 +124,6 @@ public class SphinxUtilTest {
         String assembledMessageStr = new String(assembledMessage.messageBody);
 
         assertThat(emailStr, is(equalTo(assembledMessageStr)));
+        verifyNoMoreInteractions(ignoreStubs(dbQuery));
     }
 }

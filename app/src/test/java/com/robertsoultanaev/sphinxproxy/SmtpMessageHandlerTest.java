@@ -47,6 +47,8 @@ public class SmtpMessageHandlerTest {
         verify(sphinxUtil, times(1)).splitIntoSphinxPackets(email, recipient);
         verify(asyncTcpClient, times(1)).sendMessage(packet1);
         verify(asyncTcpClient, times(1)).sendMessage(packet2);
+        verifyNoMoreInteractions(ignoreStubs(sphinxUtil));
+        verifyNoMoreInteractions(ignoreStubs(asyncTcpClient));
     }
 
     @Test
@@ -57,5 +59,7 @@ public class SmtpMessageHandlerTest {
         boolean result = smtpMessageHandler.accept(from, recipient);
 
         assertThat(result, is(true));
+        verifyNoMoreInteractions(ignoreStubs(sphinxUtil));
+        verifyNoMoreInteractions(ignoreStubs(asyncTcpClient));
     }
 }

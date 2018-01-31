@@ -105,6 +105,8 @@ public class Pop3ServerTest {
 
         pop3Client.logout();
         pop3Server.stop();
+
+        verifyNoMoreInteractions(ignoreStubs(dbQuery));
     }
 
     @Test
@@ -201,6 +203,8 @@ public class Pop3ServerTest {
 
         pop3Client.logout();
         pop3Server.stop();
+
+        verifyNoMoreInteractions(ignoreStubs(dbQuery));
     }
 
     @Test
@@ -280,6 +284,7 @@ public class Pop3ServerTest {
 
         verify(dbQuery, times(1)).deleteAssembledMessage(msg1.uuid);
         verify(dbQuery, times(1)).deleteAssembledMessage(msg2.uuid);
+        verifyNoMoreInteractions(ignoreStubs(dbQuery));
     }
 
     @Test
@@ -361,6 +366,7 @@ public class Pop3ServerTest {
         pop3Server.stop();
 
         verify(dbQuery, never()).deleteAssembledMessage(anyString());
+        verifyNoMoreInteractions(ignoreStubs(dbQuery));
     }
 
     @Test
@@ -405,5 +411,7 @@ public class Pop3ServerTest {
         pop3Client.logout();
 
         pop3Server.stop();
+
+        verifyNoMoreInteractions(ignoreStubs(dbQuery));
     }
 }
