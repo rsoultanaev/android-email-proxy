@@ -18,7 +18,7 @@ import java.util.TreeMap;
 
 public class Pop3Server {
 
-    private static final String CRLF = "\r\n";
+    public static final String CRLF = "\r\n";
 
     private enum State {
         AUTHORIZATION,
@@ -100,16 +100,6 @@ public class Pop3Server {
             throw new RuntimeException("Failed to stop the server", ex);
         }
     }
-
-//    private void sendResponse(final AsyncSocket socket, final String response) {
-//        Util.writeAll(socket, response.getBytes(), new CompletedCallback() {
-//            @Override
-//            public void onCompleted(Exception ex) {
-//                if (ex != null) throw new RuntimeException(ex);
-//                System.out.println("[Server] Successfully wrote message: " + response + "\n");
-//            }
-//        });
-//    }
 
     private void update() {
         sessionState = State.AUTHORIZATION;
