@@ -43,10 +43,9 @@ public class MailboxTest {
         String username = "fred";
         String password = "1234";
 
+        UUID msgId = UUID.randomUUID();
         String packet1Str = "header1\r\n" + "header2\r\n" + "\r\n" + "body1\r\n" + "body1\r\n";
         String packet2Str = "body3\r\n" + "body4\r\n";
-
-        UUID msgId = UUID.randomUUID();
 
         ByteBuffer packet1HeaderBf = ByteBuffer.allocate(SphinxUtil.PACKET_HEADER_SIZE);
         packet1HeaderBf.putLong(msgId.getMostSignificantBits());
@@ -87,10 +86,8 @@ public class MailboxTest {
         readyPacketIds.add(msgId.toString());
 
         List<Packet> orderedPackets = new ArrayList<Packet>();
-        Packet p1 = new Packet(msgId.toString(), 0, 2, packet1Str.getBytes());
-        Packet p2 = new Packet(msgId.toString(), 1, 2, packet2Str.getBytes());
-        orderedPackets.add(p1);
-        orderedPackets.add(p2);
+        orderedPackets.add(new Packet(msgId.toString(), 0, 2, packet1Str.getBytes()));
+        orderedPackets.add(new Packet(msgId.toString(), 1, 2, packet2Str.getBytes()));
 
         doNothing().when(pop3Client).connect(pop3Server, port);
         when(pop3Client.login(username, password)).thenReturn(true);
