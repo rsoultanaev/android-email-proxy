@@ -17,6 +17,10 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,6 +61,8 @@ public class Pop3ServerTest {
         Pop3Server pop3Server = new Pop3Server(pop3Port, username, password, dbQuery);
         pop3Server.start();
 
+        Thread.sleep(1000);
+
         POP3Client pop3Client = new POP3Client();
 
         pop3Client.connect(host, pop3Port);
@@ -64,8 +70,7 @@ public class Pop3ServerTest {
 
 
         POP3MessageInfo status = pop3Client.status();
-
-        pop3Server.stop();
+        pop3Client.logout();
 
         int expectedNumber = msgList.size();
         int expectedSize = 0;
@@ -75,6 +80,8 @@ public class Pop3ServerTest {
 
         assertThat(status.number, is(equalTo(expectedNumber)));
         assertThat(status.size, is(equalTo(expectedSize)));
+
+        pop3Server.stop();
     }
 
     @Test
