@@ -41,7 +41,7 @@ public class Pop3Server {
     private PrintWriter out;
     private BufferedReader in;
 
-    private boolean shuttingDown;
+    private volatile boolean shuttingDown;
 
     public Pop3Server(int port, String username, String password, DBQuery dbQuery) {
         this.shuttingDown = false;
