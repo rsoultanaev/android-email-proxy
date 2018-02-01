@@ -1,7 +1,11 @@
 package com.robertsoultanaev.sphinxproxy;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.msgpack.core.MessageBufferPacker;
+import org.msgpack.core.MessagePack;
+import org.msgpack.core.MessageUnpacker;
 
+import java.io.IOException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
@@ -28,17 +32,19 @@ public class EndToEndCrypto {
     private final static String ASYMMETRIC_ALGORITHM_NAME = "RSA";
     private final static String ASYMMETRIC_TRANSFORMATION = "RSA/ECB/OAEPWITHSHA-512ANDMGF1PADDING";
 
-    public static HybridEncryptionResult hybridEncrypt(PublicKey recipientPublicKey, byte[] plaintext) {
+    public static byte[] hybridEncrypt(PublicKey recipientPublicKey, byte[] plaintext) {
         SecretKey symmetricKey = generateSymmetricKey();
         byte[] encodedSymmetricKey = symmetricKey.getEncoded();
 
         GcmEncryptionResult encryptedPlainTextWithIv = symmetricEncrypt(symmetricKey, plaintext);
         byte[] encryptedSymmetricKey = asymmetricEncrypt(recipientPublicKey, encodedSymmetricKey);
+        HybridEncryptionResult hybridEncryptionResult = new HybridEncryptionResult(encryptedPlainTextWithIv, encryptedSymmetricKey);
 
-        return new HybridEncryptionResult(encryptedPlainTextWithIv, encryptedSymmetricKey);
+        return packHybridEncryptionResult(hybridEncryptionResult);
     }
 
-    public static byte[] hybridDecrypt(PrivateKey privateKey, HybridEncryptionResult hybridEncryptionResult) {
+    public static byte[] hybridDecrypt(PrivateKey privateKey, byte[] packedHybridEncryptionResult) {
+        HybridEncryptionResult hybridEncryptionResult = unpackHybridEncryptionResult(packedHybridEncryptionResult);
         byte[] encodedSymmetricKey = asymmetricDecrypt(privateKey, hybridEncryptionResult.encryptedSymmetricKey);
         SecretKey symmetricKey = new SecretKeySpec(encodedSymmetricKey, 0, encodedSymmetricKey.length, SYMMETRIC_ALGORITHM_NAME);
 
@@ -58,6 +64,51 @@ public class EndToEndCrypto {
         }
 
         return keypair;
+    }
+
+    private static byte[] packHybridEncryptionResult(HybridEncryptionResult hybridEncryptionResult) {
+        byte[] encryptedSymmetricKey = hybridEncryptionResult.encryptedSymmetricKey;
+        byte[] iv = hybridEncryptionResult.gcmEncryptionResult.iv;
+        byte[] cipherText = hybridEncryptionResult.gcmEncryptionResult.cipherText;
+
+        MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
+        try {
+            packer
+                    .packArrayHeader(3)
+                    .packBinaryHeader(encryptedSymmetricKey.length)
+                    .writePayload(encryptedSymmetricKey)
+                    .packBinaryHeader(iv.length)
+                    .writePayload(iv)
+                    .packBinaryHeader(cipherText.length)
+                    .writePayload(cipherText);
+            packer.close();
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to pack the encryption result", ex);
+        }
+
+        return packer.toByteArray();
+    }
+
+    private static HybridEncryptionResult unpackHybridEncryptionResult(byte[] packedHybridEncryptionResult) {
+        MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(packedHybridEncryptionResult);
+        HybridEncryptionResult hybridEncryptionResult;
+        try {
+            unpacker.unpackArrayHeader();
+            int encryptedSymmetricKeyLength = unpacker.unpackBinaryHeader();
+            byte[] encryptedSymmetricKey = unpacker.readPayload(encryptedSymmetricKeyLength);
+            int ivLength = unpacker.unpackBinaryHeader();
+            byte[] iv = unpacker.readPayload(ivLength);
+            int cipherTextLength = unpacker.unpackBinaryHeader();
+            byte[] cipherText = unpacker.readPayload(cipherTextLength);
+            unpacker.close();
+
+            GcmEncryptionResult gcmEncryptionResult = new GcmEncryptionResult(iv, cipherText);
+            hybridEncryptionResult = new HybridEncryptionResult(gcmEncryptionResult, encryptedSymmetricKey);
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to unpack the encryption result", ex);
+        }
+
+        return hybridEncryptionResult;
     }
 
     private static byte[] asymmetricEncrypt(PublicKey publicKey, byte[] plainText) {
