@@ -133,6 +133,7 @@ public class SphinxUtil {
         return new RoutingInformation(nodesRouting, nodeKeys);
     }
 
+    // TODO: hybridDecrypt the final message using our private key
     // Assume all packets present and in sorted order
     public static AssembledMessage assemblePackets(List<Packet> packets) {
         String uuid = packets.get(0).uuid;

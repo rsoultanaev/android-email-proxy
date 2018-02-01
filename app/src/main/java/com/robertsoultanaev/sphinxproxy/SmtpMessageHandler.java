@@ -17,6 +17,7 @@ public class SmtpMessageHandler implements SimpleMessageListener {
     }
 
     public boolean accept(String from, String recipient) {
+        // TODO: Lookup if recipient is in the list of people for whom we have keys
         return true;
     }
 
@@ -41,6 +42,7 @@ public class SmtpMessageHandler implements SimpleMessageListener {
         System.out.println("[SMTP] email length: " + email.length);
         System.out.println("-------------------------");
 
+        // TODO: Look up public key of recipient and do hybridEncrypt on the email before sphinxing it
         byte[][] sphinxPackets = sphinxUtil.splitIntoSphinxPackets(email, recipient);
 
         for (byte[] binMessage : sphinxPackets) {

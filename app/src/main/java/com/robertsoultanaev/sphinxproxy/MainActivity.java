@@ -54,6 +54,8 @@ public class MainActivity extends AppCompatActivity {
                     } catch (IOException ex) {
                         throw new RuntimeException("Failed to read the mix network configuration", ex);
                     }
+
+                    // TODO: Read recipient public keys and init own private key
                 }
             }).start();
         }
