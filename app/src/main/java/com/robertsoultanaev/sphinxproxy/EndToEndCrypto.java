@@ -19,13 +19,13 @@ public class EndToEndCrypto {
     private final static Provider BC_PROVIDER = new BouncyCastleProvider();
 
     private final static int SYMMETRIC_KEY_LENGTH = 128;
-    private static String SYMMETRIC_ALGORITHM_NAME = "AES";
+    private final static String SYMMETRIC_ALGORITHM_NAME = "AES";
     private final static String SYMMETRIC_TRANSFORMATION = "AES/GCM/NoPadding";
     private final static int AES_GCM_TAG_LENGTH = 128;
     private final static int AES_GCM_IV_LENGTH = 96;
 
-    private static int RSA_KEY_LENGTH = 4096;
-    private static String ASYMMETRIC_ALGORITHM_NAME = "RSA";
+    private final static int RSA_KEY_LENGTH = 4096;
+    private final static String ASYMMETRIC_ALGORITHM_NAME = "RSA";
     private final static String ASYMMETRIC_TRANSFORMATION = "RSA/ECB/OAEPWITHSHA-512ANDMGF1PADDING";
 
     public static HybridEncryptionResult hybridEncrypt(PublicKey recipientPublicKey, byte[] plaintext) {
@@ -61,7 +61,7 @@ public class EndToEndCrypto {
         return keypair;
     }
 
-    public static byte[] asymmetricEncrypt(PublicKey publicKey, byte[] plainText) {
+    private static byte[] asymmetricEncrypt(PublicKey publicKey, byte[] plainText) {
         Cipher rsa;
         byte[] cipherText;
 
@@ -76,7 +76,7 @@ public class EndToEndCrypto {
         return cipherText;
     }
 
-    public static byte[] asymmetricDecrypt(PrivateKey privateKey, byte[] cipherText) {
+    private static byte[] asymmetricDecrypt(PrivateKey privateKey, byte[] cipherText) {
         Cipher rsa;
         byte[] plainText;
 
@@ -91,7 +91,7 @@ public class EndToEndCrypto {
         return plainText;
     }
 
-    public static SecretKey generateSymmetricKey() {
+    private static SecretKey generateSymmetricKey() {
         KeyGenerator keyGenerator;
         SecretKey secretKey;
 
@@ -106,7 +106,7 @@ public class EndToEndCrypto {
         return secretKey;
     }
 
-    public static GcmEncryptionResult symmetricEncrypt(SecretKey key, byte[] plainText) {
+    private static GcmEncryptionResult symmetricEncrypt(SecretKey key, byte[] plainText) {
         int ivByteLength = AES_GCM_IV_LENGTH / 8;
         byte[] iv = new byte[ivByteLength];
         SecureRandom random = new SecureRandom();
@@ -127,7 +127,7 @@ public class EndToEndCrypto {
         return new GcmEncryptionResult(iv, cipherText);
     }
 
-    public static byte[] symmetricDecrypt(SecretKey key, GcmEncryptionResult gcmEncryptionResult) {
+    private static byte[] symmetricDecrypt(SecretKey key, GcmEncryptionResult gcmEncryptionResult) {
         GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(AES_GCM_TAG_LENGTH, gcmEncryptionResult.iv);
 
         Cipher aesGcm;
