@@ -34,4 +34,15 @@ public class EndToEndCryptoTest {
 
         assertThat(plaintext, is(equalTo(decryptionResult)));
     }
+
+    @Test
+    public void hybridEncryptDecryptTest() throws Exception {
+        String plaintext = "hello";
+        KeyPair keyPair = EndToEndCrypto.generateAsymmetricKey();
+
+        HybridEncryptionResult hybridEncryptionResult = EndToEndCrypto.hybridEncrypt(keyPair.getPublic(), plaintext.getBytes());
+        String decryptionResult = new String(EndToEndCrypto.hybridDecrypt(keyPair.getPrivate(), hybridEncryptionResult));
+
+        assertThat(plaintext, is(equalTo(decryptionResult)));
+    }
 }

@@ -13,6 +13,7 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 public class EndToEndCrypto {
     private final static Provider BC_PROVIDER = new BouncyCastleProvider();
@@ -26,6 +27,24 @@ public class EndToEndCrypto {
     private static int RSA_KEY_LENGTH = 4096;
     private static String ASYMMETRIC_ALGORITHM_NAME = "RSA";
     private final static String ASYMMETRIC_TRANSFORMATION = "RSA/ECB/OAEPWITHSHA-512ANDMGF1PADDING";
+
+    public static HybridEncryptionResult hybridEncrypt(PublicKey recipientPublicKey, byte[] plaintext) {
+        SecretKey symmetricKey = generateSymmetricKey();
+        byte[] encodedSymmetricKey = symmetricKey.getEncoded();
+
+        GcmEncryptionResult encryptedPlainTextWithIv = symmetricEncrypt(symmetricKey, plaintext);
+        byte[] encryptedSymmetricKey = asymmetricEncrypt(recipientPublicKey, encodedSymmetricKey);
+
+        return new HybridEncryptionResult(encryptedPlainTextWithIv, encryptedSymmetricKey);
+    }
+
+    public static byte[] hybridDecrypt(PrivateKey privateKey, HybridEncryptionResult hybridEncryptionResult) {
+        byte[] encodedSymmetricKey = asymmetricDecrypt(privateKey, hybridEncryptionResult.encryptedSymmetricKey);
+        SecretKey symmetricKey = new SecretKeySpec(encodedSymmetricKey, 0, encodedSymmetricKey.length, SYMMETRIC_ALGORITHM_NAME);
+        byte[] plainText = symmetricDecrypt(symmetricKey, hybridEncryptionResult.gcmEncryptionResult);
+
+        return plainText;
+    }
 
     public static KeyPair generateAsymmetricKey() {
         KeyPairGenerator rsaKeyGen;
