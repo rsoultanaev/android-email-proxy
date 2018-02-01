@@ -41,9 +41,8 @@ public class EndToEndCrypto {
     public static byte[] hybridDecrypt(PrivateKey privateKey, HybridEncryptionResult hybridEncryptionResult) {
         byte[] encodedSymmetricKey = asymmetricDecrypt(privateKey, hybridEncryptionResult.encryptedSymmetricKey);
         SecretKey symmetricKey = new SecretKeySpec(encodedSymmetricKey, 0, encodedSymmetricKey.length, SYMMETRIC_ALGORITHM_NAME);
-        byte[] plainText = symmetricDecrypt(symmetricKey, hybridEncryptionResult.gcmEncryptionResult);
 
-        return plainText;
+        return symmetricDecrypt(symmetricKey, hybridEncryptionResult.gcmEncryptionResult);
     }
 
     public static KeyPair generateAsymmetricKey() {
