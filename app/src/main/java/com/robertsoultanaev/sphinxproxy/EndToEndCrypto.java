@@ -2,7 +2,11 @@ package com.robertsoultanaev.sphinxproxy;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
 import java.security.Provider;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 
 import javax.crypto.Cipher;
@@ -18,6 +22,55 @@ public class EndToEndCrypto {
     private final static String SYMMETRIC_TRANSFORMATION = "AES/GCM/NoPadding";
     private final static int AES_GCM_TAG_LENGTH = 128;
     private final static int AES_GCM_IV_LENGTH = 96;
+
+    private static int RSA_KEY_LENGTH = 4096;
+    private static String ASYMMETRIC_ALGORITHM_NAME = "RSA";
+    private final static String ASYMMETRIC_TRANSFORMATION = "RSA/ECB/OAEPWITHSHA-512ANDMGF1PADDING";
+
+    public static KeyPair generateAsymmetricKey() {
+        KeyPairGenerator rsaKeyGen;
+        KeyPair keypair;
+
+        try {
+            rsaKeyGen = KeyPairGenerator.getInstance(ASYMMETRIC_ALGORITHM_NAME, BC_PROVIDER);
+            rsaKeyGen.initialize(RSA_KEY_LENGTH);
+            keypair = rsaKeyGen.generateKeyPair();
+        } catch (Exception ex) {
+            throw new RuntimeException("Key gen failed", ex);
+        }
+
+        return keypair;
+    }
+
+    public static byte[] asymmetricEncrypt(PublicKey publicKey, byte[] plainText) {
+        Cipher rsa;
+        byte[] cipherText;
+
+        try {
+            rsa = Cipher.getInstance(ASYMMETRIC_TRANSFORMATION, BC_PROVIDER);
+            rsa.init(Cipher.ENCRYPT_MODE, publicKey);
+            cipherText = rsa.doFinal(plainText);
+        } catch (Exception ex) {
+            throw new RuntimeException("Encryption failed", ex);
+        }
+
+        return cipherText;
+    }
+
+    public static byte[] asymmetricDecrypt(PrivateKey privateKey, byte[] cipherText) {
+        Cipher rsa;
+        byte[] plainText;
+
+        try {
+            rsa = Cipher.getInstance(ASYMMETRIC_TRANSFORMATION, BC_PROVIDER);
+            rsa.init(Cipher.DECRYPT_MODE, privateKey);
+            plainText = rsa.doFinal(cipherText);
+        } catch (Exception ex) {
+            throw new RuntimeException("Decryption failed", ex);
+        }
+
+        return plainText;
+    }
 
     public static SecretKey generateSymmetricKey() {
         KeyGenerator keyGenerator;
