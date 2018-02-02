@@ -32,7 +32,7 @@ public class EndToEndCrypto {
     private final static String ASYMMETRIC_ALGORITHM_NAME = "RSA";
     private final static String ASYMMETRIC_TRANSFORMATION = "RSA/ECB/OAEPWITHSHA-512ANDMGF1PADDING";
 
-    public static byte[] hybridEncrypt(PublicKey recipientPublicKey, byte[] plaintext) {
+    public static byte[] endToEndEncrypt(PublicKey recipientPublicKey, byte[] plaintext) {
         SecretKey symmetricKey = generateSymmetricKey();
         byte[] encodedSymmetricKey = symmetricKey.getEncoded();
 
@@ -43,7 +43,7 @@ public class EndToEndCrypto {
         return packHybridEncryptionResult(hybridEncryptionResult);
     }
 
-    public static byte[] hybridDecrypt(PrivateKey privateKey, byte[] packedHybridEncryptionResult) {
+    public static byte[] endToEndDecrypt(PrivateKey privateKey, byte[] packedHybridEncryptionResult) {
         HybridEncryptionResult hybridEncryptionResult = unpackHybridEncryptionResult(packedHybridEncryptionResult);
         byte[] encodedSymmetricKey = asymmetricDecrypt(privateKey, hybridEncryptionResult.encryptedSymmetricKey);
         SecretKey symmetricKey = new SecretKeySpec(encodedSymmetricKey, 0, encodedSymmetricKey.length, SYMMETRIC_ALGORITHM_NAME);

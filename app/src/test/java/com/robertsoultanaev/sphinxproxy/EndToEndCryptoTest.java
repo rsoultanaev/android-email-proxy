@@ -13,12 +13,12 @@ import static org.hamcrest.CoreMatchers.*;
 public class EndToEndCryptoTest {
 
     @Test
-    public void hybridEncryptDecryptTest() throws Exception {
+    public void endToEndEncryptDecryptTest() throws Exception {
         String plaintext = "hello";
         KeyPair keyPair = EndToEndCrypto.generateAsymmetricKey();
 
-        byte[] hybridEncryptionResult = EndToEndCrypto.hybridEncrypt(keyPair.getPublic(), plaintext.getBytes());
-        String decryptionResult = new String(EndToEndCrypto.hybridDecrypt(keyPair.getPrivate(), hybridEncryptionResult));
+        byte[] encryptionResult = EndToEndCrypto.endToEndEncrypt(keyPair.getPublic(), plaintext.getBytes());
+        String decryptionResult = new String(EndToEndCrypto.endToEndDecrypt(keyPair.getPrivate(), encryptionResult));
 
         assertThat(plaintext, is(equalTo(decryptionResult)));
     }
