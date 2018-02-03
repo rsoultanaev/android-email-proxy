@@ -17,6 +17,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.KeyPair;
+import java.security.PrivateKey;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -106,7 +107,11 @@ public class MainActivity extends AppCompatActivity {
                 DBQuery dbQuery = db.getDao();
                 POP3Client pop3Client = new POP3Client();
                 pop3Client.setDefaultTimeout(60000);
-                Mailbox mailbox = new Mailbox(server, port, username, password, dbQuery, pop3Client);
+
+                PrivateKey privateKey = Config.getPrivateKey(context);
+                EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
+
+                Mailbox mailbox = new Mailbox(server, port, username, password, dbQuery, pop3Client, endToEndCrypto, privateKey);
                 mailbox.updateMailbox();
             }
         }).start();

@@ -7,12 +7,17 @@ import com.robertsoultanaev.sphinxproxy.database.Packet;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.net.pop3.POP3Client;
 import org.apache.commons.net.pop3.POP3MessageInfo;
+import org.bouncycastle.util.encoders.Base64;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.security.PrivateKey;
+import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
-import static com.robertsoultanaev.sphinxproxy.SphinxUtil.parseMessageToPacket;
+import static com.robertsoultanaev.javasphinx.Util.concatByteArrays;
 
 public class Mailbox {
     private String mailServer;
@@ -21,14 +26,18 @@ public class Mailbox {
     private String password;
     private POP3Client pop3Client;
     private DBQuery dbQuery;
+    private EndToEndCrypto endToEndCrypto;
+    private PrivateKey privateKey;
 
-    public Mailbox(String mailServer, int port, String username, String password, DBQuery dbQuery, POP3Client pop3Client) {
+    public Mailbox(String mailServer, int port, String username, String password, DBQuery dbQuery, POP3Client pop3Client, EndToEndCrypto endToEndCrypto, PrivateKey privateKey) {
         this.mailServer = mailServer;
         this.port = port;
         this.username = username;
         this.password = password;
         this.dbQuery = dbQuery;
         this.pop3Client = pop3Client;
+        this.endToEndCrypto = endToEndCrypto;
+        this.privateKey = privateKey;
     }
 
     public void updateMailbox() {
@@ -49,6 +58,7 @@ public class Mailbox {
         for (String uuid : readyPacketIds) {
             List<Packet> orderedPackets = dbQuery.getPackets(uuid);
             AssembledMessage msg = SphinxUtil.assemblePackets(orderedPackets);
+            msg.messageBody = endToEndCrypto.endToEndDecrypt(privateKey, msg.messageBody);
             dbQuery.addAssembledMessage(msg);
         }
     }
@@ -105,7 +115,7 @@ public class Mailbox {
 
                 try {
                     byte[] encodedMessage = getMessageBody(reader);
-                    pulledMessages[i] = parseMessageToPacket(encodedMessage);
+                    pulledMessages[i] = SphinxUtil.parseMessageToPacket(encodedMessage);
                 } catch (Exception e) {
                     e.printStackTrace();
                     return null;
