@@ -44,6 +44,9 @@ public abstract class DBQuery {
     @Insert
     public abstract void insertMixNode(MixNode mixNode);
 
+    @Insert
+    public abstract void insertRecipient(Recipient recipient);
+
     @Query("DELETE FROM assembledmessage WHERE uuid=:uuid")
     public abstract void deleteAssembledMessage(String uuid);
 
@@ -58,6 +61,9 @@ public abstract class DBQuery {
 
     @Query("SELECT uuid FROM packetcount WHERE packetsInMessage=packetsReceived")
     public abstract List<String> getReadyPacketIds();
+
+    @Query("SELECT * FROM recipient WHERE address=:address")
+    public abstract Recipient getRecipient(String address);
 
     @Transaction
     public void addPacket(Packet packet) {
