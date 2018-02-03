@@ -17,30 +17,33 @@ public class EndToEndCryptoTest {
     @Test
     public void endToEndEncryptDecryptTest() throws Exception {
         String plaintext = "hello";
-        KeyPair keyPair = EndToEndCrypto.generateKeyPair();
+        EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
+        KeyPair keyPair = endToEndCrypto.generateKeyPair();
 
-        byte[] encryptionResult = EndToEndCrypto.endToEndEncrypt(keyPair.getPublic(), plaintext.getBytes());
-        String decryptionResult = new String(EndToEndCrypto.endToEndDecrypt(keyPair.getPrivate(), encryptionResult));
+        byte[] encryptionResult = endToEndCrypto.endToEndEncrypt(keyPair.getPublic(), plaintext.getBytes());
+        String decryptionResult = new String(endToEndCrypto.endToEndDecrypt(keyPair.getPrivate(), encryptionResult));
 
         assertThat(plaintext, is(equalTo(decryptionResult)));
     }
 
     @Test
     public void decodePrivateKeyTest() throws Exception {
-        PrivateKey privateKey = EndToEndCrypto.generateKeyPair().getPrivate();
+        EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
+        PrivateKey privateKey = endToEndCrypto.generateKeyPair().getPrivate();
 
-        String encodedPrivateKey = EndToEndCrypto.encodeKey(privateKey);
-        PrivateKey decodedPrivateKey = EndToEndCrypto.decodePrivateKey(encodedPrivateKey);
+        String encodedPrivateKey = endToEndCrypto.encodeKey(privateKey);
+        PrivateKey decodedPrivateKey = endToEndCrypto.decodePrivateKey(encodedPrivateKey);
 
         assertThat(privateKey, is(equalTo(decodedPrivateKey)));
     }
 
     @Test
     public void decodePublicKeyTest() throws Exception {
-        PublicKey publicKey = EndToEndCrypto.generateKeyPair().getPublic();
+        EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
+        PublicKey publicKey = endToEndCrypto.generateKeyPair().getPublic();
 
-        String encodedPublicKey = EndToEndCrypto.encodeKey(publicKey);
-        PublicKey decodedPublicKey = EndToEndCrypto.decodePublicKey(encodedPublicKey);
+        String encodedPublicKey = endToEndCrypto.encodeKey(publicKey);
+        PublicKey decodedPublicKey = endToEndCrypto.decodePublicKey(encodedPublicKey);
 
         assertThat(publicKey, is(equalTo(decodedPublicKey)));
     }

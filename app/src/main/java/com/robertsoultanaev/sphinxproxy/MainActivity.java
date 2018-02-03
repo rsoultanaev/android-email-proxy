@@ -57,7 +57,8 @@ public class MainActivity extends AppCompatActivity {
                         throw new RuntimeException("Failed to read the mix network configuration", ex);
                     }
 
-                    KeyPair keyPair = EndToEndCrypto.generateKeyPair();
+                    EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
+                    KeyPair keyPair = endToEndCrypto.generateKeyPair();
                     Config.setKeyPair(keyPair, context);
 
                     // TODO: Read recipient public keys

@@ -14,11 +14,13 @@ public class SmtpMessageHandler implements SimpleMessageListener {
     private DBQuery dbQuery;
     private SphinxUtil sphinxUtil;
     private AsyncTcpClient asyncTcpClient;
+    private EndToEndCrypto endToEndCrypto;
 
-    public SmtpMessageHandler(SphinxUtil sphinxUtil, AsyncTcpClient asyncTcpClient, DBQuery dbQuery) {
+    public SmtpMessageHandler(SphinxUtil sphinxUtil, AsyncTcpClient asyncTcpClient, DBQuery dbQuery, EndToEndCrypto endToEndCrypto) {
         this.sphinxUtil = sphinxUtil;
         this.asyncTcpClient = asyncTcpClient;
         this.dbQuery = dbQuery;
+        this.endToEndCrypto = endToEndCrypto;
     }
 
     public boolean accept(String from, String recipient) {
@@ -47,8 +49,8 @@ public class SmtpMessageHandler implements SimpleMessageListener {
         System.out.println("-------------------------");
 
         String encodedRecipientPublicKey = dbQuery.getRecipient(recipient).encodedPublicKey;
-        PublicKey recipientPublicKey = EndToEndCrypto.decodePublicKey(encodedRecipientPublicKey);
-        byte[] endToEndEncryptedEmail = EndToEndCrypto.endToEndEncrypt(recipientPublicKey, email);
+        PublicKey recipientPublicKey = endToEndCrypto.decodePublicKey(encodedRecipientPublicKey);
+        byte[] endToEndEncryptedEmail = endToEndCrypto.endToEndEncrypt(recipientPublicKey, email);
 
         byte[][] sphinxPackets = sphinxUtil.splitIntoSphinxPackets(endToEndEncryptedEmail, recipient);
 

@@ -27,8 +27,9 @@ public class Config {
     }
 
     public static void setKeyPair(KeyPair keyPair, Context context) {
-        String encodedPrivateKey = EndToEndCrypto.encodeKey(keyPair.getPrivate());
-        String encodedPublicKey = EndToEndCrypto.encodeKey(keyPair.getPublic());
+        EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
+        String encodedPrivateKey = endToEndCrypto.encodeKey(keyPair.getPrivate());
+        String encodedPublicKey = endToEndCrypto.encodeKey(keyPair.getPublic());
 
         String sharedPreferencesFile = context.getString(R.string.key_preference_file);
         String keyPrivateKey = context.getString(R.string.key_private_key);
@@ -42,6 +43,7 @@ public class Config {
     }
 
     public static PrivateKey getPrivateKey(Context context) {
+        EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
         String sharedPreferencesFile = context.getString(R.string.key_preference_file);
         String key = context.getString(R.string.key_private_key);
         SharedPreferences sharedPreferences = context.getSharedPreferences(sharedPreferencesFile, Context.MODE_PRIVATE);
@@ -52,12 +54,13 @@ public class Config {
             throw new RuntimeException("Private key not set");
         }
 
-        return EndToEndCrypto.decodePrivateKey(base64EncodedPrivateKey);
+        return endToEndCrypto.decodePrivateKey(base64EncodedPrivateKey);
     }
 
 
 
     public static PublicKey getPublicKey(Context context) {
+        EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
         String sharedPreferencesFile = context.getString(R.string.key_preference_file);
         String key = context.getString(R.string.key_public_key);
         SharedPreferences sharedPreferences = context.getSharedPreferences(sharedPreferencesFile, Context.MODE_PRIVATE);
@@ -68,6 +71,6 @@ public class Config {
             throw new RuntimeException("Public key not set");
         }
 
-        return EndToEndCrypto.decodePublicKey(base64EncodedPublicKey);
+        return endToEndCrypto.decodePublicKey(base64EncodedPublicKey);
     }
 }

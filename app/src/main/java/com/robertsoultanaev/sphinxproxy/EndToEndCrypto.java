@@ -23,7 +23,7 @@ public class EndToEndCrypto {
     private final static String TRANSFORMATION = "ECIES";
     private final static String EC_CURVE_NAME = "secp224r1";
 
-    public static KeyPair generateKeyPair() {
+    public KeyPair generateKeyPair() {
         ECGenParameterSpec ecGenParameterSpec = new ECGenParameterSpec(EC_CURVE_NAME);
         KeyPairGenerator kpg;
         KeyPair keyPair;
@@ -39,7 +39,7 @@ public class EndToEndCrypto {
         return keyPair;
     }
 
-    public static byte[] endToEndEncrypt(PublicKey recipientPublicKey, byte[] plainText) {
+    public byte[] endToEndEncrypt(PublicKey recipientPublicKey, byte[] plainText) {
         Cipher ecies;
         byte[] cipherText;
 
@@ -54,7 +54,7 @@ public class EndToEndCrypto {
         return cipherText;
     }
 
-    public static byte[] endToEndDecrypt(PrivateKey privateKey, byte[] cipherText) {
+    public byte[] endToEndDecrypt(PrivateKey privateKey, byte[] cipherText) {
         Cipher ecies;
         byte[] plainText;
 
@@ -69,11 +69,11 @@ public class EndToEndCrypto {
         return plainText;
     }
 
-    public static String encodeKey(Key key) {
+    public String encodeKey(Key key) {
         return new String(Base64.encode(key.getEncoded()));
     }
 
-    public static PrivateKey decodePrivateKey(String base64EncodedPrivateKey) {
+    public PrivateKey decodePrivateKey(String base64EncodedPrivateKey) {
         byte[] encodedPrivateKey = Base64.decode(base64EncodedPrivateKey.getBytes());
 
         PrivateKey privateKey;
@@ -87,7 +87,7 @@ public class EndToEndCrypto {
         return privateKey;
     }
 
-    public static PublicKey decodePublicKey(String base64EncodedPublicKey) {
+    public PublicKey decodePublicKey(String base64EncodedPublicKey) {
         byte[] encodedPublicKey = Base64.decode(base64EncodedPublicKey.getBytes());
 
         PublicKey publicKey;

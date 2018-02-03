@@ -40,7 +40,8 @@ public class ProxyService extends Service {
 
                     SphinxUtil sphinxUtil = new SphinxUtil(dbQuery);
                     AsyncTcpClient asyncTcpClient = new AsyncTcpClient("localhost", 10000);
-                    SmtpMessageHandler smtpMessageHandler = new SmtpMessageHandler(sphinxUtil, asyncTcpClient, dbQuery);
+                    EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
+                    SmtpMessageHandler smtpMessageHandler = new SmtpMessageHandler(sphinxUtil, asyncTcpClient, dbQuery, endToEndCrypto);
                     smtpServer = new SMTPServer(new SimpleMessageListenerAdapter(smtpMessageHandler));
                     smtpServer.setPort(smtpPort);
                     smtpServer.start();
