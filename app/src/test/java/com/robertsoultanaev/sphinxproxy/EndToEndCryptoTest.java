@@ -15,7 +15,7 @@ public class EndToEndCryptoTest {
     @Test
     public void endToEndEncryptDecryptTest() throws Exception {
         String plaintext = "hello";
-        KeyPair keyPair = EndToEndCrypto.generateAsymmetricKey();
+        KeyPair keyPair = EndToEndCrypto.generateKeyPair();
 
         byte[] encryptionResult = EndToEndCrypto.endToEndEncrypt(keyPair.getPublic(), plaintext.getBytes());
         String decryptionResult = new String(EndToEndCrypto.endToEndDecrypt(keyPair.getPrivate(), encryptionResult));
