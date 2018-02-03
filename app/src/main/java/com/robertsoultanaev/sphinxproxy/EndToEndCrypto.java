@@ -1,5 +1,7 @@
 package com.robertsoultanaev.sphinxproxy;
 
+import com.robertsoultanaev.javasphinx.ECCGroup;
+
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
@@ -12,6 +14,8 @@ import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.Security;
+import java.security.spec.ECGenParameterSpec;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -52,18 +56,21 @@ public class EndToEndCrypto {
     }
 
     public static KeyPair generateAsymmetricKey() {
-        KeyPairGenerator rsaKeyGen;
-        KeyPair keypair;
+        Security.addProvider(new BouncyCastleProvider());
+
+        ECGenParameterSpec ecGenParameterSpec = new ECGenParameterSpec(ECCGroup.DEFAULT_CURVE_NAME);
+        KeyPairGenerator kpg;
+        KeyPair keyPair;
 
         try {
-            rsaKeyGen = KeyPairGenerator.getInstance(ASYMMETRIC_ALGORITHM_NAME, BC_PROVIDER);
-            rsaKeyGen.initialize(RSA_KEY_LENGTH);
-            keypair = rsaKeyGen.generateKeyPair();
+            kpg = KeyPairGenerator.getInstance("EC", BouncyCastleProvider.PROVIDER_NAME);
+            kpg.initialize(ecGenParameterSpec);
+            keyPair = kpg.generateKeyPair();
         } catch (Exception ex) {
             throw new RuntimeException("Key gen failed", ex);
         }
 
-        return keypair;
+        return keyPair;
     }
 
     private static byte[] packHybridEncryptionResult(HybridEncryptionResult hybridEncryptionResult) {
