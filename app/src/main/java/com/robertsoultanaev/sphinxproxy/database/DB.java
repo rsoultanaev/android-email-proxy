@@ -5,7 +5,7 @@ import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 
-@Database(entities = {Packet.class, PacketCount.class, AssembledMessage.class, MixNode.class}, version = 1)
+@Database(entities = {Packet.class, PacketCount.class, AssembledMessage.class, MixNode.class, Recipient.class}, version = 1)
 public abstract class DB extends RoomDatabase {
 
     private static DB INSTANCE;

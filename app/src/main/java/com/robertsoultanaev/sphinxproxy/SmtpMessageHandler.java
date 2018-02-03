@@ -1,24 +1,28 @@
 package com.robertsoultanaev.sphinxproxy;
 
+import com.robertsoultanaev.sphinxproxy.database.DBQuery;
+
 import org.subethamail.smtp.helper.SimpleMessageListener;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.PublicKey;
 
 public class SmtpMessageHandler implements SimpleMessageListener {
+    private DBQuery dbQuery;
     private SphinxUtil sphinxUtil;
     private AsyncTcpClient asyncTcpClient;
 
-    public SmtpMessageHandler(SphinxUtil sphinxUtil, AsyncTcpClient asyncTcpClient) {
+    public SmtpMessageHandler(SphinxUtil sphinxUtil, AsyncTcpClient asyncTcpClient, DBQuery dbQuery) {
         this.sphinxUtil = sphinxUtil;
         this.asyncTcpClient = asyncTcpClient;
+        this.dbQuery = dbQuery;
     }
 
     public boolean accept(String from, String recipient) {
-        // TODO: Lookup if recipient is in the list of people for whom we have keys
-        return true;
+        return (dbQuery.getRecipient(recipient) != null);
     }
 
     public void deliver(String from, String recipient, InputStream data) {
@@ -42,8 +46,11 @@ public class SmtpMessageHandler implements SimpleMessageListener {
         System.out.println("[SMTP] email length: " + email.length);
         System.out.println("-------------------------");
 
-        // TODO: Look up public key of recipient and do endToEndEncrypt on the email before sphinxing it
-        byte[][] sphinxPackets = sphinxUtil.splitIntoSphinxPackets(email, recipient);
+        String encodedRecipientPublicKey = dbQuery.getRecipient(recipient).encodedPublicKey;
+        PublicKey recipientPublicKey = EndToEndCrypto.decodePublicKey(encodedRecipientPublicKey);
+        byte[] endToEndEncryptedEmail = EndToEndCrypto.endToEndEncrypt(recipientPublicKey, email);
+
+        byte[][] sphinxPackets = sphinxUtil.splitIntoSphinxPackets(endToEndEncryptedEmail, recipient);
 
         for (byte[] binMessage : sphinxPackets) {
             asyncTcpClient.sendMessage(binMessage);
