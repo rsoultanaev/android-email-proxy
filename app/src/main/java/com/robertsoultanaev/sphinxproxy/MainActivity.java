@@ -16,6 +16,7 @@ import org.apache.commons.net.pop3.POP3Client;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.security.KeyPair;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        final Context context = getApplicationContext();
 
         // Read mix network configuration and save into database when first installed
         String sharedPreferencesFile = getString(R.string.key_preference_file);
@@ -31,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
         if (!sharedPreferences.getBoolean(setupDoneKey, false)) {
             new Thread(new Runnable() {
                 public void run() {
-                    DB db = DB.getAppDatabase(getApplicationContext());
+                    DB db = DB.getAppDatabase(context);
                     DBQuery dbQuery = db.getDao();
 
                     try {
@@ -55,15 +57,17 @@ public class MainActivity extends AppCompatActivity {
                         throw new RuntimeException("Failed to read the mix network configuration", ex);
                     }
 
-                    // TODO: Read recipient public keys and init own private key
+                    KeyPair keyPair = EndToEndCrypto.generateKeyPair();
+                    Config.setKeyPair(keyPair, context);
+
+                    // TODO: Read recipient public keys
                 }
             }).start();
         }
 
         // Test Config key setting
-        Context context = getApplicationContext();
-        Config.setKey(R.string.key_proxy_pop3_port,  "27000",     context);
-        Config.setKey(R.string.key_proxy_smtp_port,  "28000",     context);
+        Config.setKey(R.string.key_proxy_pop3_port,   "27000",     context);
+        Config.setKey(R.string.key_proxy_smtp_port,   "28000",     context);
         Config.setKey(R.string.key_proxy_username,   "proxyuser", context);
         Config.setKey(R.string.key_proxy_password,   "12345",     context);
         Config.setKey(R.string.key_mailbox_hostname, "localhost", context);
