@@ -18,4 +18,5 @@
     <string name="key_public_key">publicKey</string>
 
     <string name="mix_network_filename">mix_network.csv</string>
+    <string name="recipient_keys_filename">recipient_keys.csv</string>
 </resources>
