@@ -10,6 +10,7 @@ import android.view.View;
 import com.robertsoultanaev.sphinxproxy.database.DB;
 import com.robertsoultanaev.sphinxproxy.database.DBQuery;
 import com.robertsoultanaev.sphinxproxy.database.MixNode;
+import com.robertsoultanaev.sphinxproxy.database.Recipient;
 
 import org.apache.commons.net.pop3.POP3Client;
 
@@ -37,6 +38,10 @@ public class MainActivity extends AppCompatActivity {
                     DB db = DB.getAppDatabase(context);
                     DBQuery dbQuery = db.getDao();
 
+                    EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
+                    KeyPair keyPair = endToEndCrypto.generateKeyPair();
+                    Config.setKeyPair(keyPair, context);
+
                     try {
                         String fileName = getString(R.string.mix_network_filename);
                         BufferedReader reader = new BufferedReader(new InputStreamReader(getAssets().open(fileName)));
@@ -50,19 +55,30 @@ public class MainActivity extends AppCompatActivity {
                         }
 
                         reader.close();
+                    } catch (IOException ex) {
+                        throw new RuntimeException("Failed to read the mix network configuration", ex);
+                    }
+
+                    try {
+                        String fileName = getString(R.string.recipient_keys_filename);
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(getAssets().open(fileName)));
+
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            String[] splitLine = line.split(",");
+                            String recipient = splitLine[0];
+                            String encodedPublicKey = splitLine[1];
+                            dbQuery.insertRecipient(new Recipient(recipient, encodedPublicKey));
+                        }
+
+                        reader.close();
 
                         SharedPreferences.Editor editor = sharedPreferences.edit();
                         editor.putBoolean(getString(R.string.key_setup_done), true);
                         editor.apply();
                     } catch (IOException ex) {
-                        throw new RuntimeException("Failed to read the mix network configuration", ex);
+                        throw new RuntimeException("Failed to read the recipient keys", ex);
                     }
-
-                    EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
-                    KeyPair keyPair = endToEndCrypto.generateKeyPair();
-                    Config.setKeyPair(keyPair, context);
-
-                    // TODO: Read recipient public keys
                 }
             }).start();
         }
