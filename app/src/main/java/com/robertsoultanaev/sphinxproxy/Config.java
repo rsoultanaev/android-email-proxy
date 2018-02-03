@@ -3,6 +3,10 @@ package com.robertsoultanaev.sphinxproxy;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+
 public class Config {
     public static void setKey(int keyId, String value, Context context) {
         String sharedPreferencesFile = context.getString(R.string.key_preference_file);
@@ -20,5 +24,50 @@ public class Config {
         SharedPreferences sharedPreferences = context.getSharedPreferences(sharedPreferencesFile, Context.MODE_PRIVATE);
 
         return sharedPreferences.getString(key, null);
+    }
+
+    public static void setKeyPair(KeyPair keyPair, Context context) {
+        String encodedPrivateKey = EndToEndCrypto.encodeKey(keyPair.getPrivate());
+        String encodedPublicKey = EndToEndCrypto.encodeKey(keyPair.getPublic());
+
+        String sharedPreferencesFile = context.getString(R.string.key_preference_file);
+        String keyPrivateKey = context.getString(R.string.key_private_key);
+        String keyPublicKey = context.getString(R.string.key_public_key);
+        SharedPreferences sharedPreferences = context.getSharedPreferences(sharedPreferencesFile, Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(keyPrivateKey, encodedPrivateKey);
+        editor.putString(keyPublicKey, encodedPublicKey);
+        editor.apply();
+    }
+
+    public static PrivateKey getPrivateKey(Context context) {
+        String sharedPreferencesFile = context.getString(R.string.key_preference_file);
+        String key = context.getString(R.string.key_private_key);
+        SharedPreferences sharedPreferences = context.getSharedPreferences(sharedPreferencesFile, Context.MODE_PRIVATE);
+
+        String base64EncodedPrivateKey = sharedPreferences.getString(key, null);
+
+        if (base64EncodedPrivateKey == null) {
+            throw new RuntimeException("Private key not set");
+        }
+
+        return EndToEndCrypto.decodePrivateKey(base64EncodedPrivateKey);
+    }
+
+
+
+    public static PublicKey getPublicKey(Context context) {
+        String sharedPreferencesFile = context.getString(R.string.key_preference_file);
+        String key = context.getString(R.string.key_public_key);
+        SharedPreferences sharedPreferences = context.getSharedPreferences(sharedPreferencesFile, Context.MODE_PRIVATE);
+
+        String base64EncodedPublicKey = sharedPreferences.getString(key, null);
+
+        if (base64EncodedPublicKey == null) {
+            throw new RuntimeException("Public key not set");
+        }
+
+        return EndToEndCrypto.decodePublicKey(base64EncodedPublicKey);
     }
 }
