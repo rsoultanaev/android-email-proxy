@@ -7,17 +7,11 @@ import com.robertsoultanaev.sphinxproxy.database.Packet;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.net.pop3.POP3Client;
 import org.apache.commons.net.pop3.POP3MessageInfo;
-import org.bouncycastle.util.encoders.Base64;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.security.PrivateKey;
-import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
-
-import static com.robertsoultanaev.javasphinx.Util.concatByteArrays;
 
 public class Mailbox {
     private String mailServer;
