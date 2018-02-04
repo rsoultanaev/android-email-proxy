@@ -78,7 +78,7 @@ public class Pop3ServerThread extends Thread {
                         break;
                 }
             } catch (IOException ex) {
-                // IOException happens if the server is closed, so we only
+                // IOException happens when the server is closed, so we only
                 // fail if exception happens without the thread being closed
                 if (!this.shuttingDown) {
                     throw new RuntimeException("Pop3ServerThread failed", ex);
