@@ -127,7 +127,9 @@ public class MainActivity extends AppCompatActivity {
                 PrivateKey privateKey = Config.getPrivateKey(context);
                 EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
 
-                Mailbox mailbox = new Mailbox(server, port, username, password, dbQuery, pop3Client, endToEndCrypto, privateKey);
+                SphinxUtil sphinxUtil = new SphinxUtil(dbQuery);
+
+                Mailbox mailbox = new Mailbox(server, port, username, password, dbQuery, pop3Client, endToEndCrypto, privateKey, sphinxUtil);
                 mailbox.updateMailbox();
             }
         }).start();

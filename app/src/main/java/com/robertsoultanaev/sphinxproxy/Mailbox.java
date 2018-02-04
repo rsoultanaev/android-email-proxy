@@ -22,8 +22,9 @@ public class Mailbox {
     private DBQuery dbQuery;
     private EndToEndCrypto endToEndCrypto;
     private PrivateKey privateKey;
+    private SphinxUtil sphinxUtil;
 
-    public Mailbox(String mailServer, int port, String username, String password, DBQuery dbQuery, POP3Client pop3Client, EndToEndCrypto endToEndCrypto, PrivateKey privateKey) {
+    public Mailbox(String mailServer, int port, String username, String password, DBQuery dbQuery, POP3Client pop3Client, EndToEndCrypto endToEndCrypto, PrivateKey privateKey, SphinxUtil sphinxUtil) {
         this.mailServer = mailServer;
         this.port = port;
         this.username = username;
@@ -32,6 +33,7 @@ public class Mailbox {
         this.pop3Client = pop3Client;
         this.endToEndCrypto = endToEndCrypto;
         this.privateKey = privateKey;
+        this.sphinxUtil = sphinxUtil;
     }
 
     public void updateMailbox() {
@@ -51,7 +53,7 @@ public class Mailbox {
 
         for (String uuid : readyPacketIds) {
             List<Packet> orderedPackets = dbQuery.getPackets(uuid);
-            AssembledMessage msg = SphinxUtil.assemblePackets(orderedPackets);
+            AssembledMessage msg = sphinxUtil.assemblePackets(orderedPackets);
             msg.messageBody = endToEndCrypto.endToEndDecrypt(privateKey, msg.messageBody);
             dbQuery.addAssembledMessage(msg);
         }
@@ -109,7 +111,7 @@ public class Mailbox {
 
                 try {
                     byte[] encodedMessage = getMessageBody(reader);
-                    pulledMessages[i] = SphinxUtil.parseMessageToPacket(encodedMessage);
+                    pulledMessages[i] = sphinxUtil.parseMessageToPacket(encodedMessage);
                 } catch (Exception e) {
                     e.printStackTrace();
                     return null;

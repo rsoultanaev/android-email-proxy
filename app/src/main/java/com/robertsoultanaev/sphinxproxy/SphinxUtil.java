@@ -133,9 +133,8 @@ public class SphinxUtil {
         return new RoutingInformation(nodesRouting, nodeKeys);
     }
 
-    // TODO: endToEndDecrypt the final message using our private key
     // Assume all packets present and in sorted order
-    public static AssembledMessage assemblePackets(List<Packet> packets) {
+    public AssembledMessage assemblePackets(List<Packet> packets) {
         String uuid = packets.get(0).uuid;
         byte[][] payloads = new byte[packets.size()][];
         for (int i = 0; i < packets.size(); i++) {
@@ -160,7 +159,7 @@ public class SphinxUtil {
         return result;
     }
 
-    public static Packet parseMessageToPacket(byte[] encodedMessage) throws IOException {
+    public Packet parseMessageToPacket(byte[] encodedMessage) throws IOException {
         byte[] message = Base64.decode(encodedMessage);
 
         byte[] headerBytes = Arrays.copyOfRange(message, 0, SphinxUtil.PACKET_HEADER_SIZE);
