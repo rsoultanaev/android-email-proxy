@@ -62,7 +62,7 @@ public class SmtpMessageHandlerTest {
         SmtpMessageHandler smtpMessageHandler = new SmtpMessageHandler(sphinxUtil, asyncTcpClient, dbQuery, endToEndCrypto);
         smtpMessageHandler.deliver(from, recipientAddress, emailStream);
 
-        verify(sphinxUtil, times(1)).splitIntoSphinxPackets(email, recipientAddress);
+        verify(sphinxUtil, times(1)).splitIntoSphinxPackets(encryptedEmail, recipientAddress);
         verify(asyncTcpClient, times(1)).sendMessage(packet1);
         verify(asyncTcpClient, times(1)).sendMessage(packet2);
         verifyNoMoreInteractions(ignoreStubs(sphinxUtil));
