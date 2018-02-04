@@ -10,6 +10,8 @@ import static org.mockito.Mockito.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.net.pop3.POP3Client;
 import org.apache.commons.net.pop3.POP3MessageInfo;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -22,8 +24,30 @@ import java.util.List;
 @RunWith(MockitoJUnitRunner.class)
 public class Pop3ServerTest {
 
+    private int pop3Port = 27000;
+    private String username = "proxyuser";
+    private String password = "12345";
+    private String host = "localhost";
+    private Pop3Server pop3Server;
+
     @Mock
     private DBQuery dbQuery;
+
+    @Before
+    public void before() throws Exception  {
+        pop3Port = 27000;
+        username = "proxyuser";
+        password = "12345";
+        host = "localhost";
+
+        pop3Server = new Pop3Server(pop3Port, username, password, dbQuery);
+        pop3Server.start();
+    }
+
+    @After
+    public void after() throws Exception  {
+        pop3Server.stop();
+    }
 
     @Test
     public void retrSessionTest() throws Exception {
@@ -36,16 +60,9 @@ public class Pop3ServerTest {
         msgList.add(msg1);
         msgList.add(msg2);
 
-        int pop3Port = 27000;
-        String username = "proxyuser";
-        String password = "12345";
-        String host = "localhost";
-
         when(dbQuery.getAssembledMessages()).thenReturn(msgList);
 
-        Pop3Server pop3Server = new Pop3Server(pop3Port, username, password, dbQuery);
-        pop3Server.start();
-        Thread.sleep(1000);
+        pop3Server.setDbQuery(dbQuery);
 
         POP3Client pop3Client = new POP3Client();
 
@@ -104,7 +121,6 @@ public class Pop3ServerTest {
         }
 
         pop3Client.logout();
-        pop3Server.stop();
 
         verifyNoMoreInteractions(ignoreStubs(dbQuery));
     }
@@ -135,16 +151,9 @@ public class Pop3ServerTest {
         List<AssembledMessage> msgList = new ArrayList<AssembledMessage>();
         msgList.add(new AssembledMessage("1", fullMessage.toString().getBytes()));
 
-        int pop3Port = 27000;
-        String username = "proxyuser";
-        String password = "12345";
-        String host = "localhost";
-
         when(dbQuery.getAssembledMessages()).thenReturn(msgList);
 
-        Pop3Server pop3Server = new Pop3Server(pop3Port, username, password, dbQuery);
-        pop3Server.start();
-        Thread.sleep(1000);
+        pop3Server.setDbQuery(dbQuery);
 
         POP3Client pop3Client = new POP3Client();
 
@@ -202,7 +211,6 @@ public class Pop3ServerTest {
         }
 
         pop3Client.logout();
-        pop3Server.stop();
 
         verifyNoMoreInteractions(ignoreStubs(dbQuery));
     }
@@ -218,18 +226,11 @@ public class Pop3ServerTest {
         msgList.add(msg1);
         msgList.add(msg2);
 
-        int pop3Port = 27000;
-        String username = "proxyuser";
-        String password = "12345";
-        String host = "localhost";
-
         doNothing().when(dbQuery).deleteAssembledMessage(msg1.uuid);
         doNothing().when(dbQuery).deleteAssembledMessage(msg2.uuid);
         when(dbQuery.getAssembledMessages()).thenReturn(msgList);
 
-        Pop3Server pop3Server = new Pop3Server(pop3Port, username, password, dbQuery);
-        pop3Server.start();
-        Thread.sleep(1000);
+        pop3Server.setDbQuery(dbQuery);
 
         POP3Client pop3Client = new POP3Client();
 
@@ -280,7 +281,6 @@ public class Pop3ServerTest {
         }
 
         pop3Client.logout();
-        pop3Server.stop();
 
         verify(dbQuery, times(1)).deleteAssembledMessage(msg1.uuid);
         verify(dbQuery, times(1)).deleteAssembledMessage(msg2.uuid);
@@ -298,18 +298,11 @@ public class Pop3ServerTest {
         msgList.add(msg1);
         msgList.add(msg2);
 
-        int pop3Port = 27000;
-        String username = "proxyuser";
-        String password = "12345";
-        String host = "localhost";
-
         doNothing().when(dbQuery).deleteAssembledMessage(msg1.uuid);
         doNothing().when(dbQuery).deleteAssembledMessage(msg2.uuid);
         when(dbQuery.getAssembledMessages()).thenReturn(msgList);
 
-        Pop3Server pop3Server = new Pop3Server(pop3Port, username, password, dbQuery);
-        pop3Server.start();
-        Thread.sleep(1000);
+        pop3Server.setDbQuery(dbQuery);
 
         POP3Client pop3Client = new POP3Client();
 
@@ -363,7 +356,6 @@ public class Pop3ServerTest {
         pop3Client.reset();
 
         pop3Client.logout();
-        pop3Server.stop();
 
         verify(dbQuery, never()).deleteAssembledMessage(anyString());
         verifyNoMoreInteractions(ignoreStubs(dbQuery));
@@ -373,17 +365,10 @@ public class Pop3ServerTest {
     public void multipleSessionsTest() throws Exception {
         List<AssembledMessage> msgList = new ArrayList<AssembledMessage>();
 
-        int pop3Port = 27000;
-        String username = "proxyuser";
-        String password = "12345";
-        String host = "localhost";
-
         doNothing().when(dbQuery).deleteAssembledMessage(anyString());
         when(dbQuery.getAssembledMessages()).thenReturn(msgList);
 
-        Pop3Server pop3Server = new Pop3Server(pop3Port, username, password, dbQuery);
-        pop3Server.start();
-        Thread.sleep(1000);
+        pop3Server.setDbQuery(dbQuery);
 
         POP3Client pop3Client = new POP3Client();
         boolean loginSuccessful = false;
@@ -409,8 +394,6 @@ public class Pop3ServerTest {
         msgInfo = pop3Client.status();
         assertThat(msgInfo, is(notNullValue()));
         pop3Client.logout();
-
-        pop3Server.stop();
 
         verifyNoMoreInteractions(ignoreStubs(dbQuery));
     }

@@ -117,10 +117,10 @@ public class SphinxUtilTest {
 
         List<Packet> packetList = new ArrayList<Packet>();
         for (byte[] processedMessage : processedMessages) {
-            packetList.add(SphinxUtil.parseMessageToPacket(processedMessage));
+            packetList.add(sphinxUtil.parseMessageToPacket(processedMessage));
         }
 
-        AssembledMessage assembledMessage = SphinxUtil.assemblePackets(packetList);
+        AssembledMessage assembledMessage = sphinxUtil.assemblePackets(packetList);
         String assembledMessageStr = new String(assembledMessage.messageBody);
 
         assertThat(emailStr, is(equalTo(assembledMessageStr)));

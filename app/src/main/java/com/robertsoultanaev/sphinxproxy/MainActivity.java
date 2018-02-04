@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
                 String username = Config.getKey(R.string.key_mailbox_username, context);
                 String password = Config.getKey(R.string.key_mailbox_password, context);
 
-                DB db = DB.getAppDatabase(getApplicationContext());
+                DB db = DB.getAppDatabase(context);
                 DBQuery dbQuery = db.getDao();
                 POP3Client pop3Client = new POP3Client();
                 pop3Client.setDefaultTimeout(60000);
@@ -127,7 +127,9 @@ public class MainActivity extends AppCompatActivity {
                 PrivateKey privateKey = Config.getPrivateKey(context);
                 EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
 
-                Mailbox mailbox = new Mailbox(server, port, username, password, dbQuery, pop3Client, endToEndCrypto, privateKey);
+                SphinxUtil sphinxUtil = new SphinxUtil(dbQuery);
+
+                Mailbox mailbox = new Mailbox(server, port, username, password, dbQuery, pop3Client, endToEndCrypto, privateKey, sphinxUtil);
                 mailbox.updateMailbox();
             }
         }).start();

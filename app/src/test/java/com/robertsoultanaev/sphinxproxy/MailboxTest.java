@@ -33,6 +33,9 @@ import static org.mockito.Mockito.when;
 public class MailboxTest {
 
     @Mock
+    private SphinxUtil sphinxUtil;
+
+    @Mock
     private EndToEndCrypto endToEndCrypto;
 
     @Mock
@@ -114,9 +117,13 @@ public class MailboxTest {
         when(dbQuery.getPackets(msgId.toString())).thenReturn(orderedPackets);
         doNothing().when(dbQuery).addAssembledMessage(any(AssembledMessage.class));
 
+        when(sphinxUtil.assemblePackets(orderedPackets)).thenReturn(assembledMessage);
+        when(sphinxUtil.parseMessageToPacket(encodedPayload1.getBytes())).thenReturn(orderedPackets.get(0));
+        when(sphinxUtil.parseMessageToPacket(encodedPayload2.getBytes())).thenReturn(orderedPackets.get(1));
+
         when(endToEndCrypto.endToEndDecrypt(eq(privateKey), any(byte[].class))).thenReturn(assembledMessage.messageBody);
 
-        Mailbox mailbox = new Mailbox(pop3Server, port, username, password, dbQuery, pop3Client, endToEndCrypto, privateKey);
+        Mailbox mailbox = new Mailbox(pop3Server, port, username, password, dbQuery, pop3Client, endToEndCrypto, privateKey, sphinxUtil);
         mailbox.updateMailbox();
 
         verifyNoMoreInteractions(ignoreStubs(pop3Client));
