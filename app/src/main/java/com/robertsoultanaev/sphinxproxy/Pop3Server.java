@@ -2,12 +2,16 @@ package com.robertsoultanaev.sphinxproxy;
 
 import com.robertsoultanaev.sphinxproxy.database.DBQuery;
 
+import java.io.IOException;
+import java.net.ServerSocket;
+
 
 public class Pop3Server {
 
     public static final String CRLF = "\r\n";
 
     private Pop3ServerThread serverThread;
+    private ServerSocket serverSocket;
 
     private int port;
     private DBQuery dbQuery;
@@ -22,17 +26,14 @@ public class Pop3Server {
     }
 
     public void start() {
-        synchronized (this) {
-            this.serverThread = new Pop3ServerThread(this);
-            this.serverThread.start();
-
-            // Block until serverThread is listening for connections
-            try {
-                wait();
-            } catch (InterruptedException ex) {
-                throw new RuntimeException(ex);
-            }
+        try {
+            serverSocket = new ServerSocket(port);
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to create socket", ex);
         }
+
+        this.serverThread = new Pop3ServerThread(this, serverSocket);
+        this.serverThread.start();
     }
 
     public void stop() {

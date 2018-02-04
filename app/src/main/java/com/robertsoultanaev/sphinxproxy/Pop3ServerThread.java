@@ -37,8 +37,10 @@ public class Pop3ServerThread extends Thread {
     private State sessionState;
     private String providedUsername;
 
-    public Pop3ServerThread(Pop3Server server) {
+    public Pop3ServerThread(Pop3Server server, ServerSocket serverSocket) {
         this.server = server;
+        this.serverSocket = serverSocket;
+
         this.shuttingDown = false;
         this.numberToMsg = new TreeMap<>();
         this.markedForDeletion = new HashSet<>();
@@ -47,16 +49,6 @@ public class Pop3ServerThread extends Thread {
 
     @Override
     public void run() {
-        try {
-            serverSocket = new ServerSocket(server.getPort());
-        } catch (IOException ex) {
-            throw new RuntimeException("Failed to create socket", ex);
-        }
-
-        synchronized (server) {
-            server.notify();
-        }
-
         while (!this.shuttingDown) {
             try {
                 clientSocket = serverSocket.accept();
@@ -117,6 +109,12 @@ public class Pop3ServerThread extends Thread {
             serverSocket.close();
         } catch (IOException ex) {
             throw new RuntimeException("Failed to stop the thread", ex);
+        }
+
+        try {
+            join();
+        } catch (InterruptedException ex) {
+            throw new RuntimeException("Interrupted while shutting down", ex);
         }
     }
 
