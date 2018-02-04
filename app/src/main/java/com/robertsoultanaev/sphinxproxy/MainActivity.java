@@ -10,12 +10,15 @@ import android.view.View;
 import com.robertsoultanaev.sphinxproxy.database.DB;
 import com.robertsoultanaev.sphinxproxy.database.DBQuery;
 import com.robertsoultanaev.sphinxproxy.database.MixNode;
+import com.robertsoultanaev.sphinxproxy.database.Recipient;
 
 import org.apache.commons.net.pop3.POP3Client;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.security.KeyPair;
+import java.security.PrivateKey;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        final Context context = getApplicationContext();
 
         // Read mix network configuration and save into database when first installed
         String sharedPreferencesFile = getString(R.string.key_preference_file);
@@ -31,8 +35,12 @@ public class MainActivity extends AppCompatActivity {
         if (!sharedPreferences.getBoolean(setupDoneKey, false)) {
             new Thread(new Runnable() {
                 public void run() {
-                    DB db = DB.getAppDatabase(getApplicationContext());
+                    DB db = DB.getAppDatabase(context);
                     DBQuery dbQuery = db.getDao();
+
+                    EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
+                    KeyPair keyPair = endToEndCrypto.generateKeyPair();
+                    Config.setKeyPair(keyPair, context);
 
                     try {
                         String fileName = getString(R.string.mix_network_filename);
@@ -47,21 +55,37 @@ public class MainActivity extends AppCompatActivity {
                         }
 
                         reader.close();
+                    } catch (IOException ex) {
+                        throw new RuntimeException("Failed to read the mix network configuration", ex);
+                    }
+
+                    try {
+                        String fileName = getString(R.string.recipient_keys_filename);
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(getAssets().open(fileName)));
+
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            String[] splitLine = line.split(",");
+                            String recipient = splitLine[0];
+                            String encodedPublicKey = splitLine[1];
+                            dbQuery.insertRecipient(new Recipient(recipient, encodedPublicKey));
+                        }
+
+                        reader.close();
 
                         SharedPreferences.Editor editor = sharedPreferences.edit();
                         editor.putBoolean(getString(R.string.key_setup_done), true);
                         editor.apply();
                     } catch (IOException ex) {
-                        throw new RuntimeException("Failed to read the mix network configuration", ex);
+                        throw new RuntimeException("Failed to read the recipient keys", ex);
                     }
                 }
             }).start();
         }
 
         // Test Config key setting
-        Context context = getApplicationContext();
-        Config.setKey(R.string.key_proxy_pop3_port,  "27000",     context);
-        Config.setKey(R.string.key_proxy_smtp_port,  "28000",     context);
+        Config.setKey(R.string.key_proxy_pop3_port,   "27000",     context);
+        Config.setKey(R.string.key_proxy_smtp_port,   "28000",     context);
         Config.setKey(R.string.key_proxy_username,   "proxyuser", context);
         Config.setKey(R.string.key_proxy_password,   "12345",     context);
         Config.setKey(R.string.key_mailbox_hostname, "localhost", context);
@@ -99,7 +123,11 @@ public class MainActivity extends AppCompatActivity {
                 DBQuery dbQuery = db.getDao();
                 POP3Client pop3Client = new POP3Client();
                 pop3Client.setDefaultTimeout(60000);
-                Mailbox mailbox = new Mailbox(server, port, username, password, dbQuery, pop3Client);
+
+                PrivateKey privateKey = Config.getPrivateKey(context);
+                EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
+
+                Mailbox mailbox = new Mailbox(server, port, username, password, dbQuery, pop3Client, endToEndCrypto, privateKey);
                 mailbox.updateMailbox();
             }
         }).start();

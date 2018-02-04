@@ -16,12 +16,14 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
+import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import static com.robertsoultanaev.javasphinx.Util.concatByteArrays;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.ignoreStubs;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -29,6 +31,9 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MailboxTest {
+
+    @Mock
+    private EndToEndCrypto endToEndCrypto;
 
     @Mock
     private DBQuery dbQuery;
@@ -46,6 +51,8 @@ public class MailboxTest {
         UUID msgId = UUID.randomUUID();
         String packet1Str = "header1\r\n" + "header2\r\n" + "\r\n" + "body1\r\n" + "body1\r\n";
         String packet2Str = "body3\r\n" + "body4\r\n";
+
+        AssembledMessage assembledMessage = new AssembledMessage(msgId.toString(), (packet1Str + packet2Str).getBytes());
 
         ByteBuffer packet1HeaderBf = ByteBuffer.allocate(SphinxUtil.PACKET_HEADER_SIZE);
         packet1HeaderBf.putLong(msgId.getMostSignificantBits());
@@ -89,6 +96,8 @@ public class MailboxTest {
         orderedPackets.add(new Packet(msgId.toString(), 0, 2, packet1Str.getBytes()));
         orderedPackets.add(new Packet(msgId.toString(), 1, 2, packet2Str.getBytes()));
 
+        PrivateKey privateKey = (new EndToEndCrypto()).generateKeyPair().getPrivate();
+
         doNothing().when(pop3Client).connect(pop3Server, port);
         when(pop3Client.login(username, password)).thenReturn(true);
         when(pop3Client.status()).thenReturn(status);
@@ -105,7 +114,9 @@ public class MailboxTest {
         when(dbQuery.getPackets(msgId.toString())).thenReturn(orderedPackets);
         doNothing().when(dbQuery).addAssembledMessage(any(AssembledMessage.class));
 
-        Mailbox mailbox = new Mailbox(pop3Server, port, username, password, dbQuery, pop3Client);
+        when(endToEndCrypto.endToEndDecrypt(eq(privateKey), any(byte[].class))).thenReturn(assembledMessage.messageBody);
+
+        Mailbox mailbox = new Mailbox(pop3Server, port, username, password, dbQuery, pop3Client, endToEndCrypto, privateKey);
         mailbox.updateMailbox();
 
         verifyNoMoreInteractions(ignoreStubs(pop3Client));

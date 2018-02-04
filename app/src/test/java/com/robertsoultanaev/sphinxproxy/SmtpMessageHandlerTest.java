@@ -1,5 +1,8 @@
 package com.robertsoultanaev.sphinxproxy;
 
+import com.robertsoultanaev.sphinxproxy.database.DBQuery;
+import com.robertsoultanaev.sphinxproxy.database.Recipient;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.CoreMatchers.*;
 import static org.mockito.Mockito.*;
@@ -10,9 +13,16 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.security.PublicKey;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SmtpMessageHandlerTest {
+
+    @Mock
+    private DBQuery dbQuery;
+
+    @Mock
+    private EndToEndCrypto endToEndCrypto;
 
     @Mock
     private SphinxUtil sphinxUtil;
@@ -32,34 +42,52 @@ public class SmtpMessageHandlerTest {
                         + "Robert\r\n";
 
         byte[] email = emailStr.getBytes();
+        byte[] encryptedEmail = new byte[100];
 
         InputStream emailStream = new ByteArrayInputStream(email);
-        String recipient = "mort@rsoultanaev.com";
+        String recipientAddress = "mort@rsoultanaev.com";
+        PublicKey recipientPublicKey = (new EndToEndCrypto()).generateKeyPair().getPublic();
+        String encodedRecipientPublicKey = "encodedPublicKey";
+        Recipient recipient = new Recipient(recipientAddress, encodedRecipientPublicKey);
+
         String from = "robert@sphinx.com";
 
-        when(sphinxUtil.splitIntoSphinxPackets(email, recipient)).thenReturn(sphinxPackets);
+        when(endToEndCrypto.decodePublicKey(encodedRecipientPublicKey)).thenReturn(recipientPublicKey);
+        when(endToEndCrypto.endToEndEncrypt(recipientPublicKey, email)).thenReturn(encryptedEmail);
+        when(dbQuery.getRecipient(recipientAddress)).thenReturn(recipient);
+        when(sphinxUtil.splitIntoSphinxPackets(encryptedEmail, recipientAddress)).thenReturn(sphinxPackets);
         doNothing().when(asyncTcpClient).sendMessage(packet1);
         doNothing().when(asyncTcpClient).sendMessage(packet2);
 
-        SmtpMessageHandler smtpMessageHandler = new SmtpMessageHandler(sphinxUtil, asyncTcpClient);
-        smtpMessageHandler.deliver(from, recipient, emailStream);
+        SmtpMessageHandler smtpMessageHandler = new SmtpMessageHandler(sphinxUtil, asyncTcpClient, dbQuery, endToEndCrypto);
+        smtpMessageHandler.deliver(from, recipientAddress, emailStream);
 
-        verify(sphinxUtil, times(1)).splitIntoSphinxPackets(email, recipient);
+        verify(sphinxUtil, times(1)).splitIntoSphinxPackets(email, recipientAddress);
         verify(asyncTcpClient, times(1)).sendMessage(packet1);
         verify(asyncTcpClient, times(1)).sendMessage(packet2);
         verifyNoMoreInteractions(ignoreStubs(sphinxUtil));
         verifyNoMoreInteractions(ignoreStubs(asyncTcpClient));
+        verifyNoMoreInteractions(ignoreStubs(dbQuery));
+        verifyNoMoreInteractions(ignoreStubs(endToEndCrypto));
     }
 
     @Test
     public void acceptTest() throws Exception {
-        SmtpMessageHandler smtpMessageHandler = new SmtpMessageHandler(sphinxUtil, asyncTcpClient);
-        String recipient = "mort@rsoultanaev.com";
+        String recipientAddress = "mort@rsoultanaev.com";
+        String encodedRecipientPublicKey = "encodedPublicKey";
+        Recipient recipient = new Recipient(recipientAddress, encodedRecipientPublicKey);
+
         String from = "robert@sphinx.com";
-        boolean result = smtpMessageHandler.accept(from, recipient);
+
+        when(dbQuery.getRecipient(recipientAddress)).thenReturn(recipient);
+
+        SmtpMessageHandler smtpMessageHandler = new SmtpMessageHandler(sphinxUtil, asyncTcpClient, dbQuery, endToEndCrypto);
+        boolean result = smtpMessageHandler.accept(from, recipientAddress);
 
         assertThat(result, is(true));
         verifyNoMoreInteractions(ignoreStubs(sphinxUtil));
         verifyNoMoreInteractions(ignoreStubs(asyncTcpClient));
+        verifyNoMoreInteractions(ignoreStubs(dbQuery));
+        verifyNoMoreInteractions(ignoreStubs(endToEndCrypto));
     }
 }
