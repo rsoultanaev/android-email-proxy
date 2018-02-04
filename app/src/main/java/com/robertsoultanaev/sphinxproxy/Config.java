@@ -27,9 +27,13 @@ public class Config {
     }
 
     public static void setKeyPair(KeyPair keyPair, Context context) {
-        EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
-        String encodedPrivateKey = endToEndCrypto.encodeKey(keyPair.getPrivate());
-        String encodedPublicKey = endToEndCrypto.encodeKey(keyPair.getPublic());
+//        EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
+//        String encodedPrivateKey = endToEndCrypto.encodeKey(keyPair.getPrivate());
+//        String encodedPublicKey = endToEndCrypto.encodeKey(keyPair.getPublic());
+
+        // Fix keys for now to do testing
+        String encodedPrivateKey = "MIGBAgEAMBAGByqGSM49AgEGBSuBBAAhBGowaAIBAQQcLbF1DZ8Tz9Yttnovor3I7FHhdNI/hnDfLEUiqaAHBgUrgQQAIaE8AzoABCNvOS14yIEldac3N0kxLbLEl6N4ckASZB0JfDu0wr3yH8pBFCmU9u3V5IYtFgB1PU/4ai+JMc5D";
+        String encodedPublicKey = "ME4wEAYHKoZIzj0CAQYFK4EEACEDOgAEI285LXjIgSV1pzc3STEtssSXo3hyQBJkHQl8O7TCvfIfykEUKZT27dXkhi0WAHU9T/hqL4kxzkM=";
 
         String sharedPreferencesFile = context.getString(R.string.key_preference_file);
         String keyPrivateKey = context.getString(R.string.key_private_key);
