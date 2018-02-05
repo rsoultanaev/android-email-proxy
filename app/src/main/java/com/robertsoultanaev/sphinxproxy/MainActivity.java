@@ -13,12 +13,17 @@ import com.robertsoultanaev.sphinxproxy.database.MixNode;
 import com.robertsoultanaev.sphinxproxy.database.Recipient;
 
 import org.apache.commons.net.pop3.POP3Client;
+import org.apache.commons.net.pop3.POP3SClient;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.KeyPair;
 import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
+
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -121,8 +126,23 @@ public class MainActivity extends AppCompatActivity {
 
                 DB db = DB.getAppDatabase(context);
                 DBQuery dbQuery = db.getDao();
-                POP3Client pop3Client = new POP3Client();
+
+                POP3SClient pop3Client = new POP3SClient(true);
                 pop3Client.setDefaultTimeout(60000);
+
+                TrustManager trustAllCerts = new X509TrustManager() {
+                    public X509Certificate[] getAcceptedIssuers() {
+                        return new X509Certificate[0];
+                    }
+                    public void checkClientTrusted(
+                            java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+                    public void checkServerTrusted(
+                            java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+                };
+
+                pop3Client.setTrustManager(trustAllCerts);
 
                 PrivateKey privateKey = Config.getPrivateKey(context);
                 EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
