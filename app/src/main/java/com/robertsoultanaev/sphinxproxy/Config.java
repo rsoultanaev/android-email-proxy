@@ -3,9 +3,19 @@ package com.robertsoultanaev.sphinxproxy;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.KeyPair;
+import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 
 public class Config {
     public static void setKey(int keyId, String value, Context context) {
@@ -61,8 +71,6 @@ public class Config {
         return endToEndCrypto.decodePrivateKey(base64EncodedPrivateKey);
     }
 
-
-
     public static PublicKey getPublicKey(Context context) {
         EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
         String sharedPreferencesFile = context.getString(R.string.key_preference_file);
@@ -76,5 +84,33 @@ public class Config {
         }
 
         return endToEndCrypto.decodePublicKey(base64EncodedPublicKey);
+    }
+
+    public static TrustManager getTrustManager(Context context) {
+        String certString = getKey(R.string.key_mailbox_cert, context);
+        TrustManager trustManager;
+
+        try {
+            CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+            InputStream certInput = new ByteArrayInputStream(certString.getBytes());
+
+            Certificate ca = certFactory.generateCertificate(certInput);;
+            certInput.close();
+
+            String keyStoreType = KeyStore.getDefaultType();
+            KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+            keyStore.load(null, null);
+            keyStore.setCertificateEntry("ca", ca);
+
+            String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
+            tmf.init(keyStore);
+
+            trustManager = tmf.getTrustManagers()[0];
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to load the trust manager", ex);
+        }
+
+        return trustManager;
     }
 }

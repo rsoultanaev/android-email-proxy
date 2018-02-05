@@ -12,7 +12,6 @@ import com.robertsoultanaev.sphinxproxy.database.DBQuery;
 import com.robertsoultanaev.sphinxproxy.database.MixNode;
 import com.robertsoultanaev.sphinxproxy.database.Recipient;
 
-import org.apache.commons.net.pop3.POP3Client;
 import org.apache.commons.net.pop3.POP3SClient;
 
 import java.io.BufferedReader;
@@ -20,10 +19,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.KeyPair;
 import java.security.PrivateKey;
-import java.security.cert.X509Certificate;
 
 import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -77,13 +74,30 @@ public class MainActivity extends AppCompatActivity {
                         }
 
                         reader.close();
-
-                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putBoolean(getString(R.string.key_setup_done), true);
-                        editor.apply();
                     } catch (IOException ex) {
                         throw new RuntimeException("Failed to read the recipient keys", ex);
                     }
+
+                    try {
+                        String fileName = getString(R.string.mailbox_cert_filename);
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(getAssets().open(fileName)));
+                        StringBuilder sb = new StringBuilder();
+
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            sb.append(line);
+                        }
+
+                        reader.close();
+
+                        Config.setKey(R.string.key_mailbox_cert, sb.toString(), context);
+                    } catch (IOException ex) {
+                        throw new RuntimeException("Failed to read the recipient keys", ex);
+                    }
+
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putBoolean(getString(R.string.key_setup_done), true);
+                    editor.apply();
                 }
             }).start();
         }
@@ -127,22 +141,10 @@ public class MainActivity extends AppCompatActivity {
                 DB db = DB.getAppDatabase(context);
                 DBQuery dbQuery = db.getDao();
 
+                TrustManager trustManager = Config.getTrustManager(context);
                 POP3SClient pop3Client = new POP3SClient(true);
                 pop3Client.setDefaultTimeout(60000);
-
-                TrustManager trustAllCerts = new X509TrustManager() {
-                    public X509Certificate[] getAcceptedIssuers() {
-                        return new X509Certificate[0];
-                    }
-                    public void checkClientTrusted(
-                            java.security.cert.X509Certificate[] certs, String authType) {
-                    }
-                    public void checkServerTrusted(
-                            java.security.cert.X509Certificate[] certs, String authType) {
-                    }
-                };
-
-                pop3Client.setTrustManager(trustAllCerts);
+                pop3Client.setTrustManager(trustManager);
 
                 PrivateKey privateKey = Config.getPrivateKey(context);
                 EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
