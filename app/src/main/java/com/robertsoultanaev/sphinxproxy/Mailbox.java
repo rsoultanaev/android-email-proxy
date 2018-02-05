@@ -5,8 +5,8 @@ import com.robertsoultanaev.sphinxproxy.database.DBQuery;
 import com.robertsoultanaev.sphinxproxy.database.Packet;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.net.pop3.POP3Client;
 import org.apache.commons.net.pop3.POP3MessageInfo;
+import org.apache.commons.net.pop3.POP3SClient;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,13 +18,13 @@ public class Mailbox {
     private int port;
     private String username;
     private String password;
-    private POP3Client pop3Client;
+    private POP3SClient pop3Client;
     private DBQuery dbQuery;
     private EndToEndCrypto endToEndCrypto;
     private PrivateKey privateKey;
     private SphinxUtil sphinxUtil;
 
-    public Mailbox(String mailServer, int port, String username, String password, DBQuery dbQuery, POP3Client pop3Client, EndToEndCrypto endToEndCrypto, PrivateKey privateKey, SphinxUtil sphinxUtil) {
+    public Mailbox(String mailServer, int port, String username, String password, DBQuery dbQuery, POP3SClient pop3Client, EndToEndCrypto endToEndCrypto, PrivateKey privateKey, SphinxUtil sphinxUtil) {
         this.mailServer = mailServer;
         this.port = port;
         this.username = username;

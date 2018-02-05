@@ -16,7 +16,9 @@
     <string name="key_mailbox_password">mailboxPassword</string>
     <string name="key_private_key">privateKey</string>
     <string name="key_public_key">publicKey</string>
+    <string name="key_mailbox_cert">mailboxCert</string>
 
     <string name="mix_network_filename">mix_network.csv</string>
     <string name="recipient_keys_filename">recipient_keys.csv</string>
+    <string name="mailbox_cert_filename">mailbox.cert</string>
 </resources>

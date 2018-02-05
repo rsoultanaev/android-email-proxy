@@ -6,6 +6,7 @@ import com.robertsoultanaev.sphinxproxy.database.Packet;
 
 import org.apache.commons.net.pop3.POP3Client;
 import org.apache.commons.net.pop3.POP3MessageInfo;
+import org.apache.commons.net.pop3.POP3SClient;
 import org.bouncycastle.util.encoders.Base64;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,7 +43,7 @@ public class MailboxTest {
     private DBQuery dbQuery;
 
     @Mock
-    private POP3Client pop3Client;
+    private POP3SClient pop3Client;
 
     @Test
     public void updateTest() throws Exception {
