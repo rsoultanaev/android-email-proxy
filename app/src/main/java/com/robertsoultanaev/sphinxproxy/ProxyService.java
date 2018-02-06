@@ -84,8 +84,4 @@ public class ProxyService extends Service {
     public IBinder onBind(Intent intent) {
         return null;
     }
-
-    public void func() {
-
-    }
 }
