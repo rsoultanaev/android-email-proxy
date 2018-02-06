@@ -30,4 +30,7 @@
     <string name="mix_network_filename">mix_network.csv</string>
     <string name="recipient_keys_filename">recipient_keys.csv</string>
     <string name="mailbox_cert_filename">mailbox.cert</string>
+
+    <string name="textview_pop3_port">POP3 port</string>
+    <string name="textview_smtp_port">SMTP port</string>
 </resources>

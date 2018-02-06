@@ -40,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
         Config.setKey(R.string.key_mailbox_username, getString(R.string.default_mailbox_username), context);
         Config.setKey(R.string.key_mailbox_password, getString(R.string.default_mailbox_password), context);
 
+
+
         // Read mix network configuration and save into database when first installed
         String sharedPreferencesFile = getString(R.string.key_preference_file);
         String setupDoneKey = getString(R.string.key_setup_done);
