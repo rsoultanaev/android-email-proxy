@@ -1,8 +1,9 @@
 <resources>
     <string name="app_name">SphinxProxy</string>
-    <string name="start_service">Start Service</string>
-    <string name="stop_service">Stop Service</string>
-    <string name="trigger_test">Trigger Test</string>
+
+    <string name="mix_network_filename">mix_network.csv</string>
+    <string name="recipient_keys_filename">recipient_keys.csv</string>
+    <string name="mailbox_cert_filename">mailbox.cert</string>
 
     <string name="key_preference_file">preferenceFile</string>
     <string name="key_setup_done">setupDone</string>
@@ -18,7 +19,27 @@
     <string name="key_public_key">publicKey</string>
     <string name="key_mailbox_cert">mailboxCert</string>
 
-    <string name="mix_network_filename">mix_network.csv</string>
-    <string name="recipient_keys_filename">recipient_keys.csv</string>
-    <string name="mailbox_cert_filename">mailbox.cert</string>
+    <string name="default_proxy_pop3_port">27000</string>
+    <string name="default_proxy_smtp_port">28000</string>
+    <string name="default_proxy_username">proxyuser</string>
+    <string name="default_proxy_password">12345</string>
+    <string name="default_mailbox_hostname">localhost</string>
+    <string name="default_mailbox_port">11000</string>
+    <string name="default_mailbox_username">mort</string>
+    <string name="default_mailbox_password">1234</string>
+
+    <string name="textview_pop3_port">POP3 port</string>
+    <string name="textview_smtp_port">SMTP port</string>
+    <string name="textview_proxy_username">Sphinx proxy username</string>
+    <string name="textview_proxy_password">Sphinx proxy password</string>
+    <string name="textview_mailbox_hostname">Mailbox hostname</string>
+    <string name="textview_mailbox_port">Mailbox port</string>
+    <string name="textview_mailbox_username">Mailbox username</string>
+    <string name="textview_mailbox_password">Mailbox password</string>
+
+    <string name="button_save_config">Save config</string>
+    <string name="button_start_service">Start Service</string>
+    <string name="button_stop_service">Stop Service</string>
+    <string name="button_pull_from_mailbox">Pull from mailbox</string>
+    <string name="button_edit_config">Edit config</string>
 </resources>

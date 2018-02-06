@@ -24,6 +24,8 @@ import javax.net.ssl.TrustManager;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static final int EDIT_CONFIG_REQUEST = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,6 +37,16 @@ public class MainActivity extends AppCompatActivity {
         String setupDoneKey = getString(R.string.key_setup_done);
         final SharedPreferences sharedPreferences = getSharedPreferences(sharedPreferencesFile, Context.MODE_PRIVATE);
         if (!sharedPreferences.getBoolean(setupDoneKey, false)) {
+            // Set default config
+            Config.setKey(R.string.key_proxy_pop3_port, getString(R.string.default_proxy_pop3_port), context);
+            Config.setKey(R.string.key_proxy_smtp_port, getString(R.string.default_proxy_smtp_port), context);
+            Config.setKey(R.string.key_proxy_username, getString(R.string.default_proxy_username), context);
+            Config.setKey(R.string.key_proxy_password, getString(R.string.default_proxy_password), context);
+            Config.setKey(R.string.key_mailbox_hostname, getString(R.string.default_mailbox_hostname), context);
+            Config.setKey(R.string.key_mailbox_port, getString(R.string.default_mailbox_port), context);
+            Config.setKey(R.string.key_mailbox_username, getString(R.string.default_mailbox_username), context);
+            Config.setKey(R.string.key_mailbox_password, getString(R.string.default_mailbox_password), context);
+
             new Thread(new Runnable() {
                 public void run() {
                     DB db = DB.getAppDatabase(context);
@@ -101,16 +113,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }).start();
         }
-
-        // Test Config key setting
-        Config.setKey(R.string.key_proxy_pop3_port,   "27000",     context);
-        Config.setKey(R.string.key_proxy_smtp_port,   "28000",     context);
-        Config.setKey(R.string.key_proxy_username,   "proxyuser", context);
-        Config.setKey(R.string.key_proxy_password,   "12345",     context);
-        Config.setKey(R.string.key_mailbox_hostname, "localhost", context);
-        Config.setKey(R.string.key_mailbox_port,     "11000",     context);
-        Config.setKey(R.string.key_mailbox_username, "mort",      context);
-        Config.setKey(R.string.key_mailbox_password, "1234",      context);
     }
 
     public void startProxy(View view) {
@@ -129,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
         stopService(proxyIntent);
     }
 
-    public void triggerTest(View view) {
+    public void pullFromMailbox(View view) {
         new Thread(new Runnable() {
             public void run() {
                 Context context = getApplicationContext();
@@ -155,5 +157,10 @@ public class MainActivity extends AppCompatActivity {
                 mailbox.updateMailbox();
             }
         }).start();
+    }
+
+    public void editConfig(View view) {
+        Intent configIntent = new Intent(this, ConfigActivity.class);
+        startActivityForResult(configIntent, EDIT_CONFIG_REQUEST);
     }
 }

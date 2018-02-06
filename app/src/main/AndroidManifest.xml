@@ -9,7 +9,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.robertsoultanaev.sphinxproxy.MainActivity">
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -18,9 +18,11 @@
         </activity>
 
         <service
-            android:name="com.robertsoultanaev.sphinxproxy.ProxyService"
+            android:name=".ProxyService"
             android:enabled="true"
             android:exported="true" />
+
+        <activity android:name=".ConfigActivity"></activity>
     </application>
 
 </manifest>

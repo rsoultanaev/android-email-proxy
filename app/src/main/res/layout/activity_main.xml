@@ -7,49 +7,58 @@
     tools:context="com.robertsoultanaev.sphinxproxy.MainActivity">
 
     <Button
-        android:id="@+id/trigger_test"
+        android:id="@+id/buttonPullFromMailbox"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="170dp"
-        android:layout_marginEnd="137dp"
-        android:layout_marginStart="137dp"
-        android:layout_marginTop="270dp"
-        android:onClick="triggerTest"
-        android:text="@string/trigger_test"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_height="46dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:onClick="pullFromMailbox"
+        android:text="@string/button_pull_from_mailbox"
+        app:layout_constraintBottom_toTopOf="@+id/buttonStartService"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/start_service_button"
+        android:id="@+id/buttonStartService"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="128dp"
-        android:layout_marginEnd="137dp"
-        android:layout_marginStart="137dp"
-        android:layout_marginTop="335dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:onClick="startProxy"
-        android:text="@string/start_service"
+        android:text="@string/button_start_service"
+        app:layout_constraintBottom_toTopOf="@+id/buttonStopService"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/buttonStopService"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="28dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:onClick="stopProxy"
+        android:text="@string/button_stop_service"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/buttonEditConfig"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:onClick="editConfig"
+        android:text="@string/button_edit_config"
+        app:layout_constraintBottom_toTopOf="@+id/buttonPullFromMailbox"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.501"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0" />
-
-    <Button
-        android:id="@+id/stop_service_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="63dp"
-        android:layout_marginEnd="133dp"
-        android:layout_marginStart="133dp"
-        android:layout_marginTop="17dp"
-        android:text="@string/stop_service"
-        android:onClick="stopProxy"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/start_service_button" />
 </android.support.constraint.ConstraintLayout>
