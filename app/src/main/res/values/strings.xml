@@ -18,6 +18,15 @@
     <string name="key_public_key">publicKey</string>
     <string name="key_mailbox_cert">mailboxCert</string>
 
+    <string name="default_proxy_pop3_port">27000</string>
+    <string name="default_proxy_smtp_port">28000</string>
+    <string name="default_proxy_username">proxyuser</string>
+    <string name="default_proxy_password">12345</string>
+    <string name="default_mailbox_hostname">localhost</string>
+    <string name="default_mailbox_port">11000</string>
+    <string name="default_mailbox_username">mort</string>
+    <string name="default_mailbox_password">1234</string>
+
     <string name="mix_network_filename">mix_network.csv</string>
     <string name="recipient_keys_filename">recipient_keys.csv</string>
     <string name="mailbox_cert_filename">mailbox.cert</string>

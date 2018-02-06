@@ -30,6 +30,16 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         final Context context = getApplicationContext();
 
+        // Set default config
+        Config.setKey(R.string.key_proxy_pop3_port, getString(R.string.default_proxy_pop3_port), context);
+        Config.setKey(R.string.key_proxy_smtp_port, getString(R.string.default_proxy_smtp_port), context);
+        Config.setKey(R.string.key_proxy_username, getString(R.string.default_proxy_username), context);
+        Config.setKey(R.string.key_proxy_password, getString(R.string.default_proxy_password), context);
+        Config.setKey(R.string.key_mailbox_hostname, getString(R.string.default_mailbox_hostname), context);
+        Config.setKey(R.string.key_mailbox_port, getString(R.string.default_mailbox_port), context);
+        Config.setKey(R.string.key_mailbox_username, getString(R.string.default_mailbox_username), context);
+        Config.setKey(R.string.key_mailbox_password, getString(R.string.default_mailbox_password), context);
+
         // Read mix network configuration and save into database when first installed
         String sharedPreferencesFile = getString(R.string.key_preference_file);
         String setupDoneKey = getString(R.string.key_setup_done);
@@ -101,16 +111,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }).start();
         }
-
-        // Test Config key setting
-        Config.setKey(R.string.key_proxy_pop3_port,   "27000",     context);
-        Config.setKey(R.string.key_proxy_smtp_port,   "28000",     context);
-        Config.setKey(R.string.key_proxy_username,   "proxyuser", context);
-        Config.setKey(R.string.key_proxy_password,   "12345",     context);
-        Config.setKey(R.string.key_mailbox_hostname, "localhost", context);
-        Config.setKey(R.string.key_mailbox_port,     "11000",     context);
-        Config.setKey(R.string.key_mailbox_username, "mort",      context);
-        Config.setKey(R.string.key_mailbox_password, "1234",      context);
     }
 
     public void startProxy(View view) {
