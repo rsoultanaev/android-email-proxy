@@ -6,43 +6,87 @@
     android:layout_height="match_parent"
     tools:context="com.robertsoultanaev.sphinxproxy.ConfigActivity">
 
-    <TextView
-        android:id="@+id/textViewPop3Port"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/textview_pop3_port"
+    <EditText
+        android:id="@+id/editTextMailboxUsername"
+        android:layout_width="171dp"
+        android:layout_height="45dp"
+        android:ems="10"
+        android:hint="@string/textview_mailbox_username"
+        android:inputType="text"
         tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="27dp" />
+        tools:layout_editor_absoluteY="259dp" />
+
+
+    <EditText
+        android:id="@+id/editTextMailboxHostname"
+        android:layout_width="172dp"
+        android:layout_height="45dp"
+        android:ems="10"
+        android:hint="@string/textview_mailbox_hostname"
+        android:inputType="text"
+        tools:layout_editor_absoluteX="15dp"
+        tools:layout_editor_absoluteY="186dp" />
+
+    <EditText
+        android:id="@+id/editTextProxyUsername"
+        android:layout_width="175dp"
+        android:layout_height="45dp"
+        android:ems="10"
+        android:hint="@string/textview_proxy_username"
+        android:inputType="text"
+        tools:layout_editor_absoluteX="13dp"
+        tools:layout_editor_absoluteY="116dp" />
 
     <EditText
         android:id="@+id/editTextPop3Port"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="177dp"
+        android:layout_height="45dp"
         android:ems="10"
         android:hint="@string/textview_pop3_port"
         android:inputType="text"
-        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteX="11dp"
         tools:layout_editor_absoluteY="46dp" />
 
-
-    <TextView
-        android:id="@+id/textViewSmtpPort"
-        android:layout_width="wrap_content"
+    <EditText
+        android:id="@+id/editTextMailboxPassword"
+        android:layout_width="156dp"
         android:layout_height="wrap_content"
-        android:text="@string/textview_smtp_port"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="111dp" />
+        android:ems="10"
+        android:hint="@string/textview_mailbox_password"
+        android:inputType="text"
+        tools:layout_editor_absoluteX="210dp"
+        tools:layout_editor_absoluteY="259dp" />
+
+
+    <EditText
+        android:id="@+id/editTextMailboxPort"
+        android:layout_width="158dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="@string/textview_mailbox_port"
+        android:inputType="text"
+        tools:layout_editor_absoluteX="208dp"
+        tools:layout_editor_absoluteY="186dp" />
+
+    <EditText
+        android:id="@+id/editTextProxyPassword"
+        android:layout_width="159dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="@string/textview_proxy_password"
+        android:inputType="text"
+        tools:layout_editor_absoluteX="206dp"
+        tools:layout_editor_absoluteY="116dp" />
 
     <EditText
         android:id="@+id/editTextSmtpPort"
-        android:layout_width="wrap_content"
+        android:layout_width="161dp"
         android:layout_height="wrap_content"
         android:ems="10"
         android:hint="@string/textview_smtp_port"
         android:inputType="text"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="134dp" />
-
+        tools:layout_editor_absoluteX="205dp"
+        tools:layout_editor_absoluteY="46dp" />
 
     <Button
         android:id="@+id/buttonSaveConfig"
