@@ -36,6 +36,12 @@ public class ConfigActivity extends AppCompatActivity {
 
         editTextPop3Port.setText(pop3Port);
         editTextSmtpPort.setText(smtpPort);
+        editTextProxyUsername.setText(proxyUsername);
+        editTextProxyPassword.setText(proxyPassword);
+        editTextMailboxHostname.setText(mailboxHostname);
+        editTextMailboxPort.setText(mailboxPort);
+        editTextMailboxUsername.setText(mailboxUsername);
+        editTextMailboxPassword.setText(mailboxPassword);
     }
 
     public void saveConfig(View view) {
