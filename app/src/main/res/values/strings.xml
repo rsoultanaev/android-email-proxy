@@ -39,4 +39,6 @@
     <string name="textview_mailbox_port">Mailbox port</string>
     <string name="textview_mailbox_username">Mailbox username</string>
     <string name="textview_mailbox_password">Mailbox password</string>
+
+    <string name="button_save_config">Save config</string>
 </resources>
