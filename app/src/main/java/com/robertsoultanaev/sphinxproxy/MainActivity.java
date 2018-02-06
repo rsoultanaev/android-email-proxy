@@ -106,12 +106,15 @@ public class MainActivity extends AppCompatActivity {
                     } catch (IOException ex) {
                         throw new RuntimeException("Failed to read the recipient keys", ex);
                     }
-
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putBoolean(getString(R.string.key_setup_done), true);
-                    editor.apply();
                 }
             }).start();
+
+            Intent configIntent = new Intent(this, ConfigActivity.class);
+            startActivityForResult(configIntent, EDIT_CONFIG_REQUEST);
+
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean(getString(R.string.key_setup_done), true);
+            editor.apply();
         }
     }
 
