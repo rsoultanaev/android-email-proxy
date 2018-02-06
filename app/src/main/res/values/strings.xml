@@ -4,6 +4,10 @@
     <string name="stop_service">Stop Service</string>
     <string name="trigger_test">Trigger Test</string>
 
+    <string name="mix_network_filename">mix_network.csv</string>
+    <string name="recipient_keys_filename">recipient_keys.csv</string>
+    <string name="mailbox_cert_filename">mailbox.cert</string>
+
     <string name="key_preference_file">preferenceFile</string>
     <string name="key_setup_done">setupDone</string>
     <string name="key_proxy_pop3_port">proxyPop3Port</string>
@@ -27,10 +31,12 @@
     <string name="default_mailbox_username">mort</string>
     <string name="default_mailbox_password">1234</string>
 
-    <string name="mix_network_filename">mix_network.csv</string>
-    <string name="recipient_keys_filename">recipient_keys.csv</string>
-    <string name="mailbox_cert_filename">mailbox.cert</string>
-
     <string name="textview_pop3_port">POP3 port</string>
     <string name="textview_smtp_port">SMTP port</string>
+    <string name="textview_proxy_username">Sphinx proxy username</string>
+    <string name="textview_proxy_password">Sphinx proxy password</string>
+    <string name="textview_mailbox_hostname">Mailbox hostname</string>
+    <string name="textview_mailbox_port">Mailbox port</string>
+    <string name="textview_mailbox_username">Mailbox username</string>
+    <string name="textview_mailbox_password">Mailbox password</string>
 </resources>
