@@ -1,8 +1,5 @@
 <resources>
     <string name="app_name">SphinxProxy</string>
-    <string name="start_service">Start Service</string>
-    <string name="stop_service">Stop Service</string>
-    <string name="trigger_test">Trigger Test</string>
 
     <string name="mix_network_filename">mix_network.csv</string>
     <string name="recipient_keys_filename">recipient_keys.csv</string>
@@ -41,4 +38,8 @@
     <string name="textview_mailbox_password">Mailbox password</string>
 
     <string name="button_save_config">Save config</string>
+    <string name="button_start_service">Start Service</string>
+    <string name="button_stop_service">Stop Service</string>
+    <string name="button_pull_from_mailbox">Pull from mailbox</string>
+    <string name="button_edit_config">Edit config</string>
 </resources>
