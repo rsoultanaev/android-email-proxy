@@ -6,94 +6,145 @@
     android:layout_height="match_parent"
     tools:context="com.robertsoultanaev.sphinxproxy.ConfigActivity">
 
-    <EditText
-        android:id="@+id/editTextMailboxUsername"
-        android:layout_width="171dp"
-        android:layout_height="45dp"
-        android:ems="10"
-        android:hint="@string/textview_mailbox_username"
-        android:inputType="text"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="259dp" />
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="16dp">
 
-    <EditText
-        android:id="@+id/editTextMailboxHostname"
-        android:layout_width="172dp"
-        android:layout_height="45dp"
-        android:ems="10"
-        android:hint="@string/textview_mailbox_hostname"
-        android:inputType="text"
-        tools:layout_editor_absoluteX="15dp"
-        tools:layout_editor_absoluteY="186dp" />
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-    <EditText
-        android:id="@+id/editTextProxyUsername"
-        android:layout_width="175dp"
-        android:layout_height="45dp"
-        android:ems="10"
-        android:hint="@string/textview_proxy_username"
-        android:inputType="text"
-        tools:layout_editor_absoluteX="13dp"
-        tools:layout_editor_absoluteY="116dp" />
+            <EditText
+                android:id="@+id/editTextPop3Port"
+                android:layout_width="wrap_content"
+                android:layout_height="45dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:ems="10"
+                android:hint="@string/textview_pop3_port"
+                android:inputType="text"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:layout_editor_absoluteY="16dp" />
 
-    <EditText
-        android:id="@+id/editTextPop3Port"
-        android:layout_width="177dp"
-        android:layout_height="45dp"
-        android:ems="10"
-        android:hint="@string/textview_pop3_port"
-        android:inputType="text"
-        tools:layout_editor_absoluteX="11dp"
-        tools:layout_editor_absoluteY="46dp" />
+            <EditText
+                android:id="@+id/editTextMailboxUsername"
+                android:layout_width="wrap_content"
+                android:layout_height="45dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:ems="10"
+                android:hint="@string/textview_mailbox_username"
+                android:inputType="text"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/editTextMailboxPort" />
 
-    <EditText
-        android:id="@+id/editTextMailboxPassword"
-        android:layout_width="156dp"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="@string/textview_mailbox_password"
-        android:inputType="text"
-        tools:layout_editor_absoluteX="210dp"
-        tools:layout_editor_absoluteY="259dp" />
+            <EditText
+                android:id="@+id/editTextMailboxPassword"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:ems="10"
+                android:hint="@string/textview_mailbox_password"
+                android:inputType="text"
+                app:layout_constraintBottom_toTopOf="@+id/buttonSaveConfig"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.503"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/editTextMailboxUsername"
+                app:layout_constraintVertical_bias="0.0" />
 
+            <EditText
+                android:id="@+id/editTextMailboxPort"
+                android:layout_width="216dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:ems="10"
+                android:hint="@string/textview_mailbox_port"
+                android:inputType="text"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/editTextMailboxHostname" />
 
-    <EditText
-        android:id="@+id/editTextMailboxPort"
-        android:layout_width="158dp"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="@string/textview_mailbox_port"
-        android:inputType="text"
-        tools:layout_editor_absoluteX="208dp"
-        tools:layout_editor_absoluteY="186dp" />
+            <EditText
+                android:id="@+id/editTextProxyUsername"
+                android:layout_width="wrap_content"
+                android:layout_height="45dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:ems="10"
+                android:hint="@string/textview_proxy_username"
+                android:inputType="text"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/editTextSmtpPort" />
 
-    <EditText
-        android:id="@+id/editTextProxyPassword"
-        android:layout_width="159dp"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="@string/textview_proxy_password"
-        android:inputType="text"
-        tools:layout_editor_absoluteX="206dp"
-        tools:layout_editor_absoluteY="116dp" />
+            <EditText
+                android:id="@+id/editTextMailboxHostname"
+                android:layout_width="wrap_content"
+                android:layout_height="45dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:ems="10"
+                android:hint="@string/textview_mailbox_hostname"
+                android:inputType="text"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/editTextProxyPassword" />
 
-    <EditText
-        android:id="@+id/editTextSmtpPort"
-        android:layout_width="161dp"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="@string/textview_smtp_port"
-        android:inputType="text"
-        tools:layout_editor_absoluteX="205dp"
-        tools:layout_editor_absoluteY="46dp" />
+            <Button
+                android:id="@+id/buttonSaveConfig"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:onClick="saveConfig"
+                android:text="@string/button_save_config"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:layout_editor_absoluteY="455dp" />
 
-    <Button
-        android:id="@+id/buttonSaveConfig"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/button_save_config"
-        tools:layout_editor_absoluteX="136dp"
-        tools:layout_editor_absoluteY="422dp"
-        android:onClick="saveConfig" />
+            <EditText
+                android:id="@+id/editTextProxyPassword"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:ems="10"
+                android:hint="@string/textview_proxy_password"
+                android:inputType="text"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/editTextProxyUsername" />
+
+            <EditText
+                android:id="@+id/editTextSmtpPort"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:ems="10"
+                android:hint="@string/textview_smtp_port"
+                android:inputType="text"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/editTextPop3Port" />
+
+        </android.support.constraint.ConstraintLayout>
+    </ScrollView>
+
 </android.support.constraint.ConstraintLayout>
