@@ -87,5 +87,39 @@ public class DatabaseTest {
         List<AssembledMessage> queryResult8 = dbQuery.getAssembledMessages();
         assertThat(queryResult8.isEmpty(), is(true));
     }
+
+    @Test
+    public void ignoreDuplicatePacketsTest() throws Exception {
+        String messageId = UUID.randomUUID().toString();
+        String packet1Body = "hello\r\n";
+        String packet2Body = "bye\r\n";
+
+        Packet packet1 = new Packet(messageId, 0, 2, packet1Body.getBytes());
+        Packet packet2 = new Packet(messageId, 1, 2, packet2Body.getBytes());
+
+        dbQuery.addPacket(packet1);
+        dbQuery.addPacket(packet2);
+
+        List<Packet> queryResult1 = dbQuery.getPackets(messageId);
+        assertThat(queryResult1.size(), is(2));
+        assertThat(queryResult1.get(0), is(packet1));
+        assertThat(queryResult1.get(1), is(packet2));
+
+        List<String> queryResult2 = dbQuery.getReadyPacketIds();
+        assertThat(queryResult2.size(), is(1));
+        assertThat(queryResult2.get(0), is(messageId));
+
+        dbQuery.addPacket(packet1);
+        dbQuery.addPacket(packet2);
+
+        List<Packet> queryResult3 = dbQuery.getPackets(messageId);
+        assertThat(queryResult3.size(), is(2));
+        assertThat(queryResult3.get(0), is(packet1));
+        assertThat(queryResult3.get(1), is(packet2));
+
+        List<String> queryResult4 = dbQuery.getReadyPacketIds();
+        assertThat(queryResult4.size(), is(1));
+        assertThat(queryResult4.get(0), is(messageId));
+    }
 }
 
