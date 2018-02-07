@@ -9,7 +9,6 @@ import com.robertsoultanaev.sphinxproxy.database.AssembledMessage;
 import com.robertsoultanaev.sphinxproxy.database.DB;
 import com.robertsoultanaev.sphinxproxy.database.DBQuery;
 import com.robertsoultanaev.sphinxproxy.database.Packet;
-import com.robertsoultanaev.sphinxproxy.database.PacketCount;
 
 import org.junit.After;
 import org.junit.Before;
@@ -41,7 +40,7 @@ public class DatabaseTest {
     }
 
     @Test
-    public void addAndAssemblePacketsTest() throws Exception {
+    public void packetsAndAssembledMessageTest() throws Exception {
         String messageId = UUID.randomUUID().toString();
         String packet1Body = "hello\r\n";
         String packet2Body = "bye\r\n";
@@ -82,6 +81,11 @@ public class DatabaseTest {
         List<AssembledMessage> queryResult7 = dbQuery.getAssembledMessages();
         assertThat(queryResult7.size(), is(1));
         assertThat(queryResult7.get(0), is(assembledMessage));
+
+        dbQuery.deleteAssembledMessage(messageId);
+
+        List<AssembledMessage> queryResult8 = dbQuery.getAssembledMessages();
+        assertThat(queryResult8.isEmpty(), is(true));
     }
 }
 
