@@ -52,10 +52,10 @@ public class SmtpMessageHandler implements SimpleMessageListener {
         PublicKey recipientPublicKey = endToEndCrypto.decodePublicKey(encodedRecipientPublicKey);
         byte[] endToEndEncryptedEmail = endToEndCrypto.endToEndEncrypt(recipientPublicKey, email);
 
-        byte[][] sphinxPackets = sphinxUtil.splitIntoSphinxPackets(endToEndEncryptedEmail, recipient);
+        SphinxPacketWithRouting[] sphinxPackets = sphinxUtil.splitIntoSphinxPackets(endToEndEncryptedEmail, recipient);
 
-        for (byte[] binMessage : sphinxPackets) {
-            asyncTcpClient.sendMessage(binMessage);
+        for (SphinxPacketWithRouting sphinxPacketWithRouting : sphinxPackets) {
+            asyncTcpClient.sendMessage(sphinxPacketWithRouting);
         }
     }
 }

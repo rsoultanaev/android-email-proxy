@@ -23,6 +23,7 @@ import org.bouncycastle.util.encoders.Hex;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -35,10 +36,12 @@ public class SphinxUtil {
     private class RoutingInformation {
         byte[][] nodesRouting;
         ECPoint[] nodeKeys;
+        int firstNodeId;
 
-        public RoutingInformation(byte[][] nodesRouting, ECPoint[] nodeKeys) {
+        public RoutingInformation(byte[][] nodesRouting, ECPoint[] nodeKeys, int firstNodeId) {
             this.nodesRouting = nodesRouting;
             this.nodeKeys = nodeKeys;
+            this.firstNodeId = firstNodeId;
         }
     }
 
@@ -55,7 +58,7 @@ public class SphinxUtil {
         }
     }
 
-    public byte[][] splitIntoSphinxPackets(byte[] email, String recipient) {
+    public SphinxPacketWithRouting[] splitIntoSphinxPackets(byte[] email, String recipient) {
         UUID messageId = UUID.randomUUID();
         byte[] dest = recipient.getBytes();
 
@@ -65,7 +68,7 @@ public class SphinxUtil {
         int targetEncodedSize = getMaxPayloadSize(params) - dest.length;
         int packetPayloadSize = (int) (((double) (3 * targetEncodedSize) / 4) - PACKET_HEADER_SIZE - 3);
         int packetsInMessage = (int) Math.ceil((double) email.length / packetPayloadSize);
-        byte[][] sphinxPackets = new byte[packetsInMessage][];
+        SphinxPacketWithRouting[] sphinxPackets = new SphinxPacketWithRouting[packetsInMessage];
 
         for (int i = 0; i < packetsInMessage; i++) {
 
@@ -78,7 +81,7 @@ public class SphinxUtil {
             byte[] packetPayload = copyUpToNum(email, packetPayloadSize * i, packetPayloadSize);
             byte[] encodedSphinxPayload = Base64.encode(concatByteArrays(packetHeader.array(), packetPayload));
 
-            RoutingInformation routingInformation = generateRoutingInformation();
+            RoutingInformation routingInformation = generateRoutingInformation(3);
 
             sphinxPackets[i] = createBinSphinxPacket(dest, encodedSphinxPayload, routingInformation);
         }
@@ -86,7 +89,7 @@ public class SphinxUtil {
         return sphinxPackets;
     }
 
-    private byte[] createBinSphinxPacket(byte[] dest, byte[] message, RoutingInformation routingInformation) {
+    private SphinxPacketWithRouting createBinSphinxPacket(byte[] dest, byte[] message, RoutingInformation routingInformation) {
         DestinationAndMessage destinationAndMessage = new DestinationAndMessage(dest, message);
 
         HeaderAndDelta headerAndDelta;
@@ -106,15 +109,19 @@ public class SphinxUtil {
             throw new RuntimeException("Failed to pack forward message", ex);
         }
 
-        return binSphinxPacket;
+        return new SphinxPacketWithRouting(routingInformation.firstNodeId, binSphinxPacket);
     }
 
-    // TODO: Implement this
-    private RoutingInformation generateRoutingInformation() {
+    private RoutingInformation generateRoutingInformation(int numRouteNodes) {
         byte[][] nodesRouting;
         ECPoint[] nodeKeys;
 
-        int[] useNodes = {8000, 8001, 8002};
+        ArrayList<Integer> orderedNodeIds = new ArrayList<Integer>(publicKeys.keySet());
+        int[] nodePool = new int[orderedNodeIds.size()];
+        for (int i = 0; i < nodePool.length; i++) {
+            nodePool[i] = orderedNodeIds.get(i);
+        }
+        int[] useNodes = SphinxClient.randSubset(nodePool, numRouteNodes);
 
         nodesRouting = new byte[useNodes.length][];
         for (int i = 0; i < useNodes.length; i++) {
@@ -126,11 +133,11 @@ public class SphinxUtil {
         }
 
         nodeKeys = new ECPoint[useNodes.length];
-        nodeKeys[0] = publicKeys.get(useNodes[0]);
-        nodeKeys[1] = publicKeys.get(useNodes[1]);
-        nodeKeys[2] = publicKeys.get(useNodes[2]);
+        for (int i = 0; i < useNodes.length; i++) {
+            nodeKeys[i] = publicKeys.get(useNodes[i]);
+        }
 
-        return new RoutingInformation(nodesRouting, nodeKeys);
+        return new RoutingInformation(nodesRouting, nodeKeys, useNodes[0]);
     }
 
     // Assume all packets present and in sorted order

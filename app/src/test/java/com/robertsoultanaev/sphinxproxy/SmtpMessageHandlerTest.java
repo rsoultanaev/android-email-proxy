@@ -32,9 +32,14 @@ public class SmtpMessageHandlerTest {
 
     @Test
     public void deliverTest() throws Exception {
-        byte[] packet1 = {(byte) 1, (byte) 2};
-        byte[] packet2 = {(byte) 3, (byte) 4};
-        byte[][] sphinxPackets = {packet1, packet2};
+        int packet1FirstNodeId = 8000;
+        int packet2FirstNodeId = 8001;
+        byte[] packet1BinMessage = {(byte) 1, (byte) 2};
+        byte[] packet2BinMessage = {(byte) 3, (byte) 4};
+        SphinxPacketWithRouting packet1 = new SphinxPacketWithRouting(packet1FirstNodeId, packet1BinMessage);
+        SphinxPacketWithRouting packet2 = new SphinxPacketWithRouting(packet2FirstNodeId, packet2BinMessage);
+
+        SphinxPacketWithRouting[] sphinxPackets = {packet1, packet2};
 
         String emailStr = "Subject: Test subject\r\n"
                         + "Test message body\r\n"

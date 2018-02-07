@@ -39,7 +39,7 @@ public class ProxyService extends Service {
                     DBQuery dbQuery = db.getDao();
 
                     SphinxUtil sphinxUtil = new SphinxUtil(dbQuery);
-                    AsyncTcpClient asyncTcpClient = new AsyncTcpClient("localhost", 10000);
+                    AsyncTcpClient asyncTcpClient = new AsyncTcpClient();
                     EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
                     SmtpMessageHandler smtpMessageHandler = new SmtpMessageHandler(sphinxUtil, asyncTcpClient, dbQuery, endToEndCrypto);
                     smtpServer = new SMTPServer(new SimpleMessageListenerAdapter(smtpMessageHandler));
