@@ -73,16 +73,16 @@ public class SphinxUtilTest {
         byte[] email = emailStr.getBytes();
         String recipient = "mort@rsoultanaev.com";
 
-        byte[][] sphinxPackets = sphinxUtil.splitIntoSphinxPackets(email, recipient);
+        SphinxPacketWithRouting[] sphinxPackets = sphinxUtil.splitIntoSphinxPackets(email, recipient);
 
         byte[][] processedMessages = new byte[sphinxPackets.length][];
 
         // Process each sphinx packet by a sequence of mixes
         for (int i = 0; i < sphinxPackets.length; i++) {
-            byte[] binMessage = sphinxPackets[i];
+            byte[] binMessage = sphinxPackets[i].binMessage;
             HeaderAndDelta headerAndDelta = SphinxClient.unpackMessage(binMessage).headerAndDelta;
 
-            BigInteger currentPrivKey = pki.get(8000).priv;
+            BigInteger currentPrivKey = pki.get(sphinxPackets[i].firstNodeId).priv;
 
             MessageUnpacker unpacker;
 
