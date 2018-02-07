@@ -16,6 +16,9 @@ public abstract class DBQuery {
     @Insert
     protected abstract void insertPacketCount(PacketCount packetCount);
 
+    @Insert
+    protected abstract void insertAssembledMessage(AssembledMessage assembledMessage);
+
     @Update
     protected abstract void updatePacketCount(PacketCount packetCount);
 
@@ -40,9 +43,6 @@ public abstract class DBQuery {
     @Query("SELECT * FROM packet WHERE (uuid=:uuid AND packetsInMessage=:packetsInMessage AND sequenceNumber=:sequenceNumber)")
     protected abstract Packet getPacket(String uuid, int packetsInMessage, int sequenceNumber);
 
-
-    @Insert
-    public abstract void insertAssembledMessage(AssembledMessage assembledMessage);
 
     @Insert
     public abstract void insertMixNode(MixNode mixNode);
@@ -81,7 +81,7 @@ public abstract class DBQuery {
             packetCount = new PacketCount(packet.uuid, packet.packetsInMessage, 1);
             insertPacketCount(packetCount);
         } else {
-            ++packetCount.packetsInMessage;
+            ++packetCount.packetsReceived;
             updatePacketCount(packetCount);
         }
     }
