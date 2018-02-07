@@ -10,6 +10,7 @@ import com.robertsoultanaev.sphinxproxy.database.DB;
 import com.robertsoultanaev.sphinxproxy.database.DBQuery;
 import com.robertsoultanaev.sphinxproxy.database.MixNode;
 import com.robertsoultanaev.sphinxproxy.database.Packet;
+import com.robertsoultanaev.sphinxproxy.database.Recipient;
 
 import org.junit.After;
 import org.junit.Before;
@@ -132,6 +133,17 @@ public class DatabaseTest {
         List<MixNode> queryResult1 = dbQuery.getMixNodes();
         assertThat(queryResult1.size(), is(1));
         assertThat(queryResult1.get(0), is(mixNode));
+    }
+
+    @Test
+    public void insertGetRecipientTest() throws Exception {
+        String recipientAddress = "fred@mail.com";
+        Recipient recipient = new Recipient(recipientAddress, "publicKey");
+
+        dbQuery.insertRecipient(recipient);
+
+        Recipient queryResult1 = dbQuery.getRecipient(recipientAddress);
+        assertThat(queryResult1, is(recipient));
     }
 }
 
