@@ -18,4 +18,16 @@ public class PacketCount {
         this.packetsInMessage = packetsInMessage;
         this.packetsReceived = packetsReceived;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PacketCount that = (PacketCount) o;
+
+        if (packetsInMessage != that.packetsInMessage) return false;
+        if (packetsReceived != that.packetsReceived) return false;
+        return uuid.equals(that.uuid);
+    }
 }

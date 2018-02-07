@@ -14,4 +14,15 @@ public class MixNode {
         this.port = port;
         this.encodedPublicKey = encodedPublicKey;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MixNode mixNode = (MixNode) o;
+
+        if (port != mixNode.port) return false;
+        return encodedPublicKey.equals(mixNode.encodedPublicKey);
+    }
 }

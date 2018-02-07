@@ -15,4 +15,15 @@ public class Recipient {
         this.address = address;
         this.encodedPublicKey = encodedPublicKey;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Recipient recipient = (Recipient) o;
+
+        if (!address.equals(recipient.address)) return false;
+        return encodedPublicKey.equals(recipient.encodedPublicKey);
+    }
 }
