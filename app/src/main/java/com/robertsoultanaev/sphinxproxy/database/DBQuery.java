@@ -37,6 +37,9 @@ public abstract class DBQuery {
     @Query("SELECT * FROM packetcount WHERE uuid=:uuid")
     protected abstract PacketCount getPacketCount(String uuid);
 
+    @Query("SELECT * FROM packet WHERE (uuid=:uuid AND packetsInMessage=:packetsInMessage AND sequenceNumber=:sequenceNumber)")
+    protected abstract Packet getPacket(String uuid, int packetsInMessage, int sequenceNumber);
+
 
     @Insert
     public abstract void insertAssembledMessage(AssembledMessage assembledMessage);
@@ -67,7 +70,11 @@ public abstract class DBQuery {
 
     @Transaction
     public void addPacket(Packet packet) {
-        // TODO: Think about receiving duplicates
+        // Ignore duplicates
+        if (getPacket(packet.uuid, packet.packetsInMessage, packet.sequenceNumber) != null) {
+            return;
+        }
+
         insertPacket(packet);
         PacketCount packetCount = getPacketCount(packet.uuid);
         if (packetCount == null) {
