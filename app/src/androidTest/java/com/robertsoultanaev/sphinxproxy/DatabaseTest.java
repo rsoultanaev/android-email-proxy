@@ -8,6 +8,7 @@ import android.support.test.runner.AndroidJUnit4;
 import com.robertsoultanaev.sphinxproxy.database.AssembledMessage;
 import com.robertsoultanaev.sphinxproxy.database.DB;
 import com.robertsoultanaev.sphinxproxy.database.DBQuery;
+import com.robertsoultanaev.sphinxproxy.database.MixNode;
 import com.robertsoultanaev.sphinxproxy.database.Packet;
 
 import org.junit.After;
@@ -120,6 +121,17 @@ public class DatabaseTest {
         List<String> queryResult4 = dbQuery.getReadyPacketIds();
         assertThat(queryResult4.size(), is(1));
         assertThat(queryResult4.get(0), is(messageId));
+    }
+
+    @Test
+    public void insertGetMixNodeTest() throws Exception {
+        MixNode mixNode = new MixNode(8000, "publicKey");
+
+        dbQuery.insertMixNode(mixNode);
+
+        List<MixNode> queryResult1 = dbQuery.getMixNodes();
+        assertThat(queryResult1.size(), is(1));
+        assertThat(queryResult1.get(0), is(mixNode));
     }
 }
 
