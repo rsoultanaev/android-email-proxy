@@ -15,6 +15,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.mockito.Mockito.*;
 
 import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -108,7 +109,7 @@ public class SphinxUtilTest {
                     java.util.Arrays.fill(zeroes, (byte) 0x00);
 
                     byte[] processedMessage = SphinxClient.receiveForward(params, ret.headerAndDelta.delta).message;
-                    processedMessages[i] = processedMessage;
+                    processedMessages[i] = Base64.encode(processedMessage);
 
                     break;
                 }

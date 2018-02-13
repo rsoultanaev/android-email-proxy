@@ -62,11 +62,7 @@ public class SphinxUtil {
         UUID messageId = UUID.randomUUID();
         byte[] dest = recipient.getBytes();
 
-        // Compute the size of the packet payload such that if we append
-        // the header to it and then base64 encode it, we arrive close to
-        // but not above the sphinx max payload limit
-        int targetEncodedSize = getMaxPayloadSize(params) - dest.length;
-        int packetPayloadSize = (int) (((double) (3 * targetEncodedSize) / 4) - PACKET_HEADER_SIZE - 3);
+        int packetPayloadSize = getMaxPayloadSize(params) - dest.length - PACKET_HEADER_SIZE;
         int packetsInMessage = (int) Math.ceil((double) email.length / packetPayloadSize);
         SphinxPacketWithRouting[] sphinxPackets = new SphinxPacketWithRouting[packetsInMessage];
 
@@ -79,11 +75,11 @@ public class SphinxUtil {
             packetHeader.putInt(i);
 
             byte[] packetPayload = copyUpToNum(email, packetPayloadSize * i, packetPayloadSize);
-            byte[] encodedSphinxPayload = Base64.encode(concatByteArrays(packetHeader.array(), packetPayload));
+            byte[] sphinxPayload = concatByteArrays(packetHeader.array(), packetPayload);
 
             RoutingInformation routingInformation = generateRoutingInformation(3);
 
-            sphinxPackets[i] = createBinSphinxPacket(dest, encodedSphinxPayload, routingInformation);
+            sphinxPackets[i] = createBinSphinxPacket(dest, sphinxPayload, routingInformation);
         }
 
         return sphinxPackets;
