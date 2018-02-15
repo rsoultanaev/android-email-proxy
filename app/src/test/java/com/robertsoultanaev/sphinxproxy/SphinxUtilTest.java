@@ -58,8 +58,9 @@ public class SphinxUtilTest {
             ECPoint pub = params.getGroup().expon(params.getGroup().getGenerator(), priv);
 
             int port = basePort + i;
-            pki.put(port,  new PkiEntry(priv, pub));
-            nodeList.add(new MixNode(port, Hex.toHexString(pub.getEncoded(true))));
+            String host = "host" + Integer.toString(i);
+            pki.put(i,  new PkiEntry(priv, pub));
+            nodeList.add(new MixNode(i, host, port, Hex.toHexString(pub.getEncoded(true))));
         }
 
         when(dbQuery.getMixNodes()).thenReturn(nodeList);
@@ -98,8 +99,8 @@ public class SphinxUtilTest {
                 String flag = unpacker.unpackString();
 
                 if (flag.equals(SphinxClient.RELAY_FLAG)) {
-                    int addr = unpacker.unpackInt();
-                    currentPrivKey = pki.get(addr).priv;
+                    int nextNodeId = unpacker.unpackInt();
+                    currentPrivKey = pki.get(nextNodeId).priv;
 
                     unpacker.close();
                 } else if (flag.equals(SphinxClient.DEST_FLAG)) {

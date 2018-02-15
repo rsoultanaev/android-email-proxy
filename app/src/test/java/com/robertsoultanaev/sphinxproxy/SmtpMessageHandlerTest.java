@@ -13,6 +13,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
 import java.security.PublicKey;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -32,12 +33,14 @@ public class SmtpMessageHandlerTest {
 
     @Test
     public void deliverTest() throws Exception {
-        int packet1FirstNodeId = 8000;
-        int packet2FirstNodeId = 8001;
+        int packet1FirstNodeId = 0;
+        int packet2FirstNodeId = 1;
+        InetSocketAddress packet1FirstNodeAddress = new InetSocketAddress("packet1FirstHost", 8000);
+        InetSocketAddress packet2FirstNodeAddress = new InetSocketAddress("packet2FirstHost", 8001);
         byte[] packet1BinMessage = {(byte) 1, (byte) 2};
         byte[] packet2BinMessage = {(byte) 3, (byte) 4};
-        SphinxPacketWithRouting packet1 = new SphinxPacketWithRouting(packet1FirstNodeId, packet1BinMessage);
-        SphinxPacketWithRouting packet2 = new SphinxPacketWithRouting(packet2FirstNodeId, packet2BinMessage);
+        SphinxPacketWithRouting packet1 = new SphinxPacketWithRouting(packet1FirstNodeId, packet1FirstNodeAddress, packet1BinMessage);
+        SphinxPacketWithRouting packet2 = new SphinxPacketWithRouting(packet2FirstNodeId, packet2FirstNodeAddress, packet2BinMessage);
 
         SphinxPacketWithRouting[] sphinxPackets = {packet1, packet2};
 

@@ -109,9 +109,10 @@ public class SphinxUtil {
             throw new RuntimeException("Failed to pack forward message", ex);
         }
 
-        InetSocketAddress firstNodeAddress = mixNodeAddresses.get(routingInformation.firstNodeId);
+        int firstNodeId = routingInformation.firstNodeId;
+        InetSocketAddress firstNodeAddress = mixNodeAddresses.get(firstNodeId);
 
-        return new SphinxPacketWithRouting(firstNodeAddress, binSphinxPacket);
+        return new SphinxPacketWithRouting(firstNodeId, firstNodeAddress, binSphinxPacket);
     }
 
     private RoutingInformation generateRoutingInformation(int numRouteNodes) {
