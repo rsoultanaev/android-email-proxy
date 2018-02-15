@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">SphinxProxy</string>
 
-    <string name="mix_network_filename">mix_network.csv</string>
+    <string name="mix_network_filename">mix_client_config.csv</string>
     <string name="recipient_keys_filename">recipient_keys.csv</string>
     <string name="mailbox_cert_filename">mailbox.cert</string>
 
