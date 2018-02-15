@@ -126,7 +126,7 @@ public class DatabaseTest {
 
     @Test
     public void insertGetMixNodeTest() throws Exception {
-        MixNode mixNode = new MixNode(8000, "publicKey");
+        MixNode mixNode = new MixNode(0, "host", 8000, "publicKey");
 
         dbQuery.insertMixNode(mixNode);
 
