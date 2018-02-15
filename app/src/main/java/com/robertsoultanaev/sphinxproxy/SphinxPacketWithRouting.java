@@ -1,18 +1,15 @@
 package com.robertsoultanaev.sphinxproxy;
 
+import java.net.InetSocketAddress;
 import java.util.Arrays;
 
 public class SphinxPacketWithRouting {
-    int firstNodeId;
-    String firstNodeHost;
-    int firstNodePort;
+    InetSocketAddress firstNodeAddress;
     byte[] binMessage;
 
-    public SphinxPacketWithRouting(int firstNodeId, byte[] binMessage) {
-        this.firstNodeId = firstNodeId;
+    public SphinxPacketWithRouting(InetSocketAddress firstNodeAddress, byte[] binMessage) {
+        this.firstNodeAddress = firstNodeAddress;
         this.binMessage = binMessage;
-        this.firstNodeHost = "localhost";
-        this.firstNodePort = firstNodeId;
     }
 
     @Override
@@ -22,9 +19,8 @@ public class SphinxPacketWithRouting {
 
         SphinxPacketWithRouting that = (SphinxPacketWithRouting) o;
 
-        if (firstNodeId != that.firstNodeId) return false;
-        if (firstNodePort != that.firstNodePort) return false;
-        if (!firstNodeHost.equals(that.firstNodeHost)) return false;
+        if (firstNodeAddress != null ? !firstNodeAddress.equals(that.firstNodeAddress) : that.firstNodeAddress != null)
+            return false;
         return Arrays.equals(binMessage, that.binMessage);
     }
 }
