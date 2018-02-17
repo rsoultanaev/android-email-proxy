@@ -22,6 +22,7 @@ import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,15 +47,18 @@ public class SphinxUtil {
     }
 
     private final SphinxParams params;
-    private final HashMap<Integer, ECPoint> publicKeys;
+    private final HashMap<Integer, InetSocketAddress> mixNodeAddresses;
+    private final HashMap<Integer, ECPoint> mixNodePublicKeys;
 
     public SphinxUtil(DBQuery dbQuery) {
         params = new SphinxParams();
-        publicKeys = new HashMap<Integer, ECPoint>();
+        mixNodePublicKeys = new HashMap<Integer, ECPoint>();
+        mixNodeAddresses = new HashMap<Integer, InetSocketAddress>();
 
         for (MixNode mixNode : dbQuery.getMixNodes()) {
             ECPoint publicKey = decodeECPoint(Hex.decode(mixNode.encodedPublicKey));
-            publicKeys.put(mixNode.port, publicKey);
+            mixNodePublicKeys.put(mixNode.id, publicKey);
+            mixNodeAddresses.put(mixNode.id, new InetSocketAddress(mixNode.host, mixNode.port));
         }
     }
 
@@ -105,14 +109,17 @@ public class SphinxUtil {
             throw new RuntimeException("Failed to pack forward message", ex);
         }
 
-        return new SphinxPacketWithRouting(routingInformation.firstNodeId, binSphinxPacket);
+        int firstNodeId = routingInformation.firstNodeId;
+        InetSocketAddress firstNodeAddress = mixNodeAddresses.get(firstNodeId);
+
+        return new SphinxPacketWithRouting(firstNodeId, firstNodeAddress, binSphinxPacket);
     }
 
     private RoutingInformation generateRoutingInformation(int numRouteNodes) {
         byte[][] nodesRouting;
         ECPoint[] nodeKeys;
 
-        ArrayList<Integer> orderedNodeIds = new ArrayList<Integer>(publicKeys.keySet());
+        ArrayList<Integer> orderedNodeIds = new ArrayList<Integer>(mixNodePublicKeys.keySet());
         int[] nodePool = new int[orderedNodeIds.size()];
         for (int i = 0; i < nodePool.length; i++) {
             nodePool[i] = orderedNodeIds.get(i);
@@ -130,7 +137,7 @@ public class SphinxUtil {
 
         nodeKeys = new ECPoint[useNodes.length];
         for (int i = 0; i < useNodes.length; i++) {
-            nodeKeys[i] = publicKeys.get(useNodes[i]);
+            nodeKeys[i] = mixNodePublicKeys.get(useNodes[i]);
         }
 
         return new RoutingInformation(nodesRouting, nodeKeys, useNodes[0]);

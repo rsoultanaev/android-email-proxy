@@ -11,11 +11,10 @@ import java.net.InetSocketAddress;
 public class AsyncTcpClient {
 
     public void sendMessage(final SphinxPacketWithRouting sphinxPacketWithRouting) {
-        final String host = sphinxPacketWithRouting.firstNodeHost;
-        final int port = sphinxPacketWithRouting.firstNodePort;
+        final InetSocketAddress firstNodeAddress = sphinxPacketWithRouting.firstNodeAddress;
         final byte[] message = sphinxPacketWithRouting.binMessage;
 
-        AsyncServer.getDefault().connectSocket(new InetSocketAddress(host, port), new ConnectCallback() {
+        AsyncServer.getDefault().connectSocket(firstNodeAddress, new ConnectCallback() {
             @Override
             public void onConnectCompleted(Exception ex, final AsyncSocket socket) {
                 if(ex != null) {

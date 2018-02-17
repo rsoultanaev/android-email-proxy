@@ -63,9 +63,11 @@ public class MainActivity extends AppCompatActivity {
                         String line;
                         while ((line = reader.readLine()) != null) {
                             String[] splitLine = line.split(",");
-                            int port = Integer.parseInt(splitLine[0]);
-                            String encodedPublicKey = splitLine[1];
-                            dbQuery.insertMixNode(new MixNode(port, encodedPublicKey));
+                            int id = Integer.parseInt(splitLine[0]);
+                            String host = splitLine[1];
+                            int port = Integer.parseInt(splitLine[2]);
+                            String encodedPublicKey = splitLine[3];
+                            dbQuery.insertMixNode(new MixNode(id, host, port, encodedPublicKey));
                         }
 
                         reader.close();
