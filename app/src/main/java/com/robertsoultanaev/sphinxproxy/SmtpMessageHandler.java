@@ -42,12 +42,6 @@ public class SmtpMessageHandler implements SimpleMessageListener {
 
         byte[] email = out.toByteArray();
 
-        System.out.println("[SMTP] email body start");
-        System.out.println(new String(email));
-        System.out.println("[SMTP] email body end");
-        System.out.println("[SMTP] email length: " + email.length);
-        System.out.println("-------------------------");
-
         String encodedRecipientPublicKey = dbQuery.getRecipient(recipient).encodedPublicKey;
         PublicKey recipientPublicKey = endToEndCrypto.decodePublicKey(encodedRecipientPublicKey);
         byte[] endToEndEncryptedEmail = endToEndCrypto.endToEndEncrypt(recipientPublicKey, email);
@@ -57,5 +51,7 @@ public class SmtpMessageHandler implements SimpleMessageListener {
         for (SphinxPacketWithRouting sphinxPacketWithRouting : sphinxPackets) {
             asyncTcpClient.sendMessage(sphinxPacketWithRouting);
         }
+
+        System.out.println("[SMTP] sent sphinx message to: " + recipient);
     }
 }
