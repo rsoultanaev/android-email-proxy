@@ -12,6 +12,7 @@ import com.robertsoultanaev.sphinxproxy.database.DBQuery;
 import com.robertsoultanaev.sphinxproxy.database.MixNode;
 import com.robertsoultanaev.sphinxproxy.database.Recipient;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.net.pop3.POP3SClient;
 
 import java.io.BufferedReader;
@@ -94,19 +95,12 @@ public class MainActivity extends AppCompatActivity {
 
                     try {
                         String fileName = getString(R.string.mailbox_cert_filename);
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(getAssets().open(fileName)));
-                        StringBuilder sb = new StringBuilder();
+                        byte[] certBytes = IOUtils.toByteArray(getAssets().open(fileName));
+                        String certString = new String(certBytes);
 
-                        String line;
-                        while ((line = reader.readLine()) != null) {
-                            sb.append(line);
-                        }
-
-                        reader.close();
-
-                        Config.setKey(R.string.key_mailbox_cert, sb.toString(), context);
+                        Config.setKey(R.string.key_mailbox_cert, certString, context);
                     } catch (IOException ex) {
-                        throw new RuntimeException("Failed to read the recipient keys", ex);
+                        throw new RuntimeException("Failed to read mailbox certificate", ex);
                     }
                 }
             }).start();

@@ -18,6 +18,7 @@ import com.robertsoultanaev.sphinxproxy.database.MixNode;
 import com.robertsoultanaev.sphinxproxy.database.Packet;
 
 import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.util.Pack;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -182,6 +183,6 @@ public class SphinxUtil {
         String uuid = new UUID(uuidHigh, uuidLow).toString();
         byte[] payload = Arrays.copyOfRange(message, 24, message.length);
 
-        return new Packet(uuid, packetsInMessage, sequenceNumber, payload);
+        return new Packet(uuid, sequenceNumber, packetsInMessage, payload);
     }
 }
