@@ -1,5 +1,7 @@
 package com.robertsoultanaev.sphinxproxy;
 
+import android.support.test.runner.AndroidJUnit4;
+
 import com.robertsoultanaev.javasphinx.SphinxParams;
 import com.robertsoultanaev.sphinxproxy.database.MixNode;
 
@@ -7,14 +9,13 @@ import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class SphinxUtilTimingTest {
 
     class PkiEntry {
@@ -77,6 +78,5 @@ public class SphinxUtilTimingTest {
         }
 
         return result.toString();
-
     }
 }
