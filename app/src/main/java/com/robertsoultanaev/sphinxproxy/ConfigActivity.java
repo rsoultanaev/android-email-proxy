@@ -16,12 +16,12 @@ public class ConfigActivity extends AppCompatActivity {
 
         final Context context = getApplicationContext();
 
-        String pop3Port = Config.getStringValue(R.string.key_proxy_pop3_port, context);
-        String smtpPort = Config.getStringValue(R.string.key_proxy_smtp_port, context);
+        String pop3Port = Integer.toString(Config.getIntValue(R.string.key_proxy_pop3_port, context));
+        String smtpPort = Integer.toString(Config.getIntValue(R.string.key_proxy_smtp_port, context));
         String proxyUsername = Config.getStringValue(R.string.key_proxy_username, context);
         String proxyPassword = Config.getStringValue(R.string.key_proxy_password, context);
         String mailboxHostname = Config.getStringValue(R.string.key_mailbox_hostname, context);
-        String mailboxPort = Config.getStringValue(R.string.key_mailbox_port, context);
+        String mailboxPort = Integer.toString(Config.getIntValue(R.string.key_mailbox_port, context));
         String mailboxUsername = Config.getStringValue(R.string.key_mailbox_username, context);
         String mailboxPassword = Config.getStringValue(R.string.key_mailbox_password, context);
 
@@ -56,21 +56,21 @@ public class ConfigActivity extends AppCompatActivity {
         final EditText editTextMailboxUsername = findViewById(R.id.editTextMailboxUsername);
         final EditText editTextMailboxPassword = findViewById(R.id.editTextMailboxPassword);
 
-        String pop3Port = editTextPop3Port.getText().toString();
-        String smtpPort = editTextSmtpPort.getText().toString();
+        int pop3Port = Integer.parseInt(editTextPop3Port.getText().toString());
+        int smtpPort = Integer.parseInt(editTextSmtpPort.getText().toString());
         String proxyUsername = editTextProxyUsername.getText().toString();
         String proxyPassword = editTextProxyPassword.getText().toString();
         String mailboxHostname = editTextMailboxHostname.getText().toString();
-        String mailboxPort = editTextMailboxPort.getText().toString();
+        int mailboxPort = Integer.parseInt(editTextMailboxPort.getText().toString());
         String mailboxUsername = editTextMailboxUsername.getText().toString();
         String mailboxPassword = editTextMailboxPassword.getText().toString();
 
-        Config.setStringValue(R.string.key_proxy_pop3_port, pop3Port, context);
-        Config.setStringValue(R.string.key_proxy_smtp_port, smtpPort, context);
+        Config.setIntValue(R.string.key_proxy_pop3_port, pop3Port, context);
+        Config.setIntValue(R.string.key_proxy_smtp_port, smtpPort, context);
         Config.setStringValue(R.string.key_proxy_username, proxyUsername, context);
         Config.setStringValue(R.string.key_proxy_password, proxyPassword, context);
         Config.setStringValue(R.string.key_mailbox_hostname, mailboxHostname, context);
-        Config.setStringValue(R.string.key_mailbox_port, mailboxPort, context);
+        Config.setIntValue(R.string.key_mailbox_port, mailboxPort, context);
         Config.setStringValue(R.string.key_mailbox_username, mailboxUsername, context);
         Config.setStringValue(R.string.key_mailbox_password, mailboxPassword, context);
 

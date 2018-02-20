@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 Context context = getApplicationContext();
                 String server = Config.getStringValue(R.string.key_mailbox_hostname, context);
-                int port = Integer.parseInt(Config.getStringValue(R.string.key_mailbox_port, context));
+                int port = Config.getIntValue(R.string.key_mailbox_port, context);
                 String username = Config.getStringValue(R.string.key_mailbox_username, context);
                 String password = Config.getStringValue(R.string.key_mailbox_password, context);
 
@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
         Config.setStringValue(R.string.key_proxy_username, getString(R.string.default_proxy_username), context);
         Config.setStringValue(R.string.key_proxy_password, getString(R.string.default_proxy_password), context);
         Config.setStringValue(R.string.key_mailbox_hostname, getString(R.string.default_mailbox_hostname), context);
-        Config.setStringValue(R.string.key_mailbox_port, getString(R.string.default_mailbox_port), context);
+        Config.setIntValue(R.string.key_mailbox_port, Integer.parseInt(getString(R.string.default_mailbox_port)), context);
         Config.setStringValue(R.string.key_mailbox_username, getString(R.string.default_mailbox_username), context);
         Config.setStringValue(R.string.key_mailbox_password, getString(R.string.default_mailbox_password), context);
     }
