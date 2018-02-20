@@ -19,6 +19,8 @@ import java.util.List;
 
 public class ProxyService extends Service {
 
+    public static int FOREGROUND_SERVICE_ID = 1337;
+
     private SMTPServer smtpServer;
     private Pop3Server pop3Server;
     private boolean running;
@@ -31,8 +33,8 @@ public class ProxyService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (!running) {
-            final int smtpPort = intent.getIntExtra("smtpPort", 28000);
-            final int pop3Port = intent.getIntExtra("pop3Port", 27000);
+            final int pop3Port = intent.getIntExtra(MainActivity.EXTRA_KEY_POP3PORT, 27000);
+            final int smtpPort = intent.getIntExtra(MainActivity.EXTRA_KEY_SMTPPORT, 28000);
 
             // Initialising SMTPServer blocks, so we need to do it in a separate thread
             new Thread(new Runnable() {
@@ -67,12 +69,11 @@ public class ProxyService extends Service {
                     .setContentText("Doing some work...")
                     .setContentIntent(pendingIntent).build();
 
-            startForeground(1337, notification);
+            startForeground(FOREGROUND_SERVICE_ID, notification);
 
             running = true;
         }
 
-        // TODO: investigate which return is best here
         return Service.START_NOT_STICKY;
     }
 

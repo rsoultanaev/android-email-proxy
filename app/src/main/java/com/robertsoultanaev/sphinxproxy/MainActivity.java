@@ -27,6 +27,9 @@ public class MainActivity extends AppCompatActivity {
 
     public static final int EDIT_CONFIG_REQUEST = 1;
 
+    public static final String EXTRA_KEY_POP3PORT = "pop3Port";
+    public static final String EXTRA_KEY_SMTPPORT = "smtpPort";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,8 +64,8 @@ public class MainActivity extends AppCompatActivity {
         int smtpPort = Integer.parseInt(Config.getKey(R.string.key_proxy_smtp_port, context));
 
         Intent proxyIntent = new Intent(this, ProxyService.class);
-        proxyIntent.putExtra("pop3Port", pop3Port);
-        proxyIntent.putExtra("smtpPort", smtpPort);
+        proxyIntent.putExtra(EXTRA_KEY_POP3PORT, pop3Port);
+        proxyIntent.putExtra(EXTRA_KEY_SMTPPORT, smtpPort);
         startService(proxyIntent);
     }
 
