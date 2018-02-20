@@ -103,9 +103,11 @@ public class Pop3ServerThread extends Thread {
         this.shuttingDown = true;
 
         try {
-            in.close();
-            out.close();
-            clientSocket.close();
+            if (clientSocket != null) {
+                in.close();
+                out.close();
+                clientSocket.close();
+            }
             serverSocket.close();
         } catch (IOException ex) {
             throw new RuntimeException("Failed to stop the thread", ex);
