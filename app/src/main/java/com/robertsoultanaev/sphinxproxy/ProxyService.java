@@ -10,9 +10,12 @@ import android.support.v4.app.NotificationCompat;
 
 import com.robertsoultanaev.sphinxproxy.database.DB;
 import com.robertsoultanaev.sphinxproxy.database.DBQuery;
+import com.robertsoultanaev.sphinxproxy.database.MixNode;
 
 import org.subethamail.smtp.helper.SimpleMessageListenerAdapter;
 import org.subethamail.smtp.server.SMTPServer;
+
+import java.util.List;
 
 public class ProxyService extends Service {
 
@@ -38,7 +41,8 @@ public class ProxyService extends Service {
                     DB db = DB.getAppDatabase(getApplicationContext());
                     DBQuery dbQuery = db.getDao();
 
-                    SphinxUtil sphinxUtil = new SphinxUtil(dbQuery);
+                    List<MixNode> mixNodes = dbQuery.getMixNodes();
+                    SphinxUtil sphinxUtil = new SphinxUtil(mixNodes);
                     AsyncTcpClient asyncTcpClient = new AsyncTcpClient();
                     EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
                     SmtpMessageHandler smtpMessageHandler = new SmtpMessageHandler(sphinxUtil, asyncTcpClient, dbQuery, endToEndCrypto);

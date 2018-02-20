@@ -37,7 +37,7 @@ public class OverheadTest {
     private DBQuery dbQuery;
 
     @Test
-    public void deliverTest() throws Exception {
+    public void overheadTest() throws Exception {
         String emailStr = genRandomAlphanumericString(200000);
         byte[] email = emailStr.getBytes();
         InputStream emailStream = new ByteArrayInputStream(email);
@@ -55,10 +55,9 @@ public class OverheadTest {
         mixNodeList.add(new MixNode(3, "host3", 8003, "02eaadcd423c8fd8cc2164e2fb5f5a3a7342013ff1ec78cce5ce8cd7e1"));
         mixNodeList.add(new MixNode(4, "host4", 8004, "03f3cd8c37977599a9a32a5b653aef617ddf89fe3367053077a934e39d"));
 
-        when(dbQuery.getMixNodes()).thenReturn(mixNodeList);
         when(dbQuery.getRecipient(recipientAddress)).thenReturn(recipient);
 
-        SphinxUtil sphinxUtil = new SphinxUtil(dbQuery);
+        SphinxUtil sphinxUtil = new SphinxUtil(mixNodeList);
         EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
         MeasuringMockAsyncTcpClient asyncTcpClient = new MeasuringMockAsyncTcpClient();
         SmtpMessageHandler smtpMessageHandler = new SmtpMessageHandler(sphinxUtil, asyncTcpClient, dbQuery, endToEndCrypto);

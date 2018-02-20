@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.KeyPair;
 import java.security.PrivateKey;
+import java.util.List;
 
 import javax.net.ssl.TrustManager;
 
@@ -150,7 +151,8 @@ public class MainActivity extends AppCompatActivity {
                 PrivateKey privateKey = Config.getPrivateKey(context);
                 EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
 
-                SphinxUtil sphinxUtil = new SphinxUtil(dbQuery);
+                List<MixNode> mixNodes = dbQuery.getMixNodes();
+                SphinxUtil sphinxUtil = new SphinxUtil(mixNodes);
 
                 Mailbox mailbox = new Mailbox(server, port, username, password, dbQuery, pop3Client, endToEndCrypto, privateKey, sphinxUtil);
                 mailbox.updateMailbox();

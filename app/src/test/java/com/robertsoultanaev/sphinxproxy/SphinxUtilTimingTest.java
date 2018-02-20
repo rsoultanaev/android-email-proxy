@@ -31,9 +31,6 @@ public class SphinxUtilTimingTest {
         }
     }
 
-    @Mock
-    private DBQuery dbQuery;
-
     @Test
     public void timeSplittingIntoPackets() throws Exception {
         int repetitions = 1000;
@@ -55,9 +52,7 @@ public class SphinxUtilTimingTest {
             nodeList.add(new MixNode(i, host, port, Hex.toHexString(pub.getEncoded(true))));
         }
 
-        when(dbQuery.getMixNodes()).thenReturn(nodeList);
-
-        SphinxUtil sphinxUtil = new SphinxUtil(dbQuery);
+        SphinxUtil sphinxUtil = new SphinxUtil(nodeList);
 
         String emailStr = genRandomAlphanumericString(emailSize);
         byte[] email = emailStr.getBytes();
