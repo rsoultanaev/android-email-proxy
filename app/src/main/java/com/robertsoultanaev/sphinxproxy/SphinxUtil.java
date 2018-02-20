@@ -13,12 +13,10 @@ import com.robertsoultanaev.javasphinx.SphinxClient;
 import com.robertsoultanaev.javasphinx.SphinxPacket;
 import com.robertsoultanaev.javasphinx.SphinxParams;
 import com.robertsoultanaev.sphinxproxy.database.AssembledMessage;
-import com.robertsoultanaev.sphinxproxy.database.DBQuery;
 import com.robertsoultanaev.sphinxproxy.database.MixNode;
 import com.robertsoultanaev.sphinxproxy.database.Packet;
 
 import org.bouncycastle.math.ec.ECPoint;
-import org.bouncycastle.util.Pack;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -51,12 +49,12 @@ public class SphinxUtil {
     private final HashMap<Integer, InetSocketAddress> mixNodeAddresses;
     private final HashMap<Integer, ECPoint> mixNodePublicKeys;
 
-    public SphinxUtil(DBQuery dbQuery) {
+    public SphinxUtil(List<MixNode> mixNodes) {
         params = new SphinxParams();
         mixNodePublicKeys = new HashMap<Integer, ECPoint>();
         mixNodeAddresses = new HashMap<Integer, InetSocketAddress>();
 
-        for (MixNode mixNode : dbQuery.getMixNodes()) {
+        for (MixNode mixNode : mixNodes) {
             ECPoint publicKey = decodeECPoint(Hex.decode(mixNode.encodedPublicKey));
             mixNodePublicKeys.put(mixNode.id, publicKey);
             mixNodeAddresses.put(mixNode.id, new InetSocketAddress(mixNode.host, mixNode.port));
