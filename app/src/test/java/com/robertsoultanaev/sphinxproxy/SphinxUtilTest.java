@@ -42,9 +42,6 @@ public class SphinxUtilTest {
         }
     }
 
-    @Mock
-    private DBQuery dbQuery;
-
     @Test
     public void splitProcessParseAndReassembleTest() throws Exception {
         SphinxParams params = new SphinxParams();
@@ -63,9 +60,7 @@ public class SphinxUtilTest {
             nodeList.add(new MixNode(i, host, port, Hex.toHexString(pub.getEncoded(true))));
         }
 
-        when(dbQuery.getMixNodes()).thenReturn(nodeList);
-
-        SphinxUtil sphinxUtil = new SphinxUtil(dbQuery);
+        SphinxUtil sphinxUtil = new SphinxUtil(nodeList);
 
         StringBuilder sb = new StringBuilder();
         while (sb.length() < 1500) {
@@ -126,6 +121,5 @@ public class SphinxUtilTest {
         String assembledMessageStr = new String(assembledMessage.messageBody);
 
         assertThat(emailStr, is(equalTo(assembledMessageStr)));
-        verifyNoMoreInteractions(ignoreStubs(dbQuery));
     }
 }
