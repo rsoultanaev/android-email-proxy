@@ -18,10 +18,24 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
 public class Config {
+    public static boolean setupDone(Context context) {
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        String setupDoneKey = context.getString(R.string.key_setup_done);
+        return sharedPreferences.getBoolean(setupDoneKey, false);
+    }
+
+    public static void setSetupDone(Context context, boolean setupDone) {
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        String key = context.getString(R.string.key_setup_done);
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(key, setupDone);
+        editor.apply();
+    }
+
     public static void setKey(int keyId, String value, Context context) {
-        String sharedPreferencesFile = context.getString(R.string.key_preference_file);
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
         String key = context.getString(keyId);
-        SharedPreferences sharedPreferences = context.getSharedPreferences(sharedPreferencesFile, Context.MODE_PRIVATE);
 
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(key, value);
@@ -29,9 +43,8 @@ public class Config {
     }
 
     public static String getKey(int keyId, Context context) {
-        String sharedPreferencesFile = context.getString(R.string.key_preference_file);
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
         String key = context.getString(keyId);
-        SharedPreferences sharedPreferences = context.getSharedPreferences(sharedPreferencesFile, Context.MODE_PRIVATE);
 
         return sharedPreferences.getString(key, null);
     }
@@ -57,10 +70,8 @@ public class Config {
     }
 
     public static PrivateKey getPrivateKey(Context context) {
-        EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
-        String sharedPreferencesFile = context.getString(R.string.key_preference_file);
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
         String key = context.getString(R.string.key_private_key);
-        SharedPreferences sharedPreferences = context.getSharedPreferences(sharedPreferencesFile, Context.MODE_PRIVATE);
 
         String base64EncodedPrivateKey = sharedPreferences.getString(key, null);
 
@@ -68,20 +79,22 @@ public class Config {
             throw new RuntimeException("Private key not set");
         }
 
+        EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
+
         return endToEndCrypto.decodePrivateKey(base64EncodedPrivateKey);
     }
 
     public static PublicKey getPublicKey(Context context) {
-        EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
-        String sharedPreferencesFile = context.getString(R.string.key_preference_file);
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
         String key = context.getString(R.string.key_public_key);
-        SharedPreferences sharedPreferences = context.getSharedPreferences(sharedPreferencesFile, Context.MODE_PRIVATE);
 
         String base64EncodedPublicKey = sharedPreferences.getString(key, null);
 
         if (base64EncodedPublicKey == null) {
             throw new RuntimeException("Public key not set");
         }
+
+        EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
 
         return endToEndCrypto.decodePublicKey(base64EncodedPublicKey);
     }
@@ -94,7 +107,7 @@ public class Config {
             CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
             InputStream certInput = new ByteArrayInputStream(certString.getBytes());
 
-            Certificate ca = certFactory.generateCertificate(certInput);;
+            Certificate ca = certFactory.generateCertificate(certInput);
             certInput.close();
 
             String keyStoreType = KeyStore.getDefaultType();
@@ -112,5 +125,10 @@ public class Config {
         }
 
         return trustManager;
+    }
+
+    private static SharedPreferences getSharedPreferences(Context context) {
+        String sharedPreferencesFile = context.getString(R.string.key_preference_file);
+        return context.getSharedPreferences(sharedPreferencesFile, Context.MODE_PRIVATE);
     }
 }
