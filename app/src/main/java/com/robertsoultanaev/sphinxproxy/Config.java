@@ -4,14 +4,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 
 import javax.net.ssl.TrustManager;
@@ -33,7 +31,23 @@ public class Config {
         editor.apply();
     }
 
-    public static void setKey(int keyId, String value, Context context) {
+    public static void setIntValue(int keyId, int value, Context context) {
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        String key = context.getString(keyId);
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(key, value);
+        editor.apply();
+    }
+
+    public static int getIntValue(int keyId, Context context) {
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        String key = context.getString(keyId);
+
+        return sharedPreferences.getInt(key, -1);
+    }
+
+    public static void setStringValue(int keyId, String value, Context context) {
         SharedPreferences sharedPreferences = getSharedPreferences(context);
         String key = context.getString(keyId);
 
@@ -42,7 +56,7 @@ public class Config {
         editor.apply();
     }
 
-    public static String getKey(int keyId, Context context) {
+    public static String getStringValue(int keyId, Context context) {
         SharedPreferences sharedPreferences = getSharedPreferences(context);
         String key = context.getString(keyId);
 
@@ -100,7 +114,7 @@ public class Config {
     }
 
     public static TrustManager getTrustManager(Context context) {
-        String certString = getKey(R.string.key_mailbox_cert, context);
+        String certString = getStringValue(R.string.key_mailbox_cert, context);
         TrustManager trustManager;
 
         try {

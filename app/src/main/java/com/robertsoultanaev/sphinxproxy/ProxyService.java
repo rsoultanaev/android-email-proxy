@@ -35,8 +35,8 @@ public class ProxyService extends Service {
         if (!running) {
             final Context context = getApplicationContext();
 
-            final int pop3Port = Integer.parseInt(Config.getKey(R.string.key_proxy_pop3_port, context));
-            final int smtpPort = Integer.parseInt(Config.getKey(R.string.key_proxy_smtp_port, context));
+            final int pop3Port = Config.getIntValue(R.string.key_proxy_pop3_port, context);
+            final int smtpPort = Config.getIntValue(R.string.key_proxy_smtp_port, context);
 
             new Thread(new Runnable() {
                 public void run() {
@@ -51,8 +51,8 @@ public class ProxyService extends Service {
                     smtpServer.setPort(smtpPort);
                     smtpServer.start();
 
-                    String username = Config.getKey(R.string.key_proxy_username, context);
-                    String password = Config.getKey(R.string.key_proxy_password, context);
+                    String username = Config.getStringValue(R.string.key_proxy_username, context);
+                    String password = Config.getStringValue(R.string.key_proxy_password, context);
                     pop3Server = new Pop3Server(pop3Port, username, password, dbQuery);
                     pop3Server.start();
 

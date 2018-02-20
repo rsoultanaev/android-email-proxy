@@ -69,10 +69,10 @@ public class MainActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             public void run() {
                 Context context = getApplicationContext();
-                String server = Config.getKey(R.string.key_mailbox_hostname, context);
-                int port = Integer.parseInt(Config.getKey(R.string.key_mailbox_port, context));
-                String username = Config.getKey(R.string.key_mailbox_username, context);
-                String password = Config.getKey(R.string.key_mailbox_password, context);
+                String server = Config.getStringValue(R.string.key_mailbox_hostname, context);
+                int port = Integer.parseInt(Config.getStringValue(R.string.key_mailbox_port, context));
+                String username = Config.getStringValue(R.string.key_mailbox_username, context);
+                String password = Config.getStringValue(R.string.key_mailbox_password, context);
 
                 DB db = DB.getAppDatabase(context);
                 DBQuery dbQuery = db.getDao();
@@ -100,14 +100,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setDefaultConfig(Context context) {
-        Config.setKey(R.string.key_proxy_pop3_port, getString(R.string.default_proxy_pop3_port), context);
-        Config.setKey(R.string.key_proxy_smtp_port, getString(R.string.default_proxy_smtp_port), context);
-        Config.setKey(R.string.key_proxy_username, getString(R.string.default_proxy_username), context);
-        Config.setKey(R.string.key_proxy_password, getString(R.string.default_proxy_password), context);
-        Config.setKey(R.string.key_mailbox_hostname, getString(R.string.default_mailbox_hostname), context);
-        Config.setKey(R.string.key_mailbox_port, getString(R.string.default_mailbox_port), context);
-        Config.setKey(R.string.key_mailbox_username, getString(R.string.default_mailbox_username), context);
-        Config.setKey(R.string.key_mailbox_password, getString(R.string.default_mailbox_password), context);
+        Config.setIntValue(R.string.key_proxy_pop3_port, Integer.parseInt(getString(R.string.default_proxy_pop3_port)), context);
+        Config.setIntValue(R.string.key_proxy_smtp_port, Integer.parseInt(getString(R.string.default_proxy_smtp_port)), context);
+        Config.setStringValue(R.string.key_proxy_username, getString(R.string.default_proxy_username), context);
+        Config.setStringValue(R.string.key_proxy_password, getString(R.string.default_proxy_password), context);
+        Config.setStringValue(R.string.key_mailbox_hostname, getString(R.string.default_mailbox_hostname), context);
+        Config.setStringValue(R.string.key_mailbox_port, getString(R.string.default_mailbox_port), context);
+        Config.setStringValue(R.string.key_mailbox_username, getString(R.string.default_mailbox_username), context);
+        Config.setStringValue(R.string.key_mailbox_password, getString(R.string.default_mailbox_password), context);
     }
 
     private void loadMixNetworkConfig(DBQuery dbQuery) {
@@ -156,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
             byte[] certBytes = IOUtils.toByteArray(getAssets().open(fileName));
             String certString = new String(certBytes);
 
-            Config.setKey(R.string.key_mailbox_cert, certString, context);
+            Config.setStringValue(R.string.key_mailbox_cert, certString, context);
         } catch (IOException ex) {
             throw new RuntimeException("Failed to read mailbox certificate", ex);
         }
