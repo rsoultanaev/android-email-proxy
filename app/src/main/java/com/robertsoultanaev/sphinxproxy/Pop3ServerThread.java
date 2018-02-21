@@ -65,15 +65,15 @@ public class Pop3ServerThread extends Thread {
                     numberToMsg.put(i, assembledMessages.get(i - 1));
                 }
 
-                output = "+OK Hello there" + "\r";
-                out.println(output);
+                output = "+OK Hello there";
+                printlnCrlf(out, output);
 
                 while ((inputLine = in.readLine()) != null) {
                     String[] args = inputLine.split("[\\r\\n ]");
                     String command = args[0].toUpperCase();
 
                     output = handleCommand(command, args);
-                    out.println(output);
+                    printlnCrlf(out, output);
                     if (command.equals("QUIT"))
                         break;
                 }
@@ -168,7 +168,7 @@ public class Pop3ServerThread extends Thread {
                 break;
         }
 
-        return response + "\r";
+        return response;
     }
 
     private String handleStat() {
@@ -408,5 +408,11 @@ public class Pop3ServerThread extends Thread {
 
         providedUsername = null;
         return response;
+    }
+
+    private void printlnCrlf(PrintWriter writer, String s) {
+        String carriageReturn = "\r";
+        String output = s + carriageReturn;
+        writer.println(output);
     }
 }

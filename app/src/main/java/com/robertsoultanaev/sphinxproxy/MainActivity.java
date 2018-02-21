@@ -2,7 +2,6 @@ package com.robertsoultanaev.sphinxproxy;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -34,95 +33,30 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         final Context context = getApplicationContext();
 
-        // Read mix network configuration and save into database when first installed
-        String sharedPreferencesFile = getString(R.string.key_preference_file);
-        String setupDoneKey = getString(R.string.key_setup_done);
-        final SharedPreferences sharedPreferences = getSharedPreferences(sharedPreferencesFile, Context.MODE_PRIVATE);
-        if (!sharedPreferences.getBoolean(setupDoneKey, false)) {
-            // Set default config
-            Config.setKey(R.string.key_proxy_pop3_port, getString(R.string.default_proxy_pop3_port), context);
-            Config.setKey(R.string.key_proxy_smtp_port, getString(R.string.default_proxy_smtp_port), context);
-            Config.setKey(R.string.key_proxy_username, getString(R.string.default_proxy_username), context);
-            Config.setKey(R.string.key_proxy_password, getString(R.string.default_proxy_password), context);
-            Config.setKey(R.string.key_mailbox_hostname, getString(R.string.default_mailbox_hostname), context);
-            Config.setKey(R.string.key_mailbox_port, getString(R.string.default_mailbox_port), context);
-            Config.setKey(R.string.key_mailbox_username, getString(R.string.default_mailbox_username), context);
-            Config.setKey(R.string.key_mailbox_password, getString(R.string.default_mailbox_password), context);
+        if (!Config.setupDone(context)) {
+            setDefaultConfig(context);
 
             new Thread(new Runnable() {
                 public void run() {
-                    DB db = DB.getAppDatabase(context);
-                    DBQuery dbQuery = db.getDao();
+                    DBQuery dbQuery = DB.getAppDatabase(context).getDao();
 
-                    EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
-                    KeyPair keyPair = endToEndCrypto.generateKeyPair();
-                    Config.setKeyPair(keyPair, context);
+                    generateAndSetKeyPair(context);
 
-                    try {
-                        String fileName = getString(R.string.mix_network_filename);
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(getAssets().open(fileName)));
-
-                        String line;
-                        while ((line = reader.readLine()) != null) {
-                            String[] splitLine = line.split(",");
-                            int id = Integer.parseInt(splitLine[0]);
-                            String host = splitLine[1];
-                            int port = Integer.parseInt(splitLine[2]);
-                            String encodedPublicKey = splitLine[3];
-                            dbQuery.insertMixNode(new MixNode(id, host, port, encodedPublicKey));
-                        }
-
-                        reader.close();
-                    } catch (IOException ex) {
-                        throw new RuntimeException("Failed to read the mix network configuration", ex);
-                    }
-
-                    try {
-                        String fileName = getString(R.string.recipient_keys_filename);
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(getAssets().open(fileName)));
-
-                        String line;
-                        while ((line = reader.readLine()) != null) {
-                            String[] splitLine = line.split(",");
-                            String recipient = splitLine[0];
-                            String encodedPublicKey = splitLine[1];
-                            dbQuery.insertRecipient(new Recipient(recipient, encodedPublicKey));
-                        }
-
-                        reader.close();
-                    } catch (IOException ex) {
-                        throw new RuntimeException("Failed to read the recipient keys", ex);
-                    }
-
-                    try {
-                        String fileName = getString(R.string.mailbox_cert_filename);
-                        byte[] certBytes = IOUtils.toByteArray(getAssets().open(fileName));
-                        String certString = new String(certBytes);
-
-                        Config.setKey(R.string.key_mailbox_cert, certString, context);
-                    } catch (IOException ex) {
-                        throw new RuntimeException("Failed to read mailbox certificate", ex);
-                    }
+                    loadMixNetworkConfig(dbQuery);
+                    loadRecipientPublicKeys(dbQuery);
+                    loadMailboxCertificate(context);
                 }
             }).start();
 
             Intent configIntent = new Intent(this, ConfigActivity.class);
             startActivityForResult(configIntent, EDIT_CONFIG_REQUEST);
 
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putBoolean(getString(R.string.key_setup_done), true);
-            editor.apply();
+            Config.setSetupDone(context, true);
         }
     }
 
     public void startProxy(View view) {
-        Context context = getApplicationContext();
-        int pop3Port = Integer.parseInt(Config.getKey(R.string.key_proxy_pop3_port, context));
-        int smtpPort = Integer.parseInt(Config.getKey(R.string.key_proxy_smtp_port, context));
-
         Intent proxyIntent = new Intent(this, ProxyService.class);
-        proxyIntent.putExtra("pop3Port", pop3Port);
-        proxyIntent.putExtra("smtpPort", smtpPort);
         startService(proxyIntent);
     }
 
@@ -135,10 +69,10 @@ public class MainActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             public void run() {
                 Context context = getApplicationContext();
-                String server = Config.getKey(R.string.key_mailbox_hostname, context);
-                int port = Integer.parseInt(Config.getKey(R.string.key_mailbox_port, context));
-                String username = Config.getKey(R.string.key_mailbox_username, context);
-                String password = Config.getKey(R.string.key_mailbox_password, context);
+                String server = Config.getStringValue(R.string.key_mailbox_hostname, context);
+                int port = Config.getIntValue(R.string.key_mailbox_port, context);
+                String username = Config.getStringValue(R.string.key_mailbox_username, context);
+                String password = Config.getStringValue(R.string.key_mailbox_password, context);
 
                 DB db = DB.getAppDatabase(context);
                 DBQuery dbQuery = db.getDao();
@@ -163,5 +97,74 @@ public class MainActivity extends AppCompatActivity {
     public void editConfig(View view) {
         Intent configIntent = new Intent(this, ConfigActivity.class);
         startActivityForResult(configIntent, EDIT_CONFIG_REQUEST);
+    }
+
+    private void setDefaultConfig(Context context) {
+        Config.setIntValue(R.string.key_proxy_pop3_port, Integer.parseInt(getString(R.string.default_proxy_pop3_port)), context);
+        Config.setIntValue(R.string.key_proxy_smtp_port, Integer.parseInt(getString(R.string.default_proxy_smtp_port)), context);
+        Config.setStringValue(R.string.key_proxy_username, getString(R.string.default_proxy_username), context);
+        Config.setStringValue(R.string.key_proxy_password, getString(R.string.default_proxy_password), context);
+        Config.setStringValue(R.string.key_mailbox_hostname, getString(R.string.default_mailbox_hostname), context);
+        Config.setIntValue(R.string.key_mailbox_port, Integer.parseInt(getString(R.string.default_mailbox_port)), context);
+        Config.setStringValue(R.string.key_mailbox_username, getString(R.string.default_mailbox_username), context);
+        Config.setStringValue(R.string.key_mailbox_password, getString(R.string.default_mailbox_password), context);
+    }
+
+    private void loadMixNetworkConfig(DBQuery dbQuery) {
+        try {
+            String fileName = getString(R.string.mix_network_filename);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(getAssets().open(fileName)));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] splitLine = line.split(",");
+                int id = Integer.parseInt(splitLine[0]);
+                String host = splitLine[1];
+                int port = Integer.parseInt(splitLine[2]);
+                String encodedPublicKey = splitLine[3];
+                dbQuery.insertMixNode(new MixNode(id, host, port, encodedPublicKey));
+            }
+
+            reader.close();
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to read the mix network configuration", ex);
+        }
+    }
+
+    private void loadRecipientPublicKeys(DBQuery dbQuery) {
+        try {
+            String fileName = getString(R.string.recipient_keys_filename);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(getAssets().open(fileName)));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] splitLine = line.split(",");
+                String recipient = splitLine[0];
+                String encodedPublicKey = splitLine[1];
+                dbQuery.insertRecipient(new Recipient(recipient, encodedPublicKey));
+            }
+
+            reader.close();
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to read the recipient keys", ex);
+        }
+    }
+
+    private void loadMailboxCertificate(Context context) {
+        try {
+            String fileName = getString(R.string.mailbox_cert_filename);
+            byte[] certBytes = IOUtils.toByteArray(getAssets().open(fileName));
+            String certString = new String(certBytes);
+
+            Config.setStringValue(R.string.key_mailbox_cert, certString, context);
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to read mailbox certificate", ex);
+        }
+    }
+
+    private void generateAndSetKeyPair(Context context) {
+        EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
+        KeyPair keyPair = endToEndCrypto.generateKeyPair();
+        Config.setKeyPair(keyPair, context);
     }
 }
