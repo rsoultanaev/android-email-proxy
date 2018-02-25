@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class ConfigActivity extends AppCompatActivity {
 
@@ -56,14 +57,78 @@ public class ConfigActivity extends AppCompatActivity {
         final EditText editTextMailboxUsername = findViewById(R.id.editTextMailboxUsername);
         final EditText editTextMailboxPassword = findViewById(R.id.editTextMailboxPassword);
 
-        int pop3Port = Integer.parseInt(editTextPop3Port.getText().toString());
-        int smtpPort = Integer.parseInt(editTextSmtpPort.getText().toString());
-        String proxyUsername = editTextProxyUsername.getText().toString();
-        String proxyPassword = editTextProxyPassword.getText().toString();
-        String mailboxHostname = editTextMailboxHostname.getText().toString();
-        int mailboxPort = Integer.parseInt(editTextMailboxPort.getText().toString());
-        String mailboxUsername = editTextMailboxUsername.getText().toString();
-        String mailboxPassword = editTextMailboxPassword.getText().toString();
+        String inputPop3Port = editTextPop3Port.getText().toString();
+        String inputSmtpPort = editTextSmtpPort.getText().toString();
+        String inputProxyUsername = editTextProxyUsername.getText().toString();
+        String inputProxyPassword = editTextProxyPassword.getText().toString();
+        String inputMailboxHostname = editTextMailboxHostname.getText().toString();
+        String inputMailboxPort = editTextMailboxPort.getText().toString();
+        String inputMailboxUsername = editTextMailboxUsername.getText().toString();
+        String inputMailboxPassword = editTextMailboxPassword.getText().toString();
+
+        int pop3Port;
+        try {
+            pop3Port = Integer.parseInt(inputPop3Port);
+        } catch (NumberFormatException ex) {
+            Toast.makeText(context, "Please enter a number for the POP3 port", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        int smtpPort;
+        try {
+            smtpPort = Integer.parseInt(inputSmtpPort);
+        } catch (NumberFormatException ex) {
+            Toast.makeText(context, "Please enter a number for the SMTP port", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String proxyUsername;
+        if (!inputProxyUsername.isEmpty()) {
+            proxyUsername = inputProxyUsername;
+        } else {
+            Toast.makeText(context, "Please enter the proxy username", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String proxyPassword;
+        if (!inputProxyPassword.isEmpty()) {
+            proxyPassword = inputProxyPassword;
+        } else {
+            Toast.makeText(context, "Please enter the proxy password", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String mailboxHostname;
+        if (!inputMailboxHostname.isEmpty()) {
+            mailboxHostname = inputMailboxHostname;
+        } else {
+            Toast.makeText(context, "Please enter the mailbox hostname", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        int mailboxPort;
+        try {
+            mailboxPort = Integer.parseInt(inputMailboxPort);
+        } catch (NumberFormatException ex) {
+            Toast.makeText(context, "Please enter a number for the mailbox port", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String mailboxUsername;
+        if (!inputMailboxUsername.isEmpty()) {
+            mailboxUsername = inputMailboxUsername;
+        } else {
+            Toast.makeText(context, "Please enter the mailbox username", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String mailboxPassword;
+        if (!inputMailboxPassword.isEmpty()) {
+            mailboxPassword = inputMailboxPassword;
+        } else {
+            Toast.makeText(context, "Please enter the mailbox password", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         Config.setIntValue(R.string.key_proxy_pop3_port, pop3Port, context);
         Config.setIntValue(R.string.key_proxy_smtp_port, smtpPort, context);
