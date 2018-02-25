@@ -86,7 +86,8 @@ public class MainActivity extends AppCompatActivity {
                 EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
 
                 List<MixNode> mixNodes = dbQuery.getMixNodes();
-                SphinxUtil sphinxUtil = new SphinxUtil(mixNodes);
+                int numUseMixes = Config.getIntValue(R.string.key_num_use_mixes, context);
+                SphinxUtil sphinxUtil = new SphinxUtil(mixNodes, numUseMixes);
 
                 Mailbox mailbox = new Mailbox(server, port, username, password, dbQuery, pop3Client, endToEndCrypto, privateKey, sphinxUtil);
                 mailbox.updateMailbox();

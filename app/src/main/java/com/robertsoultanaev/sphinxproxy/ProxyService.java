@@ -43,7 +43,8 @@ public class ProxyService extends Service {
                     DBQuery dbQuery = DB.getAppDatabase(context).getDao();
 
                     List<MixNode> mixNodes = dbQuery.getMixNodes();
-                    SphinxUtil sphinxUtil = new SphinxUtil(mixNodes);
+                    int numUseMixes = Config.getIntValue(R.string.key_num_use_mixes, context);
+                    SphinxUtil sphinxUtil = new SphinxUtil(mixNodes, numUseMixes);
                     AsyncTcpClient asyncTcpClient = new AsyncTcpClient();
                     EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
                     SmtpMessageHandler smtpMessageHandler = new SmtpMessageHandler(sphinxUtil, asyncTcpClient, dbQuery, endToEndCrypto);
