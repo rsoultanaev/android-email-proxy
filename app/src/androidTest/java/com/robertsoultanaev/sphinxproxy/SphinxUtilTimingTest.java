@@ -12,42 +12,29 @@ import org.junit.runner.RunWith;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Random;
 
 @RunWith(AndroidJUnit4.class)
 public class SphinxUtilTimingTest {
 
-    class PkiEntry {
-        BigInteger priv;
-        ECPoint pub;
-
-        public PkiEntry(BigInteger priv, ECPoint pub) {
-            this.priv = priv;
-            this.pub = pub;
-        }
-    }
-
     @Test
     public void timeSplittingIntoPackets() throws Exception {
-        int repetitions = 1000;
-
-        int emailSize = 10000;
-        int numUseMixes = 3;
-
         SphinxParams params = new SphinxParams();
 
+        int repetitions = 100;
+
+        int emailSize = 1000;
+        int numUseMixes = 5;
+
         int basePort = 8000;
-        HashMap<Integer, PkiEntry> pki = new HashMap<Integer, PkiEntry>();
         ArrayList<MixNode> nodeList = new ArrayList<MixNode>();
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < numUseMixes; i++) {
             BigInteger priv = params.getGroup().genSecret();
             ECPoint pub = params.getGroup().expon(params.getGroup().getGenerator(), priv);
 
             int port = basePort + i;
             String host = "host" + Integer.toString(i);
-            pki.put(i,  new PkiEntry(priv, pub));
             nodeList.add(new MixNode(i, host, port, Hex.toHexString(pub.getEncoded(true))));
         }
 
