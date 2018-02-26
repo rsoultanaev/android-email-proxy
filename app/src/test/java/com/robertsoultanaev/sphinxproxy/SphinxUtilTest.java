@@ -99,9 +99,6 @@ public class SphinxUtilTest {
                 } else if (flag.equals(SphinxClient.DEST_FLAG)) {
                     unpacker.close();
 
-                    byte[] zeroes = new byte[params.getKeyLength()];
-                    java.util.Arrays.fill(zeroes, (byte) 0x00);
-
                     byte[] processedMessage = SphinxClient.receiveForward(params, ret.macKey, ret.headerAndDelta.delta).message;
                     processedMessages[i] = Base64.encode(processedMessage);
 
