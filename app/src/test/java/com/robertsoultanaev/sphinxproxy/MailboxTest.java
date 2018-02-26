@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.robertsoultanaev.javasphinx.Util.concatByteArrays;
+import static com.robertsoultanaev.javasphinx.Util.concatenate;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -71,8 +71,8 @@ public class MailboxTest {
         packet2HeaderBf.putInt(1);
         byte[] packet2Header = packet2HeaderBf.array();
 
-        String encodedPayload1 = new String(Base64.encode(concatByteArrays(packet1Header, packet1Str.getBytes())));
-        String encodedPayload2 = new String(Base64.encode(concatByteArrays(packet2Header, packet2Str.getBytes())));
+        String encodedPayload1 = new String(Base64.encode(concatenate(packet1Header, packet1Str.getBytes())));
+        String encodedPayload2 = new String(Base64.encode(concatenate(packet2Header, packet2Str.getBytes())));
 
         String fromMailbox1 = "mailboxHeader1\r\n" + "mailboxHeader1\r\n" + "\r\n" + encodedPayload1 + "\r\n";
         String fromMailbox2 = "mailboxHeader2\r\n" + "mailboxHeader2\r\n" + "\r\n" + encodedPayload2 + "\r\n";

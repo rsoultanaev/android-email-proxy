@@ -102,7 +102,7 @@ public class SphinxUtilTest {
                     byte[] zeroes = new byte[params.getKeyLength()];
                     java.util.Arrays.fill(zeroes, (byte) 0x00);
 
-                    byte[] processedMessage = SphinxClient.receiveForward(params, ret.headerAndDelta.delta).message;
+                    byte[] processedMessage = SphinxClient.receiveForward(params, ret.macKey, ret.headerAndDelta.delta).message;
                     processedMessages[i] = Base64.encode(processedMessage);
 
                     break;

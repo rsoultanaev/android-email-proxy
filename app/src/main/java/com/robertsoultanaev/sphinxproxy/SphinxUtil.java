@@ -6,7 +6,7 @@ import com.robertsoultanaev.javasphinx.ParamLengths;
 import static com.robertsoultanaev.javasphinx.SphinxClient.createForwardMessage;
 import static com.robertsoultanaev.javasphinx.SphinxClient.packMessage;
 import static com.robertsoultanaev.javasphinx.SphinxClient.getMaxPayloadSize;
-import static com.robertsoultanaev.javasphinx.Util.concatByteArrays;
+import static com.robertsoultanaev.javasphinx.Util.concatenate;
 import static com.robertsoultanaev.javasphinx.Util.decodeECPoint;
 
 import com.robertsoultanaev.javasphinx.SphinxClient;
@@ -81,7 +81,7 @@ public class SphinxUtil {
             packetHeader.putInt(i);
 
             byte[] packetPayload = copyUpToNum(email, packetPayloadSize * i, packetPayloadSize);
-            byte[] sphinxPayload = concatByteArrays(packetHeader.array(), packetPayload);
+            byte[] sphinxPayload = concatenate(packetHeader.array(), packetPayload);
 
             RoutingInformation routingInformation = generateRoutingInformation(this.numRouteNodes);
 
@@ -94,22 +94,12 @@ public class SphinxUtil {
     private SphinxPacketWithRouting createBinSphinxPacket(byte[] dest, byte[] message, RoutingInformation routingInformation) {
         DestinationAndMessage destinationAndMessage = new DestinationAndMessage(dest, message);
 
-        HeaderAndDelta headerAndDelta;
-        try {
-            headerAndDelta = createForwardMessage(params, routingInformation.nodesRouting, routingInformation.nodeKeys, destinationAndMessage);
-        } catch (IOException ex) {
-            throw new RuntimeException("Failed to create forward message", ex);
-        }
+        HeaderAndDelta headerAndDelta = createForwardMessage(params, routingInformation.nodesRouting, routingInformation.nodeKeys, destinationAndMessage);
 
         ParamLengths paramLengths = new ParamLengths(params.getHeaderLength(), params.getBodyLength());
         SphinxPacket sphinxPacket = new SphinxPacket(paramLengths, headerAndDelta);
 
-        byte[] binSphinxPacket;
-        try {
-            binSphinxPacket = packMessage(sphinxPacket);
-        } catch (IOException ex) {
-            throw new RuntimeException("Failed to pack forward message", ex);
-        }
+        byte[] binSphinxPacket = packMessage(sphinxPacket);
 
         int firstNodeId = routingInformation.firstNodeId;
         InetSocketAddress firstNodeAddress = mixNodeAddresses.get(firstNodeId);
@@ -130,11 +120,7 @@ public class SphinxUtil {
 
         nodesRouting = new byte[useNodes.length][];
         for (int i = 0; i < useNodes.length; i++) {
-            try {
-                nodesRouting[i] = SphinxClient.encodeNode(useNodes[i]);
-            } catch (IOException ex) {
-                throw new RuntimeException("Failed to encode node", ex);
-            }
+            nodesRouting[i] = SphinxClient.encodeNode(useNodes[i]);
         }
 
         nodeKeys = new ECPoint[useNodes.length];
@@ -152,7 +138,7 @@ public class SphinxUtil {
         for (int i = 0; i < packets.size(); i++) {
             payloads[i] = packets.get(i).payload;
         }
-        byte[] message = concatByteArrays(payloads);
+        byte[] message = concatenate(payloads);
 
         return new AssembledMessage(uuid, message);
     }
