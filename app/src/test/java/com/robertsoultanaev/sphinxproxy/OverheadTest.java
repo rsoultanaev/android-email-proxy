@@ -57,7 +57,8 @@ public class OverheadTest {
 
         when(dbQuery.getRecipient(recipientAddress)).thenReturn(recipient);
 
-        SphinxUtil sphinxUtil = new SphinxUtil(mixNodeList);
+        int numUseMixes = 3;
+        SphinxUtil sphinxUtil = new SphinxUtil(mixNodeList, 3);
         EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
         MeasuringMockAsyncTcpClient asyncTcpClient = new MeasuringMockAsyncTcpClient();
         SmtpMessageHandler smtpMessageHandler = new SmtpMessageHandler(sphinxUtil, asyncTcpClient, dbQuery, endToEndCrypto);

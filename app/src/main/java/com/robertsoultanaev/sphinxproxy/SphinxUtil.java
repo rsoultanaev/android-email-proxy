@@ -48,8 +48,9 @@ public class SphinxUtil {
     private final SphinxParams params;
     private final HashMap<Integer, InetSocketAddress> mixNodeAddresses;
     private final HashMap<Integer, ECPoint> mixNodePublicKeys;
+    private final int numRouteNodes;
 
-    public SphinxUtil(List<MixNode> mixNodes) {
+    public SphinxUtil(List<MixNode> mixNodes, int numRouteNodes) {
         params = new SphinxParams();
         mixNodePublicKeys = new HashMap<Integer, ECPoint>();
         mixNodeAddresses = new HashMap<Integer, InetSocketAddress>();
@@ -59,6 +60,8 @@ public class SphinxUtil {
             mixNodePublicKeys.put(mixNode.id, publicKey);
             mixNodeAddresses.put(mixNode.id, new InetSocketAddress(mixNode.host, mixNode.port));
         }
+
+        this.numRouteNodes = numRouteNodes;
     }
 
     public SphinxPacketWithRouting[] splitIntoSphinxPackets(byte[] email, String recipient) {
@@ -80,7 +83,7 @@ public class SphinxUtil {
             byte[] packetPayload = copyUpToNum(email, packetPayloadSize * i, packetPayloadSize);
             byte[] sphinxPayload = concatByteArrays(packetHeader.array(), packetPayload);
 
-            RoutingInformation routingInformation = generateRoutingInformation(3);
+            RoutingInformation routingInformation = generateRoutingInformation(this.numRouteNodes);
 
             sphinxPackets[i] = createBinSphinxPacket(dest, sphinxPayload, routingInformation);
         }

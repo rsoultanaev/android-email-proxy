@@ -56,6 +56,7 @@ public class ConfigActivity extends AppCompatActivity {
         final EditText editTextMailboxPort = findViewById(R.id.editTextMailboxPort);
         final EditText editTextMailboxUsername = findViewById(R.id.editTextMailboxUsername);
         final EditText editTextMailboxPassword = findViewById(R.id.editTextMailboxPassword);
+        final EditText editTextNumUseMixes = findViewById(R.id.editTextNumUseMixes);
 
         String inputPop3Port = editTextPop3Port.getText().toString();
         String inputSmtpPort = editTextSmtpPort.getText().toString();
@@ -65,6 +66,7 @@ public class ConfigActivity extends AppCompatActivity {
         String inputMailboxPort = editTextMailboxPort.getText().toString();
         String inputMailboxUsername = editTextMailboxUsername.getText().toString();
         String inputMailboxPassword = editTextMailboxPassword.getText().toString();
+        String inputNumUseMixes = editTextNumUseMixes.getText().toString();
 
         int pop3Port;
         try {
@@ -130,6 +132,20 @@ public class ConfigActivity extends AppCompatActivity {
             return;
         }
 
+        int numUseMixes;
+        try {
+            numUseMixes = Integer.parseInt(inputNumUseMixes);
+        } catch (NumberFormatException ex) {
+            Toast.makeText(context, "Please enter a number for the number of mixes used", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        int numTotalMixes = Config.getIntValue(R.string.key_num_total_mixes, context);
+        if (numUseMixes > numTotalMixes) {
+            Toast.makeText(context, "Number of mixes to be used cannot exceed the total number of mixes: " + numTotalMixes, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         Config.setIntValue(R.string.key_proxy_pop3_port, pop3Port, context);
         Config.setIntValue(R.string.key_proxy_smtp_port, smtpPort, context);
         Config.setStringValue(R.string.key_proxy_username, proxyUsername, context);
@@ -138,6 +154,7 @@ public class ConfigActivity extends AppCompatActivity {
         Config.setIntValue(R.string.key_mailbox_port, mailboxPort, context);
         Config.setStringValue(R.string.key_mailbox_username, mailboxUsername, context);
         Config.setStringValue(R.string.key_mailbox_password, mailboxPassword, context);
+        Config.setIntValue(R.string.key_num_use_mixes, numUseMixes, context);
 
         setResult(Activity.RESULT_OK);
         finish();

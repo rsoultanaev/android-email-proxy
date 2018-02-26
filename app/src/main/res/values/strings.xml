@@ -18,6 +18,8 @@
     <string name="key_private_key">privateKey</string>
     <string name="key_public_key">publicKey</string>
     <string name="key_mailbox_cert">mailboxCert</string>
+    <string name="key_num_use_mixes">numUseMixes</string>
+    <string name="key_num_total_mixes">numTotalMixes</string>
 
     <string name="default_proxy_pop3_port">27000</string>
     <string name="default_proxy_smtp_port">28000</string>
@@ -27,6 +29,7 @@
     <string name="default_mailbox_port">995</string>
     <string name="default_mailbox_username">mort</string>
     <string name="default_mailbox_password">1234</string>
+    <string name="default_num_use_mixes">3</string>
 
     <string name="textview_pop3_port">POP3 port</string>
     <string name="textview_smtp_port">SMTP port</string>
@@ -36,6 +39,7 @@
     <string name="textview_mailbox_port">Mailbox port</string>
     <string name="textview_mailbox_username">Mailbox username</string>
     <string name="textview_mailbox_password">Mailbox password</string>
+    <string name="textview_num_use_mixes">Number of mixes to use</string>
 
     <string name="button_save_config">Save config</string>
     <string name="button_start_service">Start Service</string>

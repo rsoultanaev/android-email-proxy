@@ -39,7 +39,7 @@
                 android:layout_marginTop="48dp"
                 android:ems="10"
                 android:hint="@string/textview_pop3_port"
-                android:inputType="text"
+                android:inputType="number"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -66,7 +66,7 @@
                 android:layout_marginTop="48dp"
                 android:ems="10"
                 android:hint="@string/textview_smtp_port"
-                android:inputType="text"
+                android:inputType="number"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/editTextPop3Port" />
@@ -177,7 +177,7 @@
                 android:layout_marginTop="48dp"
                 android:ems="10"
                 android:hint="@string/textview_mailbox_port"
-                android:inputType="text"
+                android:inputType="number"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/editTextMailboxHostname" />
@@ -235,11 +235,40 @@
                 android:ems="10"
                 android:hint="@string/textview_mailbox_password"
                 android:inputType="text"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/editTextMailboxUsername" />
+
+
+
+            <TextView
+                android:id="@+id/textViewNumUseMixes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/textview_num_use_mixes"
+                app:layout_constraintBottom_toTopOf="@+id/editTextNumUseMixes"
+                app:layout_constraintEnd_toEndOf="@+id/editTextNumUseMixes"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="@+id/editTextNumUseMixes"
+                app:layout_constraintTop_toBottomOf="@+id/editTextMailboxPassword"
+                app:layout_constraintVertical_bias="1.0" />
+
+            <EditText
+                android:id="@+id/editTextNumUseMixes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="48dp"
+                android:ems="10"
+                android:hint="@string/textview_num_use_mixes"
+                android:inputType="number"
                 app:layout_constraintBottom_toTopOf="@+id/buttonSaveConfig"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.503"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/editTextMailboxUsername"
+                app:layout_constraintTop_toBottomOf="@+id/editTextMailboxPassword"
                 app:layout_constraintVertical_bias="0.0" />
 
 
@@ -257,7 +286,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/editTextMailboxPassword" />
+                app:layout_constraintTop_toBottomOf="@+id/editTextNumUseMixes" />
 
         </android.support.constraint.ConstraintLayout>
     </ScrollView>

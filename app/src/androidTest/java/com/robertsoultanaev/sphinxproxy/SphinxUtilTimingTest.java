@@ -31,7 +31,9 @@ public class SphinxUtilTimingTest {
     @Test
     public void timeSplittingIntoPackets() throws Exception {
         int repetitions = 1000;
+
         int emailSize = 10000;
+        int numUseMixes = 3;
 
         SphinxParams params = new SphinxParams();
 
@@ -49,7 +51,7 @@ public class SphinxUtilTimingTest {
             nodeList.add(new MixNode(i, host, port, Hex.toHexString(pub.getEncoded(true))));
         }
 
-        SphinxUtil sphinxUtil = new SphinxUtil(nodeList);
+        SphinxUtil sphinxUtil = new SphinxUtil(nodeList, numUseMixes);
 
         String emailStr = genRandomAlphanumericString(emailSize);
         byte[] email = emailStr.getBytes();
