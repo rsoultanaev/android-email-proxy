@@ -25,6 +25,7 @@ public class ConfigActivity extends AppCompatActivity {
         String mailboxPort = Integer.toString(Config.getIntValue(R.string.key_mailbox_port, context));
         String mailboxUsername = Config.getStringValue(R.string.key_mailbox_username, context);
         String mailboxPassword = Config.getStringValue(R.string.key_mailbox_password, context);
+        String numUseMixes = Integer.toString(Config.getIntValue(R.string.key_num_use_mixes, context));
 
         final EditText editTextPop3Port = findViewById(R.id.editTextPop3Port);
         final EditText editTextSmtpPort = findViewById(R.id.editTextSmtpPort);
@@ -34,6 +35,7 @@ public class ConfigActivity extends AppCompatActivity {
         final EditText editTextMailboxPort = findViewById(R.id.editTextMailboxPort);
         final EditText editTextMailboxUsername = findViewById(R.id.editTextMailboxUsername);
         final EditText editTextMailboxPassword = findViewById(R.id.editTextMailboxPassword);
+        final EditText editTextNumUseMixes = findViewById(R.id.editTextNumUseMixes);
 
         editTextPop3Port.setText(pop3Port);
         editTextSmtpPort.setText(smtpPort);
@@ -43,6 +45,7 @@ public class ConfigActivity extends AppCompatActivity {
         editTextMailboxPort.setText(mailboxPort);
         editTextMailboxUsername.setText(mailboxUsername);
         editTextMailboxPassword.setText(mailboxPassword);
+        editTextNumUseMixes.setText(numUseMixes);
     }
 
     public void saveConfig(View view) {

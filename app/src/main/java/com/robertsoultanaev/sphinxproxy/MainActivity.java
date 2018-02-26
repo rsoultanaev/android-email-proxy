@@ -34,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
         final Context context = getApplicationContext();
 
         if (!Config.setupDone(context)) {
+            setDefaultConfig(context);
+
             new Thread(new Runnable() {
                 public void run() {
                     DBQuery dbQuery = DB.getAppDatabase(context).getDao();
@@ -45,8 +47,6 @@ public class MainActivity extends AppCompatActivity {
                     loadMailboxCertificate(context);
                 }
             }).start();
-
-            setDefaultConfig(context);
 
             Intent configIntent = new Intent(this, ConfigActivity.class);
             startActivityForResult(configIntent, EDIT_CONFIG_REQUEST);
@@ -109,22 +109,15 @@ public class MainActivity extends AppCompatActivity {
         Config.setIntValue(R.string.key_mailbox_port, Integer.parseInt(getString(R.string.default_mailbox_port)), context);
         Config.setStringValue(R.string.key_mailbox_username, getString(R.string.default_mailbox_username), context);
         Config.setStringValue(R.string.key_mailbox_password, getString(R.string.default_mailbox_password), context);
-
-        int numTotalMixes = Config.getIntValue(R.string.key_num_total_mixes, context);
-        int numUseMixes = Integer.parseInt(getString(R.string.default_num_use_mixes));
-        if (numUseMixes > numTotalMixes) {
-            numUseMixes = numTotalMixes;
-        }
-        Config.setIntValue(R.string.key_num_use_mixes, numUseMixes, context);
+        Config.setIntValue(R.string.key_num_use_mixes, Integer.parseInt(getString(R.string.default_num_use_mixes)), context);
     }
 
     private void loadMixNetworkConfig(DBQuery dbQuery, Context context) {
+        String fileName = getString(R.string.mix_network_filename);
+        String line;
+        int numTotalMixes = 0;
         try {
-            String fileName = getString(R.string.mix_network_filename);
             BufferedReader reader = new BufferedReader(new InputStreamReader(getAssets().open(fileName)));
-
-            String line;
-            int numTotalMixes = 0;
             while ((line = reader.readLine()) != null) {
                 String[] splitLine = line.split(",");
                 int id = Integer.parseInt(splitLine[0]);
@@ -135,11 +128,11 @@ public class MainActivity extends AppCompatActivity {
                 numTotalMixes++;
             }
             reader.close();
-
-            Config.setIntValue(R.string.key_num_total_mixes, numTotalMixes, context);
         } catch (IOException ex) {
             throw new RuntimeException("Failed to read the mix network configuration", ex);
         }
+
+        Config.setIntValue(R.string.key_num_total_mixes, numTotalMixes, context);
     }
 
     private void loadRecipientPublicKeys(DBQuery dbQuery) {
