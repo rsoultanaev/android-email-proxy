@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -63,19 +62,11 @@ public class Config {
         return sharedPreferences.getString(key, null);
     }
 
-    public static void setKeyPair(KeyPair keyPair, Context context) {
-//        EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
-//        String encodedPrivateKey = endToEndCrypto.encodeKey(keyPair.getPrivate());
-//        String encodedPublicKey = endToEndCrypto.encodeKey(keyPair.getPublic());
+    public static void setKeyPair(String encodedPrivateKey, String encodedPublicKey, Context context) {
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
 
-        // Fix keys for now to do testing
-        String encodedPrivateKey = "MIGBAgEAMBAGByqGSM49AgEGBSuBBAAhBGowaAIBAQQcLbF1DZ8Tz9Yttnovor3I7FHhdNI/hnDfLEUiqaAHBgUrgQQAIaE8AzoABCNvOS14yIEldac3N0kxLbLEl6N4ckASZB0JfDu0wr3yH8pBFCmU9u3V5IYtFgB1PU/4ai+JMc5D";
-        String encodedPublicKey = "ME4wEAYHKoZIzj0CAQYFK4EEACEDOgAEI285LXjIgSV1pzc3STEtssSXo3hyQBJkHQl8O7TCvfIfykEUKZT27dXkhi0WAHU9T/hqL4kxzkM=";
-
-        String sharedPreferencesFile = context.getString(R.string.key_preference_file);
         String keyPrivateKey = context.getString(R.string.key_private_key);
         String keyPublicKey = context.getString(R.string.key_public_key);
-        SharedPreferences sharedPreferences = context.getSharedPreferences(sharedPreferencesFile, Context.MODE_PRIVATE);
 
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(keyPrivateKey, encodedPrivateKey);
