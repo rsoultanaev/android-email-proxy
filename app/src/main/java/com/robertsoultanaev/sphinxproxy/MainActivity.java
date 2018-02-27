@@ -39,8 +39,6 @@ public class MainActivity extends AppCompatActivity {
                 public void run() {
                     DBQuery dbQuery = DB.getAppDatabase(context).getDao();
 
-//                    generateAndSetKeyPair(context);
-
                     loadSelfKeyPair(context);
                     loadMixNetworkConfig(dbQuery, context);
                     loadRecipientPublicKeys(dbQuery);
