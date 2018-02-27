@@ -17,7 +17,6 @@ import org.apache.commons.net.pop3.POP3SClient;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.util.List;
 
@@ -40,8 +39,9 @@ public class MainActivity extends AppCompatActivity {
                 public void run() {
                     DBQuery dbQuery = DB.getAppDatabase(context).getDao();
 
-                    generateAndSetKeyPair(context);
+//                    generateAndSetKeyPair(context);
 
+                    loadSelfKeyPair(context);
                     loadMixNetworkConfig(dbQuery, context);
                     loadRecipientPublicKeys(dbQuery);
                     loadMailboxCertificate(context);
@@ -135,6 +135,25 @@ public class MainActivity extends AppCompatActivity {
         Config.setIntValue(R.string.key_num_total_mixes, numTotalMixes, context);
     }
 
+    private void loadSelfKeyPair(Context context) {
+        try {
+            String fileName = getString(R.string.self_keypair_filename);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(getAssets().open(fileName)));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] splitLine = line.split(",");
+                String encodedPrivateKey = splitLine[0];
+                String encodedPublicKey = splitLine[1];
+                Config.setKeyPair(encodedPrivateKey, encodedPublicKey, context);
+            }
+
+            reader.close();
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to read the recipient keys", ex);
+        }
+    }
+
     private void loadRecipientPublicKeys(DBQuery dbQuery) {
         try {
             String fileName = getString(R.string.recipient_keys_filename);
@@ -164,11 +183,5 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException ex) {
             throw new RuntimeException("Failed to read mailbox certificate", ex);
         }
-    }
-
-    private void generateAndSetKeyPair(Context context) {
-        EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
-        KeyPair keyPair = endToEndCrypto.generateKeyPair();
-        Config.setKeyPair(keyPair, context);
     }
 }

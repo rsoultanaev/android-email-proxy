@@ -3,6 +3,7 @@
 
     <string name="mix_network_filename">mix_client_config.csv</string>
     <string name="recipient_keys_filename">recipient_keys.csv</string>
+    <string name="self_keypair_filename">self_keypair.csv</string>
     <string name="mailbox_cert_filename">mailbox.cert</string>
 
     <string name="key_preference_file">preferenceFile</string>
