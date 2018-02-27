@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
