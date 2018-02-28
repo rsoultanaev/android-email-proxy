@@ -33,8 +33,6 @@ public class MainActivity extends AppCompatActivity {
         final Context context = getApplicationContext();
 
         if (!Config.setupDone(context)) {
-            setDefaultConfig(context);
-
             new Thread(new Runnable() {
                 public void run() {
                     DBQuery dbQuery = DB.getAppDatabase(context).getDao();
@@ -43,13 +41,14 @@ public class MainActivity extends AppCompatActivity {
                     loadMixNetworkConfig(dbQuery, context);
                     loadRecipientPublicKeys(dbQuery);
                     loadMailboxCertificate(context);
+                    setDefaultConfig(context);
+
+                    Config.setSetupDone(context, true);
+
+                    Intent configIntent = new Intent(context, ConfigActivity.class);
+                    startActivityForResult(configIntent, EDIT_CONFIG_REQUEST);
                 }
             }).start();
-
-            Intent configIntent = new Intent(this, ConfigActivity.class);
-            startActivityForResult(configIntent, EDIT_CONFIG_REQUEST);
-
-            Config.setSetupDone(context, true);
         }
     }
 
@@ -107,7 +106,13 @@ public class MainActivity extends AppCompatActivity {
         Config.setIntValue(R.string.key_mailbox_port, Integer.parseInt(getString(R.string.default_mailbox_port)), context);
         Config.setStringValue(R.string.key_mailbox_username, getString(R.string.default_mailbox_username), context);
         Config.setStringValue(R.string.key_mailbox_password, getString(R.string.default_mailbox_password), context);
-        Config.setIntValue(R.string.key_num_use_mixes, Integer.parseInt(getString(R.string.default_num_use_mixes)), context);
+
+        int numUseMixes = Integer.parseInt(getString(R.string.default_num_use_mixes));
+        int numTotalMixes = Config.getIntValue(R.string.key_num_total_mixes, context);
+        if (numTotalMixes < numUseMixes) {
+            numUseMixes = numTotalMixes;
+        }
+        Config.setIntValue(R.string.key_num_use_mixes, numUseMixes, context);
     }
 
     private void loadMixNetworkConfig(DBQuery dbQuery, Context context) {
