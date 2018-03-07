@@ -2,6 +2,7 @@ package com.robertsoultanaev.sphinxproxy;
 
 import android.support.test.runner.AndroidJUnit4;
 
+import com.robertsoultanaev.javasphinx.ECCGroup;
 import com.robertsoultanaev.javasphinx.SphinxParams;
 import com.robertsoultanaev.sphinxproxy.database.MixNode;
 
@@ -19,11 +20,12 @@ public class SphinxUtilTimingTest {
 
     @Test
     public void timeSplittingIntoPackets() throws Exception {
-        SphinxParams params = new SphinxParams();
+        int bodyLength = 1024;
+        SphinxParams params = new SphinxParams(16, bodyLength, 192, new ECCGroup());
 
         int repetitions = 100;
 
-        int emailSize = 1000;
+        int emailSize = 10000;
         int numUseMixes = 5;
 
         int basePort = 8000;
@@ -38,7 +40,7 @@ public class SphinxUtilTimingTest {
             nodeList.add(new MixNode(i, host, port, Hex.toHexString(pub.getEncoded(true))));
         }
 
-        SphinxUtil sphinxUtil = new SphinxUtil(nodeList, numUseMixes);
+        SphinxUtil sphinxUtil = new SphinxUtil(nodeList, numUseMixes, params);
 
         String emailStr = genRandomAlphanumericString(emailSize);
         byte[] email = emailStr.getBytes();
