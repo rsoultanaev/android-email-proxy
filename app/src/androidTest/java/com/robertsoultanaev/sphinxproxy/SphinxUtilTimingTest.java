@@ -25,7 +25,7 @@ public class SphinxUtilTimingTest {
 
         int repetitions = 100;
 
-        int emailSize = 10000;
+        int[] testSizes = {1000, 3000, 5000, 7000, 9000};
         int numUseMixes = 5;
 
         int basePort = 8000;
@@ -42,20 +42,26 @@ public class SphinxUtilTimingTest {
 
         SphinxUtil sphinxUtil = new SphinxUtil(nodeList, numUseMixes, params);
 
-        String emailStr = genRandomAlphanumericString(emailSize);
-        byte[] email = emailStr.getBytes();
+        byte[][] testEmails = new byte[testSizes.length][];
+        for (int i = 0; i < testSizes.length; i++) {
+            testEmails[i] = genRandomAlphanumericString(testSizes[i]).getBytes();
+        }
         String recipient = "mort@rsoultanaev.com";
 
-        long startTime = System.nanoTime();
-        for (int i = 0; i < repetitions; i++) {
-            sphinxUtil.splitIntoSphinxPackets(email, recipient);
+        for (int i = 0; i < testSizes.length; i++) {
+            byte[] email = testEmails[i];
+            long startTime = System.nanoTime();
+            for (int j = 0; j < repetitions; j++) {
+                sphinxUtil.splitIntoSphinxPackets(email, recipient);
+            }
+            long endTime = System.nanoTime();
+
+            long timeTaken = (endTime - startTime) / repetitions;
+            long timeTakenMillis = timeTaken / 1000000;
+
+            System.out.println("Email length: " + email.length);
+            System.out.println("Time taken to encrypt: " + timeTakenMillis + "ms");
         }
-        long endTime = System.nanoTime();
-
-        long timeTaken = (endTime - startTime) / repetitions;
-        long timeTakenMillis = timeTaken / 1000000;
-
-        System.out.println("Time taken per split: " + timeTakenMillis + "ms");
     }
 
     private String genRandomAlphanumericString(int targetLength) {
