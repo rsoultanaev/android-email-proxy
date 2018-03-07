@@ -30,7 +30,6 @@ public class AsyncTcpClient {
 
                         System.out.println("[AsyncTcpClient] Successfully wrote message");
                         System.out.println("[AsyncTcpClient] Message length: " + message.length);
-                        System.out.println(new String(message));
                     }
                 });
 
