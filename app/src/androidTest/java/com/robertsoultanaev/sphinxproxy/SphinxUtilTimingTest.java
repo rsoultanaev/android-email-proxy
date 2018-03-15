@@ -26,12 +26,12 @@ public class SphinxUtilTimingTest {
         int repetitions = 100;
 
         int[] testSizes = {1000, 3000, 5000, 7000, 9000};
-        int numUseMixes = 5;
+        int totalMixes = 10;
 
         int basePort = 8000;
         ArrayList<MixNode> nodeList = new ArrayList<MixNode>();
 
-        for (int i = 0; i < numUseMixes; i++) {
+        for (int i = 0; i < totalMixes; i++) {
             BigInteger priv = params.getGroup().genSecret();
             ECPoint pub = params.getGroup().expon(params.getGroup().getGenerator(), priv);
 
@@ -40,27 +40,66 @@ public class SphinxUtilTimingTest {
             nodeList.add(new MixNode(i, host, port, Hex.toHexString(pub.getEncoded(true))));
         }
 
-        SphinxUtil sphinxUtil = new SphinxUtil(nodeList, numUseMixes, params);
-
         byte[][] testEmails = new byte[testSizes.length][];
         for (int i = 0; i < testSizes.length; i++) {
             testEmails[i] = genRandomAlphanumericString(testSizes[i]).getBytes();
         }
-        String recipient = "mort@rsoultanaev.com";
 
+        int numUseMixes = 5;
+        String recipient = "mort@rsoultanaev.com";
+        SphinxUtil sphinxUtil = new SphinxUtil(nodeList, numUseMixes, params);
         for (int i = 0; i < testSizes.length; i++) {
-            byte[] email = testEmails[i];
             long startTime = System.nanoTime();
             for (int j = 0; j < repetitions; j++) {
-                sphinxUtil.splitIntoSphinxPackets(email, recipient);
+                sphinxUtil.splitIntoSphinxPackets(testEmails[i], recipient);
             }
             long endTime = System.nanoTime();
 
             long timeTaken = (endTime - startTime) / repetitions;
             long timeTakenMillis = timeTaken / 1000000;
 
-            System.out.println("Email length: " + email.length);
+            System.out.println("Email length: " + testEmails[i].length);
             System.out.println("Time taken to encrypt: " + timeTakenMillis + "ms");
+        }
+
+        int[] testMixNums = {3, 5, 7};
+        byte[] testEmail = testEmails[2];
+        System.out.println("Test email size: " + testEmail.length);
+        for (int i = 0; i < testMixNums.length; i++) {
+            SphinxUtil testSphinxUtil = new SphinxUtil(nodeList, testMixNums[i], params);
+
+            long startTime = System.nanoTime();
+            for (int j = 0; j < repetitions; j++) {
+                testSphinxUtil.splitIntoSphinxPackets(testEmail, recipient);
+            }
+            long endTime = System.nanoTime();
+
+            long timeTaken = (endTime - startTime) / repetitions;
+            long timeTakenMillis = timeTaken / 1000000;
+
+            System.out.println("Number of mixes used: " + testMixNums[i]);
+            System.out.println("Time taken to encrypt: " + timeTakenMillis + "ms");
+        }
+
+        int[] testBodyLengths = {1024, 4096, 8192};
+        for (int i = 0; i < testBodyLengths.length; i++) {
+            SphinxParams testParams = new SphinxParams(16, testBodyLengths[i], 192, new ECCGroup());
+            SphinxUtil testSphinxUtil = new SphinxUtil(nodeList, numUseMixes, testParams);
+            System.out.println("Body length used: " + testBodyLengths[i]);
+
+            for (int j = 0; j < testEmails.length; j++) {
+                long startTime = System.nanoTime();
+                for (int k = 0; k < repetitions; k++) {
+                    testSphinxUtil.splitIntoSphinxPackets(testEmails[j], recipient);
+                }
+                long endTime = System.nanoTime();
+
+                long timeTaken = (endTime - startTime) / repetitions;
+                long timeTakenMillis = timeTaken / 1000000;
+
+                System.out.println("Email length used: " + testEmails[j].length);
+                System.out.println("Time taken to encrypt: " + timeTakenMillis + "ms");
+            }
         }
     }
 
