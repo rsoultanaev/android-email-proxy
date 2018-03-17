@@ -30,7 +30,7 @@
     <string name="default_mailbox_port">995</string>
     <string name="default_mailbox_username">mort</string>
     <string name="default_mailbox_password">1234</string>
-    <string name="default_num_use_mixes">3</string>
+    <string name="default_num_use_mixes">5</string>
 
     <string name="textview_pop3_port">POP3 port</string>
     <string name="textview_smtp_port">SMTP port</string>
