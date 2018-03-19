@@ -25,9 +25,9 @@ public class SendingTimingTest {
     public void timeSendingMessages() throws Exception {
         int[] testSizes = {500, 1000, 3000, 5000, 7000, 9000};
 
-        String mixHost = "";
-        int mixPort = 0;
-        String encodedMixPubKey = "";
+        String mixHost = "ec2-35-176-102-252.eu-west-2.compute.amazonaws.com";
+        int mixPort = 8000;
+        String encodedMixPubKey = "039035bbb28c19631d39e98c0a9e5d7d3b75a8532ff0dff4d455b5a140";
         ArrayList<MixNode> mixNodeList = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             mixNodeList.add(new MixNode(i, mixHost, mixPort, encodedMixPubKey));
@@ -35,7 +35,7 @@ public class SendingTimingTest {
 
         int numUseMixes = 3;
         SphinxUtil sphinxUtil = new SphinxUtil(mixNodeList, numUseMixes);
-        
+
         String recipientAddress = "mort@rsoultanaev.com";
         ArrayList<SphinxPacketWithRouting[]> testMessages = new ArrayList<>();
         for (int testSize : testSizes) {
