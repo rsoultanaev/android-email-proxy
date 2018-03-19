@@ -1,5 +1,7 @@
 package com.robertsoultanaev.sphinxproxy;
 
+import com.robertsoultanaev.javasphinx.ECCGroup;
+import com.robertsoultanaev.javasphinx.SphinxParams;
 import com.robertsoultanaev.sphinxproxy.database.DBQuery;
 import com.robertsoultanaev.sphinxproxy.database.MixNode;
 import com.robertsoultanaev.sphinxproxy.database.Recipient;
@@ -38,10 +40,6 @@ public class OverheadTest {
 
     @Test
     public void overheadTest() throws Exception {
-        String emailStr = genRandomAlphanumericString(200000);
-        byte[] email = emailStr.getBytes();
-        InputStream emailStream = new ByteArrayInputStream(email);
-
         String recipientAddress = "mort@rsoultanaev.com";
         String encodedRecipientPublicKey = "ME4wEAYHKoZIzj0CAQYFK4EEACEDOgAEI285LXjIgSV1pzc3STEtssSXo3hyQBJkHQl8O7TCvfIfykEUKZT27dXkhi0WAHU9T/hqL4kxzkM=";
         Recipient recipient = new Recipient(recipientAddress, encodedRecipientPublicKey);
@@ -58,17 +56,46 @@ public class OverheadTest {
         when(dbQuery.getRecipient(recipientAddress)).thenReturn(recipient);
 
         int numUseMixes = 3;
-        SphinxUtil sphinxUtil = new SphinxUtil(mixNodeList, 3);
+
+        int largeTestSize = 200000;
+        int[] testSizes = {500, 1000, 3000, 5000, 7000, 9000};
+        int[] testBodyLengths = {1024, 4096, 8192};
+
         EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
-        MeasuringMockAsyncTcpClient asyncTcpClient = new MeasuringMockAsyncTcpClient();
-        SmtpMessageHandler smtpMessageHandler = new SmtpMessageHandler(sphinxUtil, asyncTcpClient, dbQuery, endToEndCrypto);
-        smtpMessageHandler.deliver(from, recipientAddress, emailStream);
 
-        double overhead = (double) asyncTcpClient.bytesSent / email.length;
+        for (int testBodyLength : testBodyLengths) {
+            // Overall overhead
+            String testLargeEmailStr = genRandomAlphanumericString(largeTestSize);
+            byte[] testLargeEmail = testLargeEmailStr.getBytes();
+            InputStream testLargeEmailStream = new ByteArrayInputStream(testLargeEmail);
 
-        System.out.println("Bytes input: " + email.length);
-        System.out.println("Bytes output: " + asyncTcpClient.bytesSent);
-        System.out.println("Overhead: " + overhead);
+            SphinxParams testParams = new SphinxParams(16, testBodyLength, 192, new ECCGroup());
+            SphinxUtil sphinxUtil = new SphinxUtil(mixNodeList, numUseMixes, testParams);
+            MeasuringMockAsyncTcpClient largeEmailOverheadClient = new MeasuringMockAsyncTcpClient();
+            SmtpMessageHandler largeEmailOverheadHandler = new SmtpMessageHandler(sphinxUtil, largeEmailOverheadClient, dbQuery, endToEndCrypto);
+            largeEmailOverheadHandler.deliver(from, recipientAddress, testLargeEmailStream);
+
+            double overhead = (double) largeEmailOverheadClient.bytesSent / testLargeEmail.length;
+
+            System.out.println("Body length: " + testBodyLength);
+            System.out.println("Email size: " + largeTestSize);
+            System.out.println("Overhead: " + overhead);
+
+            for (int testSize : testSizes) {
+                String emailStr = genRandomAlphanumericString(testSize);
+                byte[] email = emailStr.getBytes();
+                InputStream emailStream = new ByteArrayInputStream(email);
+
+                MeasuringMockAsyncTcpClient asyncTcpClient = new MeasuringMockAsyncTcpClient();
+                SmtpMessageHandler smtpMessageHandler = new SmtpMessageHandler(sphinxUtil, asyncTcpClient, dbQuery, endToEndCrypto);
+                smtpMessageHandler.deliver(from, recipientAddress, emailStream);
+
+                overhead = (double) asyncTcpClient.bytesSent / email.length;
+
+                System.out.println("Email size: " + testSize);
+                System.out.println("Overhead: " + overhead);
+            }
+        }
     }
 
     private String genRandomAlphanumericString(int targetLength) {
