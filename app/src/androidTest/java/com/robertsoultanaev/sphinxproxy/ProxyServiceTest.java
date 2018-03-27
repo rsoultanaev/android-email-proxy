@@ -29,8 +29,9 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(AndroidJUnit4.class)
 public class ProxyServiceTest {
+
     @Test
-    public void test() throws Exception {
+    public void testSMPTProxy() throws Exception {
         Context context = InstrumentationRegistry.getTargetContext();
 
         SphinxParams params = new SphinxParams();
