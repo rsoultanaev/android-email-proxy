@@ -19,6 +19,8 @@ import org.apache.commons.net.pop3.POP3Client;
 import org.apache.commons.net.pop3.POP3MessageInfo;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.encoders.Hex;
+import org.junit.After;
+import org.junit.Before;
 import org.subethamail.smtp.client.SmartClient;
 
 import org.junit.Test;
@@ -38,30 +40,22 @@ import static org.junit.Assert.assertTrue;
 @RunWith(AndroidJUnit4.class)
 public class ProxyServiceTest {
 
-    @Test
-    public void testSMPTProxy() throws Exception {
-        Context context = InstrumentationRegistry.getTargetContext();
+    private Context context;
+    private DBQuery dbQuery;
 
-        SphinxParams params = new SphinxParams();
-        EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
+    private int pop3ServerPort = 27000;
+    private int smtpProxyPort = 28000;
+
+    @Before
+    public void setup() throws Exception {
+        context = InstrumentationRegistry.getTargetContext();
 
         DB db = DB.getAppDatabase(context);
-        DBQuery dbQuery = db.getDao();
+        dbQuery = db.getDao();
         dbQuery.deleteEverything();
 
-        String senderAddress = "john@example.com";
-        String recipientAddress = "mort@rsoultanaev.com";
-        String messageStartToken = "jf764594bnf83";
-        String messageBodyStr = messageStartToken + "Test message";
-        byte[] messageBody = messageBodyStr.getBytes();
-        String mixHostname = "localhost";
-        int mixPort = 30000;
-        String encodedRecipientPrivateKey = "MIGBAgEAMBAGByqGSM49AgEGBSuBBAAhBGowaAIBAQQcLbF1DZ8Tz9Yttnovor3I7FHhdNI/hnDfLEUiqaAHBgUrgQQAIaE8AzoABCNvOS14yIEldac3N0kxLbLEl6N4ckASZB0JfDu0wr3yH8pBFCmU9u3V5IYtFgB1PU/4ai+JMc5D";
-        String encodedRecipientPublicKey = "ME4wEAYHKoZIzj0CAQYFK4EEACEDOgAEI285LXjIgSV1pzc3STEtssSXo3hyQBJkHQl8O7TCvfIfykEUKZT27dXkhi0WAHU9T/hqL4kxzkM=";
-        PrivateKey recipientPrivateKey = endToEndCrypto.decodePrivateKey(encodedRecipientPrivateKey);
-
-        Config.setIntValue(R.string.key_proxy_pop3_port, 27000, context);
-        Config.setIntValue(R.string.key_proxy_smtp_port, 28000, context);
+        Config.setIntValue(R.string.key_proxy_pop3_port, pop3ServerPort, context);
+        Config.setIntValue(R.string.key_proxy_smtp_port, smtpProxyPort, context);
         Config.setStringValue(R.string.key_proxy_username, "proxyuser", context);
         Config.setStringValue(R.string.key_proxy_password, "12345", context);
         Config.setStringValue(R.string.key_mailbox_hostname, "ec2-35-178-56-77.eu-west-2.compute.amazonaws.com", context);
@@ -69,7 +63,34 @@ public class ProxyServiceTest {
         Config.setStringValue(R.string.key_mailbox_username, "mort", context);
         Config.setStringValue(R.string.key_mailbox_password, "1234", context);
         Config.setIntValue(R.string.key_num_use_mixes, 3, context);
+    }
+
+    @After
+    public void cleanup() throws Exception {
+        Intent proxyIntent = new Intent(context, ProxyService.class);
+        context.stopService(proxyIntent);
+
+        Thread.sleep(1000);
+    }
+
+    @Test
+    public void testSMTPProxy() throws Exception {
+        String senderAddress = "john@example.com";
+        String recipientAddress = "mort@rsoultanaev.com";
+        String mixHostname = "localhost";
+        int mixPort = 30000;
+        String messageStartToken = "jf764594bnf83";
+        String messageBodyStr = messageStartToken + "Test message";
+        byte[] messageBody = messageBodyStr.getBytes();
+        String encodedRecipientPrivateKey = "MIGBAgEAMBAGByqGSM49AgEGBSuBBAAhBGowaAIBAQQcLbF1DZ8Tz9Yttnovor3I7FHhdNI/hnDfLEUiqaAHBgUrgQQAIaE8AzoABCNvOS14yIEldac3N0kxLbLEl6N4ckASZB0JfDu0wr3yH8pBFCmU9u3V5IYtFgB1PU/4ai+JMc5D";
+        String encodedRecipientPublicKey = "ME4wEAYHKoZIzj0CAQYFK4EEACEDOgAEI285LXjIgSV1pzc3STEtssSXo3hyQBJkHQl8O7TCvfIfykEUKZT27dXkhi0WAHU9T/hqL4kxzkM=";
+
+        SphinxParams params = new SphinxParams();
+        EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
+
         Config.setKeyPair(encodedRecipientPrivateKey, encodedRecipientPublicKey, context);
+
+        PrivateKey recipientPrivateKey = endToEndCrypto.decodePrivateKey(encodedRecipientPrivateKey);
 
         HashMap<Integer, MockMixPki> pki = new HashMap<>();
         for (int i = 0; i < 3; i++) {
@@ -84,8 +105,6 @@ public class ProxyServiceTest {
         Recipient recipient = new Recipient(recipientAddress, encodedRecipientPublicKey);
         dbQuery.insertRecipient(recipient);
 
-        db.close();
-
         Intent proxyIntent = new Intent(context, ProxyService.class);
         context.startService(proxyIntent);
 
@@ -93,7 +112,7 @@ public class ProxyServiceTest {
 
         Thread.sleep(2000);
 
-        SmartClient client = new SmartClient("localhost", 28000,"localhost");
+        SmartClient client = new SmartClient("localhost", smtpProxyPort,"localhost");
         client.from(senderAddress);
         client.to(recipientAddress);
         client.dataStart();
@@ -121,37 +140,6 @@ public class ProxyServiceTest {
 
     @Test
     public void testPOP3Server() throws Exception {
-        Context context = InstrumentationRegistry.getTargetContext();
-
-        SphinxParams params = new SphinxParams();
-        EndToEndCrypto endToEndCrypto = new EndToEndCrypto();
-
-        DB db = DB.getAppDatabase(context);
-        DBQuery dbQuery = db.getDao();
-        dbQuery.deleteEverything();
-
-        String senderAddress = "john@example.com";
-        String recipientAddress = "mort@rsoultanaev.com";
-        String messageStartToken = "jf764594bnf83";
-        String messageBodyStr = messageStartToken + "Test message";
-        byte[] messageBody = messageBodyStr.getBytes();
-        String mixHostname = "localhost";
-        int mixPort = 30000;
-        String encodedRecipientPrivateKey = "MIGBAgEAMBAGByqGSM49AgEGBSuBBAAhBGowaAIBAQQcLbF1DZ8Tz9Yttnovor3I7FHhdNI/hnDfLEUiqaAHBgUrgQQAIaE8AzoABCNvOS14yIEldac3N0kxLbLEl6N4ckASZB0JfDu0wr3yH8pBFCmU9u3V5IYtFgB1PU/4ai+JMc5D";
-        String encodedRecipientPublicKey = "ME4wEAYHKoZIzj0CAQYFK4EEACEDOgAEI285LXjIgSV1pzc3STEtssSXo3hyQBJkHQl8O7TCvfIfykEUKZT27dXkhi0WAHU9T/hqL4kxzkM=";
-        PrivateKey recipientPrivateKey = endToEndCrypto.decodePrivateKey(encodedRecipientPrivateKey);
-
-        Config.setIntValue(R.string.key_proxy_pop3_port, 27000, context);
-        Config.setIntValue(R.string.key_proxy_smtp_port, 28000, context);
-        Config.setStringValue(R.string.key_proxy_username, "proxyuser", context);
-        Config.setStringValue(R.string.key_proxy_password, "12345", context);
-        Config.setStringValue(R.string.key_mailbox_hostname, "ec2-35-178-56-77.eu-west-2.compute.amazonaws.com", context);
-        Config.setIntValue(R.string.key_mailbox_port, 995, context);
-        Config.setStringValue(R.string.key_mailbox_username, "mort", context);
-        Config.setStringValue(R.string.key_mailbox_password, "1234", context);
-        Config.setIntValue(R.string.key_num_use_mixes, 3, context);
-        Config.setKeyPair(encodedRecipientPrivateKey, encodedRecipientPublicKey, context);
-
         String msg1id = UUID.randomUUID().toString();
         String msg2id = UUID.randomUUID().toString();
         String msg1Body = "hello" + Pop3Server.CRLF;
@@ -170,7 +158,7 @@ public class ProxyServiceTest {
         POP3Client pop3Client = new POP3Client();
 
         // Connect
-        pop3Client.connect("localhost", 27000);
+        pop3Client.connect("localhost", pop3ServerPort);
 
         // USER & PASS
         boolean loginSuccessful = pop3Client.login("proxyuser", "12345");
