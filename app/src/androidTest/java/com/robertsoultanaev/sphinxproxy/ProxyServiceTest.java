@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.robertsoultanaev.javasphinx.SphinxClient;
 import com.robertsoultanaev.javasphinx.SphinxParams;
 import com.robertsoultanaev.javasphinx.Util;
 import com.robertsoultanaev.sphinxproxy.database.AssembledMessage;
@@ -29,9 +28,7 @@ import org.junit.runner.RunWith;
 import java.io.BufferedReader;
 import java.math.BigInteger;
 import java.security.PrivateKey;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
