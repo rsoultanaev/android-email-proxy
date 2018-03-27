@@ -37,6 +37,12 @@ public abstract class DBQuery {
     @Query("DELETE FROM AssembledMessage")
     protected abstract void deleteAllAssembledMessages();
 
+    @Query("DELETE FROM Recipient")
+    protected abstract void deleteAllRecipients();
+
+    @Query("DELETE FROM MixNode")
+    protected abstract void deleteAllMixNodes();
+
     @Query("SELECT * FROM packetcount WHERE uuid=:uuid")
     protected abstract PacketCount getPacketCount(String uuid);
 
@@ -98,5 +104,7 @@ public abstract class DBQuery {
         deleteAllAssembledMessages();
         deleteAllPacketCounts();
         deleteAllPackets();
+        deleteAllRecipients();
+        deleteAllMixNodes();
     }
 }
